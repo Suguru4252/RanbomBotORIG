@@ -9,7 +9,7 @@ from aiogram.filters import Command
 from aiogram.types import FSInputFile
 
 # ТВОЙ НОВЫЙ ТОКЕН (вставь сюда)
-BOT_TOKEN = "ВСТАВЬ_СЮДА_НОВЫЙ_ТОКЕН_ОТ_BOTFATHER"
+BOT_TOKEN = "8703891124:AAGYfu1MsclMc8e4ulVOTdNy-j1TbJN3CDc"
 
 logging.basicConfig(level=logging.INFO)
 
