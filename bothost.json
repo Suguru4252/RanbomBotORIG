@@ -1,8 +1,6 @@
 {
-    "name": "Image Generator Bot",
-    "version": "1.0.0",
-    "description": "Бот для генерации картинок через Pollinations.ai",
+    "name": "Image Bot",
+    "version": "1.0",
     "main": "bot.py",
-    "python_version": "3.9",
-    "requirements": "requirements.txt"
+    "python_version": "3.10"
 }
