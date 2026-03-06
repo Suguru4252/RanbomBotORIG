@@ -31,10 +31,10 @@ from aiogram.exceptions import TelegramBadRequest
 # ==================== НАСТРОЙКИ ====================
 
 # Токен бота (получи у @BotFather)
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"  # <--- ЗАМЕНИ НА СВОЙ ТОКЕН!
+BOT_TOKEN = "8572906701:AAFpWLGbEZqvZsupPZqElr0q197f3WllvYU"  # <--- ЗАМЕНИ НА СВОЙ ТОКЕН!
 
 # ID администратора (для уведомлений)
-ADMIN_ID = 123456789  # <--- ЗАМЕНИ НА СВОЙ ID (узнай у @userinfobot)
+ADMIN_ID = 5596589260  # <--- ЗАМЕНИ НА СВОЙ ID (узнай у @userinfobot)
 
 # Настройки генерации
 DEFAULT_IMAGE_SIZE = "512x512"  # размер по умолчанию
