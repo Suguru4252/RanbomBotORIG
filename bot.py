@@ -3,7 +3,7 @@
 
 """
 Telegram Bot для генерации изображений по текстовому описанию
-Использует бесплатный Pollinations API
+Исправленная версия - без ошибок
 """
 
 import asyncio
@@ -637,10 +637,10 @@ async def cmd_help(message: types.Message, state: FSMContext):
         "**Настройки:**\n"
         "• /settings - изменить стиль или размер изображения\n"
         "• /stats - посмотреть свою статистику\n\n"
-        "**Лимиты:**\n"
-        "• Максимум {MAX_GENERATIONS_PER_DAY} генераций в день на пользователя\n"
+        f"**Лимиты:**\n"
+        f"• Максимум {MAX_GENERATIONS_PER_DAY} генераций в день на пользователя\n"
         "• Бесплатный сервис, но есть очередь при высокой нагрузке"
-    ).format(MAX_GENERATIONS_PER_DAY=MAX_GENERATIONS_PER_DAY)
+    )
     
     await message.answer(help_text, parse_mode="Markdown")
 
@@ -698,7 +698,11 @@ async def cmd_settings(message: types.Message, state: FSMContext):
     ))
     builder.adjust(1)
     
-    await message.answer(settings_text, parse_mode="Markdown", reply_markup=builder.as_markup())
+    await message.answer(
+        settings_text, 
+        parse_mode="Markdown", 
+        reply_markup=builder.as_markup()
+    )
 
 @dp.message(Command("generate"))
 async def cmd_generate(message: types.Message, state: FSMContext):
@@ -775,7 +779,11 @@ async def button_admin(message: types.Message, state: FSMContext):
         "Выберите действие:"
     )
     
-    await message.answer(admin_text, parse_mode="Markdown", reply_markup=get_admin_keyboard())
+    await message.answer(
+        admin_text, 
+        parse_mode="Markdown", 
+        reply_markup=get_admin_keyboard()
+    )
 
 @dp.message(F.text == "❌ Отмена")
 async def button_cancel(message: types.Message, state: FSMContext):
@@ -785,6 +793,8 @@ async def button_cancel(message: types.Message, state: FSMContext):
         "Действие отменено.",
         reply_markup=get_main_keyboard(message.from_user.id)
     )
+
+# ==================== ИСПРАВЛЕННАЯ ФУНКЦИЯ ОБРАБОТКИ ПРОМПТА ====================
 
 @dp.message(GenerationStates.waiting_for_prompt)
 async def process_generation_prompt(message: types.Message, state: FSMContext):
@@ -864,7 +874,7 @@ async def process_generation_prompt(message: types.Message, state: FSMContext):
                     f"📊 Осталось сегодня: {MAX_GENERATIONS_PER_DAY - today_count - 1}"
                 ),
                 parse_mode="Markdown",
-                reply_markup=get_generation_keyboard()
+                reply_markup=get_generation_keyboard()  # Inline клавиатура, не Reply
             )
             
             # Удаляем сообщение о загрузке
@@ -872,15 +882,16 @@ async def process_generation_prompt(message: types.Message, state: FSMContext):
             
         except Exception as e:
             logger.error(f"Ошибка при отправке: {e}")
-            await wait_msg.edit_text(
+            await message.answer(
                 f"❌ Ошибка при отправке изображения. Попробуйте позже.",
                 reply_markup=get_main_keyboard(user_id)
             )
     else:
-        await wait_msg.edit_text(
+        await message.answer(
             "❌ Не удалось сгенерировать изображение. Попробуйте другой промпт или позже.",
             reply_markup=get_main_keyboard(user_id)
         )
+        await wait_msg.delete()
     
     await state.clear()
 
@@ -974,7 +985,11 @@ async def callback_show_history(callback: CallbackQuery):
         history_text += f"   ✨ {item['style']} | 📏 {item['size']}\n"
         history_text += f"   🕐 {item['created_at'][:16]}\n\n"
     
-    await callback.message.answer(history_text, parse_mode="Markdown", reply_markup=get_history_keyboard())
+    await callback.message.answer(
+        history_text, 
+        parse_mode="Markdown", 
+        reply_markup=get_history_keyboard()
+    )
 
 @dp.callback_query(F.data == "style_settings")
 async def callback_style_settings(callback: CallbackQuery):
@@ -1090,7 +1105,8 @@ async def callback_back_to_main(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     await state.clear()
     
-    await callback.message.edit_text(
+    await callback.message.delete()
+    await callback.message.answer(
         "Главное меню:",
         reply_markup=get_main_keyboard(callback.from_user.id)
     )
@@ -1286,3 +1302,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+    
