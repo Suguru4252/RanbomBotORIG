@@ -31,7 +31,7 @@ from aiogram.exceptions import TelegramBadRequest
 # ==================== НАСТРОЙКИ ====================
 
 # Токен бота (получи у @BotFather)
-BOT_TOKEN = "8703891124:AAFp8QR42TeKijiEMEOG5NUZEQaylokDDwU"  # <--- ЗАМЕНИ НА СВОЙ ТОКЕН!
+BOT_TOKEN = "8796516711:AAEQ9Q9lPTlO0ZJZ9NUpo1K8GXsWDyDAKUw"  # <--- ЗАМЕНИ НА СВОЙ ТОКЕН!
 
 # ID администратора (для уведомлений)
 ADMIN_ID = 5596589260  # <--- ЗАМЕНИ НА СВОЙ ID (узнай у @userinfobot)
