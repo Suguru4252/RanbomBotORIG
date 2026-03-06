@@ -1,6 +1,0 @@
-{
-    "name": "Image Bot",
-    "version": "1.0",
-    "main": "bot.py",
-    "python_version": "3.10"
-}
