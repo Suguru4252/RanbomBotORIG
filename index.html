@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>RUCOY ONLINE - ПОЛНАЯ ВЕРСИЯ</title>
+    <title>Rucoy Online - Точная копия</title>
     <style>
         * {
             margin: 0;
@@ -23,417 +23,149 @@
             cursor: crosshair;
         }
 
-        /* ГЛАВНОЕ МЕНЮ */
-        #mainMenu {
+        /* ВЕРХНЯЯ ПАНЕЛЬ (КАК НА 5-6 ФОТО) */
+        .top-bar {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #0a0c15 0%, #1a1f2e 100%);
-            z-index: 1000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s;
-        }
-
-        .menu-container {
-            text-align: center;
-            background: rgba(0,0,0,0.85);
-            border: 3px solid #ffd966;
-            border-radius: 32px;
-            padding: 50px;
-            min-width: 450px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 50px rgba(255,217,102,0.3);
-        }
-
-        .game-title {
-            font-size: 48px;
-            font-weight: bold;
-            color: #ffd966;
-            text-shadow: 0 0 20px #ffaa44;
-            margin-bottom: 30px;
-            letter-spacing: 4px;
-        }
-
-        .menu-btn {
-            background: #2c2f3f;
-            border: 2px solid #ffd966;
-            color: #ffd966;
-            font-size: 24px;
-            font-family: monospace;
-            padding: 12px 32px;
-            margin: 15px;
-            border-radius: 40px;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 250px;
-        }
-
-        .menu-btn:hover {
-            background: #ffd966;
-            color: #1a1f2e;
-            transform: scale(1.05);
-            box-shadow: 0 0 20px #ffd966;
-        }
-
-        /* UI ПАНЕЛЬ */
-        .ui-panel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
             right: 0;
-            background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.85) 100%);
-            border-top: 3px solid #ffd966;
-            padding: 15px 25px;
+            background: rgba(0,0,0,0.85);
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
             z-index: 200;
-            backdrop-filter: blur(5px);
+            border-bottom: 2px solid #ffd966;
         }
 
-        .stats-left {
+        .stats-top {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             align-items: center;
-            flex-wrap: wrap;
         }
 
-        .stat-card {
-            background: rgba(0,0,0,0.7);
-            padding: 8px 16px;
-            border-radius: 24px;
+        .hp-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .hp-stat span:first-child { color: #ff6a6a; font-weight: bold; font-size: 18px; }
+        .hp-stat span:last-child { color: #fff; font-size: 18px; }
+
+        .mp-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mp-stat span:first-child { color: #6a9eff; font-weight: bold; font-size: 18px; }
+        .mp-stat span:last-child { color: #fff; font-size: 18px; }
+
+        .level-stat {
+            background: #2c2f3f;
+            padding: 4px 12px;
+            border-radius: 20px;
             color: #ffd966;
             font-weight: bold;
-            font-size: 14px;
-            border-left: 3px solid #ffd966;
         }
 
-        .hp-bar-container {
-            width: 280px;
-            height: 24px;
-            background: #3a1f1f;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid #ffd966;
-        }
-
-        .hp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #d44a4a, #ff6a6a);
-            width: 100%;
-            transition: width 0.2s ease;
-        }
-
-        .mp-bar-container {
-            width: 200px;
-            height: 20px;
-            background: #1f2a3a;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid #88aaff;
-        }
-
-        .mp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4a7db4, #6a9eff);
-            width: 100%;
-            transition: width 0.2s ease;
-        }
-
-        .xp-bar-container {
-            width: 320px;
+        .xp-bar-top {
+            width: 250px;
             height: 12px;
             background: #2a2a2a;
             border-radius: 6px;
             overflow: hidden;
         }
-
-        .xp-fill {
+        .xp-fill-top {
             height: 100%;
             background: linear-gradient(90deg, #6a9eff, #3a6eff);
             width: 0%;
-            transition: width 0.2s ease;
         }
 
-        button {
-            background: #4a3e2a;
-            border: none;
-            color: #ffd966;
-            padding: 8px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.1s;
-        }
-
-        button:active {
-            transform: scale(0.95);
-        }
-
-        .class-btn {
-            background: #2c2f3f;
-            margin: 0 5px;
+        /* НИЖНЯЯ ПАНЕЛЬ (ЗЕЛЬЯ И СУПЕРУДАР) */
+        .bottom-panel {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 12px 25px;
+            border-radius: 60px;
             border: 1px solid #ffd966;
+            z-index: 200;
         }
 
-        .class-btn.active {
-            background: #6a3e9e;
-            box-shadow: 0 0 12px #a97eff;
-            border-color: #c9aaff;
+        .bottom-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: #2c2f3f;
+            border: 2px solid #ffd966;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.1s;
+            font-size: 28px;
         }
+        .bottom-btn:active { transform: scale(0.95); }
+        .bottom-btn span { font-size: 10px; color: #ffd966; margin-top: 4px; }
 
-        /* ИНВЕНТАРЬ */
+        /* ИНВЕНТАРЬ (КАК В RUCOY) */
         .inventory-panel {
             position: fixed;
             right: 20px;
             top: 80px;
             background: rgba(0,0,0,0.95);
             border: 2px solid #ffd966;
-            border-radius: 16px;
-            padding: 20px;
-            width: 380px;
+            border-radius: 12px;
+            padding: 15px;
+            width: 420px;
             display: none;
             z-index: 300;
-            backdrop-filter: blur(10px);
         }
 
-        .inventory-title {
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
             color: #ffd966;
-            font-size: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ffd966;
             margin-bottom: 15px;
-            text-align: center;
         }
 
-        .inventory-grid {
+        .inventory-slots {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             gap: 6px;
-            margin-bottom: 20px;
         }
 
-        .inventory-slot {
+        .inv-slot {
             background: rgba(0,0,0,0.6);
             border: 1px solid #ffd966;
-            border-radius: 8px;
+            border-radius: 6px;
             aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
-            transition: all 0.1s;
             position: relative;
         }
+        .inv-slot:hover { background: rgba(255,217,102,0.3); }
 
-        .inventory-slot:hover {
-            background: rgba(255,217,102,0.3);
-            transform: scale(1.05);
-        }
-
-        .slot-count {
-            position: absolute;
-            bottom: 2px;
-            right: 4px;
-            font-size: 10px;
-            color: #ffd966;
-            background: rgba(0,0,0,0.6);
-            padding: 1px 3px;
-            border-radius: 4px;
-        }
-
-        .equipment-section {
-            border-top: 1px solid #ffd966;
-            padding-top: 15px;
-            margin-top: 10px;
-        }
-
-        /* ПАНЕЛЬ НАВЫКОВ */
-        .skills-panel {
+        /* СТАТИСТИКА ПЕРСОНАЖА (КАК НА 1 ФОТО) */
+        .stats-panel {
             position: fixed;
             left: 20px;
             top: 80px;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.9);
             border: 2px solid #ffd966;
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 20px;
-            width: 320px;
-            display: none;
-            z-index: 300;
-        }
-
-        .skill-slot {
-            background: rgba(0,0,0,0.6);
-            border: 1px solid #ffd966;
-            border-radius: 12px;
-            padding: 10px;
-            margin: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            cursor: pointer;
-        }
-
-        .skill-icon {
-            font-size: 32px;
-            width: 50px;
-            text-align: center;
-        }
-
-        .skill-info {
-            flex: 1;
-        }
-
-        .skill-name {
-            color: #ffd966;
-            font-weight: bold;
-        }
-
-        .skill-desc {
-            font-size: 10px;
-            color: #aaa;
-        }
-
-        .skill-cooldown {
-            background: rgba(0,0,0,0.8);
-            border-radius: 8px;
-            padding: 5px;
-            text-align: center;
-            min-width: 50px;
-            color: #ffaa44;
-        }
-
-        /* ПАНЕЛЬ КВЕСТОВ */
-        .quests-panel {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95);
-            border: 2px solid #ffd966;
-            border-radius: 16px;
-            padding: 25px;
-            width: 450px;
-            display: none;
-            z-index: 300;
-        }
-
-        /* ЧАТ */
-        .chat-panel {
-            position: fixed;
-            bottom: 100px;
-            left: 20px;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid #ffd966;
-            border-radius: 12px;
-            width: 350px;
-            height: 200px;
-            display: flex;
-            flex-direction: column;
-            z-index: 150;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-            font-size: 11px;
-            color: #fff;
-        }
-
-        .chat-input {
-            border-top: 1px solid #ffd966;
-            padding: 8px;
-            display: flex;
-        }
-
-        .chat-input input {
-            flex: 1;
-            background: rgba(0,0,0,0.6);
-            border: none;
-            color: #ffd966;
-            padding: 5px;
-            font-family: monospace;
-        }
-
-        /* УВЕДОМЛЕНИЯ */
-        .damage-number {
-            position: fixed;
-            font-weight: bold;
-            font-size: 22px;
-            color: #ffaa44;
-            text-shadow: 2px 2px 0 #000;
-            pointer-events: none;
-            animation: floatUp 0.8s ease-out forwards;
-            z-index: 400;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-60px); }
-        }
-
-        .log-message {
-            position: fixed;
-            bottom: 100px;
-            left: 20px;
-            background: rgba(0,0,0,0.7);
-            border-left: 4px solid #ffd966;
-            padding: 8px 15px;
-            color: #ffd966;
-            font-size: 12px;
-            border-radius: 4px;
-            animation: fadeOut 2.5s forwards;
-            pointer-events: none;
-            z-index: 200;
-        }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; transform: translateX(0); }
-            70% { opacity: 1; }
-            100% { opacity: 0; transform: translateX(-20px); }
-        }
-
-        .notification {
-            position: fixed;
-            top: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            border: 2px solid #ffd966;
-            border-radius: 12px;
-            padding: 10px 25px;
-            color: #ffd966;
-            font-weight: bold;
-            animation: fadeInOut 2s forwards;
-            z-index: 300;
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
-            15% { opacity: 1; transform: translateX(-50%) scale(1); }
-            85% { opacity: 1; transform: translateX(-50%) scale(1); }
-            100% { opacity: 0; transform: translateX(-50%) scale(0.8); }
-        }
-
-        /* ПАНЕЛЬ ПЕРСОНАЖА */
-        .character-panel {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95);
-            border: 2px solid #ffd966;
-            border-radius: 20px;
-            padding: 25px;
-            width: 500px;
+            width: 280px;
             display: none;
             z-index: 300;
         }
@@ -441,230 +173,194 @@
         .stat-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px;
+            padding: 6px 0;
+            color: #fff;
             border-bottom: 1px solid #333;
         }
 
-        /* БОСС БАР */
-        .boss-bar {
+        /* ЛАВКА (НПС) */
+        .shop-panel {
             position: fixed;
-            top: 20px;
             left: 50%;
-            transform: translateX(-50%);
-            width: 400px;
-            background: rgba(0,0,0,0.9);
-            border: 2px solid #ffaa44;
-            border-radius: 12px;
-            padding: 8px;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            border: 2px solid #ffd966;
+            border-radius: 16px;
+            padding: 20px;
+            width: 500px;
             display: none;
-            z-index: 250;
+            z-index: 400;
         }
 
-        .boss-name {
-            color: #ffaa44;
-            font-weight: bold;
-            text-align: center;
+        .shop-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #333;
         }
 
-        .boss-hp-bar {
-            height: 20px;
-            background: #3a1f1f;
-            border-radius: 10px;
-            margin-top: 5px;
-            overflow: hidden;
+        /* КРАСНЫЙ КВАДРАТ ДЛЯ ВЫБРАННОГО МОБА */
+        .selected-mob {
+            position: absolute;
+            border: 3px solid #ff4444;
+            box-shadow: 0 0 10px #ff4444;
+            pointer-events: none;
+            z-index: 150;
         }
 
-        .boss-hp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff6a2a, #ffaa44);
-            width: 100%;
-        }
-
-        @media (max-width: 800px) {
-            .ui-panel { flex-direction: column; align-items: stretch; }
-            .hp-bar-container, .mp-bar-container, .xp-bar-container { width: 100%; }
-            .stats-left { justify-content: center; }
-            .inventory-panel { width: 95%; right: 2.5%; top: 60px; }
+        /* ДАЛЬНОСТЬ АТАКИ (ВИЗУАЛ) */
+        .attack-range-indicator {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(255,68,68,0.5);
+            pointer-events: none;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
 
-    <!-- ГЛАВНОЕ МЕНЮ -->
-    <div id="mainMenu">
-        <div class="menu-container">
-            <div class="game-title">⚔️ RUCOY ONLINE ⚔️</div>
-            <div style="margin: 20px 0;">
-                <div class="menu-btn" id="startGameBtn">▶ НАЧАТЬ ИГРУ</div>
-                <div class="menu-btn" id="continueBtn">📀 ПРОДОЛЖИТЬ</div>
-                <div class="menu-btn" id="controlsBtn">🎮 УПРАВЛЕНИЕ</div>
-            </div>
-            <div style="color: #888; font-size: 12px; margin-top: 20px;">
-                Версия 2.0 | Клик по врагу - атака | Клик по земле - движение
-            </div>
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+    <div class="top-bar">
+        <div class="stats-top">
+            <div class="level-stat">Lv.<span id="topLevel">1</span></div>
+            <div class="hp-stat"><span>❤️</span><span id="topHp">120/120</span></div>
+            <div class="mp-stat"><span>💙</span><span id="topMp">60/60</span></div>
+            <div class="xp-bar-top"><div class="xp-fill-top" id="topXpFill"></div></div>
+        </div>
+        <div style="display: flex; gap: 15px;">
+            <div style="color:#ffd966;">💰 <span id="topGold">0</span></div>
+            <button id="statsBtn" style="background:none; border:1px solid #ffd966; color:#ffd966; padding:4px 12px;">📊</button>
+            <button id="invTopBtn" style="background:none; border:1px solid #ffd966; color:#ffd966; padding:4px 12px;">🎒</button>
         </div>
     </div>
 
-    <!-- UI ПАНЕЛЬ -->
-    <div class="ui-panel" id="uiPanel" style="display: none;">
-        <div class="stats-left">
-            <div class="stat-card">⚔️ Lv.<span id="levelVal">1</span></div>
-            <div class="stat-card">🛡️ <span id="className">Рыцарь</span></div>
-            <div class="hp-bar-container"><div class="hp-fill" id="hpFill"></div></div>
-            <div class="mp-bar-container"><div class="mp-fill" id="mpFill"></div></div>
-            <div class="stat-card">❤️ <span id="hpText">120/120</span></div>
-            <div class="stat-card">💧 <span id="mpText">60/60</span></div>
+    <!-- НИЖНЯЯ ПАНЕЛЬ (ЗЕЛЬЯ + СУПЕРУДАР) -->
+    <div class="bottom-panel">
+        <div class="bottom-btn" id="healPotionBtn">
+            🧪<span>Лечение</span>
         </div>
-        <div class="xp-bar-container"><div class="xp-fill" id="xpFill"></div></div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button id="classKnight" class="class-btn active">🛡️ Рыцарь</button>
-            <button id="classArcher" class="class-btn">🏹 Лучник</button>
-            <button id="classMage" class="class-btn">🔮 Маг</button>
-            <button id="healBtn">💊 Лечение</button>
-            <button id="spellBtn">✨ Спецудар</button>
-            <button id="invBtn">🎒 Инвентарь</button>
-            <button id="skillsBtn">⚡ Навыки</button>
-            <button id="charBtn">👤 Персонаж</button>
+        <div class="bottom-btn" id="manaPotionBtn">
+            💙<span>Мана</span>
         </div>
+        <div class="bottom-btn" id="superSkillBtn">
+            ⚔️<span>Супер</span>
+        </div>
+    </div>
+
+    <!-- ПАНЕЛЬ СТАТИСТИКИ -->
+    <div class="stats-panel" id="statsPanel">
+        <div style="color:#ffd966; font-size:18px; margin-bottom:15px;">ХАРАКТЕРИСТИКИ</div>
+        <div id="statsContent"></div>
+        <button id="closeStats" style="margin-top:15px; width:100%;">Закрыть</button>
     </div>
 
     <!-- ИНВЕНТАРЬ -->
     <div class="inventory-panel" id="inventoryPanel">
-        <div class="inventory-title">🎒 ИНВЕНТАРЬ</div>
-        <div class="inventory-grid" id="inventoryGrid"></div>
-        <div class="equipment-section">
-            <div style="color:#ffd966; margin-bottom:10px;">⚔️ ЭКИПИРОВКА</div>
-            <div id="equipmentSlots" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+        <div class="inventory-header">
+            <span>ИНВЕНТАРЬ</span>
+            <span>💰 <span id="invGold">0</span></span>
         </div>
-        <div style="margin-top: 15px; display: flex; justify-content: space-between;">
-            <span style="color:#ffd966;">💰 <span id="goldAmount">0</span> золота</span>
-            <button id="closeInv">Закрыть</button>
+        <div class="inventory-slots" id="inventorySlots"></div>
+        <button id="closeInv" style="margin-top:15px; width:100%;">Закрыть</button>
+    </div>
+
+    <!-- ЛАВКА НПС -->
+    <div class="shop-panel" id="shopPanel">
+        <div style="color:#ffd966; font-size:20px; margin-bottom:15px; text-align:center;">🏪 ТОРГОВЕЦ</div>
+        <div id="shopItems"></div>
+        <div style="margin-top:15px; display:flex; gap:10px;">
+            <button id="closeShop" style="flex:1;">Закрыть</button>
         </div>
-    </div>
-
-    <!-- ПАНЕЛЬ НАВЫКОВ -->
-    <div class="skills-panel" id="skillsPanel">
-        <div class="inventory-title">⚡ ДОСТУПНЫЕ НАВЫКИ</div>
-        <div id="skillsList"></div>
-        <button id="closeSkills" style="margin-top:15px; width:100%;">Закрыть</button>
-    </div>
-
-    <!-- ПАНЕЛЬ ПЕРСОНАЖА -->
-    <div class="character-panel" id="characterPanel">
-        <div class="inventory-title">👤 ХАРАКТЕРИСТИКИ</div>
-        <div id="characterStats"></div>
-        <button id="closeChar" style="margin-top:20px; width:100%;">Закрыть</button>
-    </div>
-
-    <!-- ПАНЕЛЬ КВЕСТОВ -->
-    <div class="quests-panel" id="questsPanel">
-        <div class="inventory-title">📜 АКТИВНЫЕ КВЕСТЫ</div>
-        <div id="questsList"></div>
-        <button id="closeQuests" style="margin-top:20px;">Закрыть</button>
-    </div>
-
-    <!-- ЧАТ -->
-    <div class="chat-panel" id="chatPanel">
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-input">
-            <input type="text" id="chatInput" placeholder="Нажми Enter для чата..." maxlength="100">
-        </div>
-    </div>
-
-    <!-- БОСС БАР -->
-    <div class="boss-bar" id="bossBar">
-        <div class="boss-name" id="bossName">ДРАКОН</div>
-        <div class="boss-hp-bar"><div class="boss-hp-fill" id="bossHpFill"></div></div>
     </div>
 
     <script>
-        // =========================================================================
-        // ЧАСТЬ 1: ИНИЦИАЛИЗАЦИЯ И БАЗОВЫЕ ПЕРЕМЕННЫЕ
-        // =========================================================================
+        // ==================== RUCOY ONLINE - ТОЧНАЯ КОПИЯ ====================
         
+        // КАНВАС
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        // РАЗМЕРЫ МИРА
+        // ==================== НАСТРОЙКИ МИРА (КЛЕТКИ) ====================
         const TILE_SIZE = 48;
-        const WORLD_WIDTH = 60;
-        const WORLD_HEIGHT = 60;
+        const WORLD_WIDTH = 40;
+        const WORLD_HEIGHT = 40;
         
         let camera = { x: 0, y: 0 };
+        let selectedMonster = null;
+        let selectedMonsterId = null;
         
-        // ГЕНЕРАЦИЯ КАРТЫ (с биомами)
+        // КАРТА (0 - можно ходить, 1 - стена/вода/дерево)
         let worldMap = [];
         let worldBiome = [];
+        
+        // БЕЗОПАСНАЯ ЗОНА (ЛАВКА)
+        let safeZone = { x: 5, y: 5, radius: 3 };
         
         function generateWorld() {
             for (let y = 0; y < WORLD_HEIGHT; y++) {
                 worldMap[y] = [];
                 worldBiome[y] = [];
                 for (let x = 0; x < WORLD_WIDTH; x++) {
-                    // Шум для биомов
-                    let noise = Math.sin(x * 0.15) * Math.cos(y * 0.15) + Math.sin(x * 0.3) * 0.3;
-                    
+                    // Стены по краям
                     if (x === 0 || y === 0 || x === WORLD_WIDTH - 1 || y === WORLD_HEIGHT - 1) {
                         worldMap[y][x] = 1;
                         worldBiome[y][x] = 'wall';
-                    } else {
-                        // Вода
-                        if (noise < -0.6) {
-                            worldMap[y][x] = 0;
-                            worldBiome[y][x] = 'water';
-                        }
-                        // Лес
-                        else if (noise < -0.2) {
-                            worldMap[y][x] = 0;
-                            worldBiome[y][x] = 'forest';
-                        }
-                        // Горы
-                        else if (noise > 0.5) {
-                            worldMap[y][x] = Math.random() < 0.3 ? 1 : 0;
-                            worldBiome[y][x] = 'mountain';
-                        }
-                        // Пустыня
-                        else if (noise > 0.2) {
-                            worldMap[y][x] = 0;
-                            worldBiome[y][x] = 'desert';
-                        }
-                        // Трава
-                        else {
-                            worldMap[y][x] = 0;
-                            worldBiome[y][x] = 'grass';
-                        }
+                    } 
+                    // Безопасная зона (лавка) - всегда проходимо
+                    else if (Math.abs(x - safeZone.x) <= safeZone.radius && Math.abs(y - safeZone.y) <= safeZone.radius) {
+                        worldMap[y][x] = 0;
+                        worldBiome[y][x] = 'shop';
+                    }
+                    // Вода
+                    else if (Math.sin(x * 0.3) * Math.cos(y * 0.3) < -0.5) {
+                        worldMap[y][x] = 1;
+                        worldBiome[y][x] = 'water';
+                    }
+                    // Лес
+                    else if (Math.sin(x * 0.2) * Math.cos(y * 0.2) > 0.6) {
+                        worldMap[y][x] = 1;
+                        worldBiome[y][x] = 'tree';
+                    }
+                    // Горы
+                    else if (Math.sin(x * 0.4) * Math.cos(y * 0.4) > 0.7) {
+                        worldMap[y][x] = 1;
+                        worldBiome[y][x] = 'mountain';
+                    }
+                    else {
+                        worldMap[y][x] = 0;
+                        worldBiome[y][x] = 'grass';
                     }
                 }
             }
             
-            // Добавляем пещеры
-            for (let i = 0; i < 50; i++) {
-                let x = 5 + Math.floor(Math.random() * (WORLD_WIDTH - 10));
-                let y = 5 + Math.floor(Math.random() * (WORLD_HEIGHT - 10));
-                for (let dx = -2; dx <= 2; dx++) {
-                    for (let dy = -2; dy <= 2; dy++) {
-                        if (Math.random() < 0.5 && y+dy > 0 && y+dy < WORLD_HEIGHT-1 && x+dx > 0 && x+dx < WORLD_WIDTH-1) {
-                            worldMap[y+dy][x+dx] = 0;
-                            worldBiome[y+dy][x+dx] = 'cave';
-                        }
+            // Делаем безопасную зону полностью проходимой
+            for (let dy = -safeZone.radius; dy <= safeZone.radius; dy++) {
+                for (let dx = -safeZone.radius; dx <= safeZone.radius; dx++) {
+                    let nx = safeZone.x + dx;
+                    let ny = safeZone.y + dy;
+                    if (nx >= 0 && nx < WORLD_WIDTH && ny >= 0 && ny < WORLD_HEIGHT) {
+                        worldMap[ny][nx] = 0;
+                        worldBiome[ny][nx] = 'shop';
                     }
                 }
             }
         }
         
-        // =========================================================================
-        // ЧАСТЬ 2: ИГРОК (ПОЛНАЯ СИСТЕМА)
-        // =========================================================================
-        
+        // ==================== ИГРОК (КЛЕТОЧНОЕ ДВИЖЕНИЕ) ====================
         let player = {
-            x: WORLD_WIDTH/2 * TILE_SIZE,
-            y: WORLD_HEIGHT/2 * TILE_SIZE,
-            targetX: WORLD_WIDTH/2 * TILE_SIZE,
-            targetY: WORLD_HEIGHT/2 * TILE_SIZE,
+            tileX: 20,
+            tileY: 20,
+            x: 20 * TILE_SIZE,
+            y: 20 * TILE_SIZE,
+            targetTileX: 20,
+            targetTileY: 20,
             level: 1,
             xp: 0,
             maxHp: 120,
@@ -676,47 +372,67 @@
             className: 'knight',
             gold: 500,
             inventory: [],
-            equipment: {
-                weapon: null,
-                armor: null,
-                helmet: null,
-                boots: null,
-                ring: null
-            },
+            equipment: { weapon: null, armor: null, helmet: null },
             moving: false,
-            speed: 220,
-            attackSpeed: 0.6,
-            lastAttack: 0,
+            moveProgress: 1,
             
             get attack() {
                 let bonus = 0;
                 if (this.className === 'knight') bonus = 6;
                 else if (this.className === 'archer') bonus = 8;
                 else if (this.className === 'mage') bonus = 7;
-                if (this.equipment.weapon) bonus += this.equipment.weapon.damage;
+                if (this.equipment.weapon) bonus += this.equipment.weapon.damage || 0;
                 return this.baseAttack + bonus;
             },
             
             get defense() {
                 let bonus = this.baseDefense;
-                if (this.equipment.armor) bonus += this.equipment.armor.defense;
-                if (this.equipment.helmet) bonus += this.equipment.helmet?.defense || 0;
-                if (this.equipment.boots) bonus += this.equipment.boots?.defense || 0;
+                if (this.equipment.armor) bonus += this.equipment.armor.defense || 0;
                 return bonus;
             },
             
-            moveTo(x, y) {
-                let tx = Math.max(32, Math.min(x, WORLD_WIDTH * TILE_SIZE - 32));
-                let ty = Math.max(32, Math.min(y, WORLD_HEIGHT * TILE_SIZE - 32));
-                let tileX = Math.floor(tx / TILE_SIZE);
-                let tileY = Math.floor(ty / TILE_SIZE);
-                if (worldMap[tileY] && worldMap[tileY][tileX] === 1) return;
-                this.targetX = tx;
-                this.targetY = ty;
+            // ДВИЖЕНИЕ ПО КЛЕТКАМ
+            moveToTile(tx, ty) {
+                if (this.hp <= 0) return false;
+                if (tx < 0 || tx >= WORLD_WIDTH || ty < 0 || ty >= WORLD_HEIGHT) return false;
+                if (worldMap[ty][tx] === 1) return false;
+                
+                // ПРОВЕРКА НА МОБОВ (нельзя пройти сквозь)
+                for (let m of monsters) {
+                    if (m.alive && m.tileX === tx && m.tileY === ty) {
+                        return false;
+                    }
+                }
+                
+                this.targetTileX = tx;
+                this.targetTileY = ty;
                 this.moving = false;
+                return true;
             },
             
-            takeDamage(damage, source) {
+            updateMovement(deltaTime) {
+                if (this.tileX !== this.targetTileX || this.tileY !== this.targetTileY) {
+                    let targetX = this.targetTileX * TILE_SIZE;
+                    let targetY = this.targetTileY * TILE_SIZE;
+                    let dx = targetX - this.x;
+                    let dy = targetY - this.y;
+                    let dist = Math.hypot(dx, dy);
+                    let step = 200 * deltaTime;
+                    
+                    if (dist < step) {
+                        this.x = targetX;
+                        this.y = targetY;
+                        this.tileX = this.targetTileX;
+                        this.tileY = this.targetTileY;
+                    } else {
+                        let angle = Math.atan2(dy, dx);
+                        this.x += Math.cos(angle) * step;
+                        this.y += Math.sin(angle) * step;
+                    }
+                }
+            },
+            
+            takeDamage(damage) {
                 let actual = Math.max(1, Math.floor(damage - this.defense * 0.3));
                 this.hp = Math.max(0, this.hp - actual);
                 if (this.hp <= 0) this.die();
@@ -724,16 +440,18 @@
             },
             
             die() {
-                addLog('💀 ВЫ ПОГИБЛИ! Возрождение через 3 секунды...');
+                addLog('💀 ВЫ ПОГИБЛИ! Возрождение...');
                 this.hp = 0;
                 setTimeout(() => {
                     this.hp = this.maxHp;
                     this.mp = this.maxMp;
-                    this.x = WORLD_WIDTH/2 * TILE_SIZE;
-                    this.y = WORLD_HEIGHT/2 * TILE_SIZE;
-                    this.targetX = this.x;
-                    this.targetY = this.y;
-                    addLog('🌟 Вы возродились в городе');
+                    this.tileX = safeZone.x;
+                    this.tileY = safeZone.y;
+                    this.targetTileX = safeZone.x;
+                    this.targetTileY = safeZone.y;
+                    this.x = this.tileX * TILE_SIZE;
+                    this.y = this.tileY * TILE_SIZE;
+                    addLog('🌟 Вы возродились в безопасной зоне');
                     updateUI();
                 }, 3000);
             },
@@ -757,12 +475,11 @@
                 this.mp = this.maxMp;
                 this.baseAttack += 5;
                 this.baseDefense += 2;
-                addLog(`✨✨ УРОВЕНЬ ${this.level}! ✨✨`);
-                addLog(`❤️ +25 HP | ⚔️ +5 Атака | 🛡️ +2 Защита`);
+                addLog(`✨ УРОВЕНЬ ${this.level}! ✨`);
                 updateUI();
-                showNotification(`LEVEL UP! ${this.level}`, '#ffaa44');
             },
             
+            // АТАКА (зависит от класса)
             attackMonster(monster) {
                 let now = Date.now() / 1000;
                 if (now - this.lastAttack < this.attackSpeed) {
@@ -770,20 +487,26 @@
                     return false;
                 }
                 
+                // ПРОВЕРКА ДАЛЬНОСТИ
+                let dist = Math.abs(this.tileX - monster.tileX) + Math.abs(this.tileY - monster.tileY);
+                
+                if (this.className === 'knight' && dist > 1) {
+                    addLog('🏃 Подойдите ближе для атаки мечом!');
+                    return false;
+                }
+                if ((this.className === 'archer' || this.className === 'mage') && dist > 12) {
+                    addLog('📡 Слишком далеко для атаки!');
+                    return false;
+                }
+                
                 let damage = this.attack - monster.defense + Math.random() * 20;
                 damage = Math.max(5, Math.floor(damage));
-                
-                let isCrit = Math.random() < 0.1;
-                if (isCrit) {
-                    damage = Math.floor(damage * 1.5);
-                    addLog(`💥 КРИТИЧЕСКИЙ УДАР! +${damage} урона!`);
-                }
                 
                 monster.hp -= damage;
                 this.lastAttack = now;
                 
-                showDamage(monster.x, monster.y, damage, isCrit ? '#ffaa44' : '#ff8844');
                 addLog(`⚔️ Вы нанесли ${damage} урона ${monster.name}`);
+                showDamage(monster.x, monster.y, damage);
                 
                 if (monster.hp <= 0) {
                     monster.die(this);
@@ -791,42 +514,30 @@
                     let goldDrop = Math.floor(monster.goldMin + Math.random() * (monster.goldMax - monster.goldMin));
                     this.gold += goldDrop;
                     addLog(`💰 +${goldDrop} золота!`);
-                    
-                    // Шанс дропа предмета
-                    if (monster.drops && Math.random() < 0.2) {
-                        let drop = monster.drops[Math.floor(Math.random() * monster.drops.length)];
-                        if (drop) {
-                            this.inventory.push(drop);
-                            addLog(`🎁 Вы получили: ${drop.name}!`);
-                            updateInventoryUI();
-                        }
-                    }
                 }
                 updateUI();
                 return true;
-            }
+            },
+            
+            attackSpeed: 0.9,
+            lastAttack: 0,
+            lastRegen: 0
         };
         
-        // =========================================================================
-        // ЧАСТЬ 3: МОНСТРЫ (ПОЛНАЯ БАЗА)
-        // =========================================================================
-        
+        // ==================== МОНСТРЫ (КЛЕТОЧНОЕ ДВИЖЕНИЕ, ОКРУЖЕНИЕ) ====================
         let monsters = [];
         let nextMonsterId = 1;
         
         const MONSTER_TYPES = {
-            goblin: { name: 'Гоблин', hp: 45, attack: 16, defense: 3, xp: 35, goldMin: 8, goldMax: 18, size: 32, speed: 70, color: '#6b8c42', aggroRange: 140, attackRange: 40, drops: [] },
-            wolf: { name: 'Волк', hp: 55, attack: 20, defense: 4, xp: 45, goldMin: 12, goldMax: 25, size: 32, speed: 100, color: '#8a8a6a', aggroRange: 160, attackRange: 38, drops: [] },
-            skeleton: { name: 'Скелет', hp: 75, attack: 24, defense: 6, xp: 60, goldMin: 15, goldMax: 30, size: 34, speed: 75, color: '#bdb28c', aggroRange: 150, attackRange: 42, drops: [] },
-            orc: { name: 'Орк', hp: 110, attack: 30, defense: 8, xp: 95, goldMin: 25, goldMax: 45, size: 38, speed: 80, color: '#7a6a4a', aggroRange: 170, attackRange: 44, drops: [{ name: 'Орочий меч', icon: '⚔️', damage: 10 }] },
-            minotaur: { name: 'Минотавр', hp: 180, attack: 40, defense: 12, xp: 150, goldMin: 40, goldMax: 70, size: 42, speed: 85, color: '#9b5e2c', aggroRange: 190, attackRange: 48, drops: [{ name: 'Рог минотавра', icon: '🦷' }] },
-            troll: { name: 'Тролль', hp: 220, attack: 38, defense: 14, xp: 180, goldMin: 50, goldMax: 90, size: 44, speed: 65, color: '#6a8c5a', aggroRange: 170, attackRange: 50, drops: [{ name: 'Шкура тролля', icon: '🧥', defense: 8 }] },
-            ghost: { name: 'Призрак', hp: 85, attack: 28, defense: 2, xp: 80, goldMin: 20, goldMax: 35, size: 32, speed: 110, color: '#aaccee', aggroRange: 180, attackRange: 36, drops: [{ name: 'Эктоплазма', icon: '💀' }] },
-            dragon: { name: 'ДРАКОН', hp: 850, attack: 75, defense: 28, xp: 800, goldMin: 200, goldMax: 400, size: 64, speed: 90, color: '#aa4a2a', aggroRange: 300, attackRange: 70, isBoss: true, drops: [{ name: 'Драконий меч', icon: '🐉⚔️', damage: 28 }, { name: 'Драконья чешуя', icon: '🐉' }] }
+            goblin: { name: 'Гоблин', hp: 45, attack: 16, defense: 3, xp: 35, goldMin: 8, goldMax: 18, size: 32, color: '#6b8c42', aggroRange: 5, attackRange: 1 },
+            wolf: { name: 'Волк', hp: 55, attack: 20, defense: 4, xp: 45, goldMin: 12, goldMax: 25, size: 32, color: '#8a8a6a', aggroRange: 6, attackRange: 1 },
+            skeleton: { name: 'Скелет', hp: 75, attack: 24, defense: 6, xp: 60, goldMin: 15, goldMax: 30, size: 34, color: '#bdb28c', aggroRange: 5, attackRange: 1 },
+            orc: { name: 'Орк', hp: 110, attack: 30, defense: 8, xp: 95, goldMin: 25, goldMax: 45, size: 38, color: '#7a6a4a', aggroRange: 5, attackRange: 1 },
+            minotaur: { name: 'Минотавр', hp: 180, attack: 40, defense: 12, xp: 150, goldMin: 40, goldMax: 70, size: 42, color: '#9b5e2c', aggroRange: 5, attackRange: 1 }
         };
         
         class Monster {
-            constructor(type, x, y) {
+            constructor(type, tileX, tileY) {
                 let data = MONSTER_TYPES[type];
                 this.id = nextMonsterId++;
                 this.type = type;
@@ -839,43 +550,71 @@
                 this.goldMin = data.goldMin;
                 this.goldMax = data.goldMax;
                 this.size = data.size;
-                this.speed = data.speed;
                 this.color = data.color;
                 this.aggroRange = data.aggroRange;
                 this.attackRange = data.attackRange;
-                this.drops = data.drops || [];
-                this.isBoss = data.isBoss || false;
-                this.x = x;
-                this.y = y;
+                this.tileX = tileX;
+                this.tileY = tileY;
+                this.x = tileX * TILE_SIZE;
+                this.y = tileY * TILE_SIZE;
                 this.alive = true;
                 this.aggro = false;
                 this.attackCooldown = 0;
                 this.lastAttack = 0;
             }
             
+            // ПРОВЕРКА, МОЖЕТ ЛИ МОНБ СТАТЬ НА КЛЕТКУ
+            canMoveTo(tx, ty) {
+                if (tx < 0 || tx >= WORLD_WIDTH || ty < 0 || ty >= WORLD_HEIGHT) return false;
+                if (worldMap[ty][tx] === 1) return false;
+                if (player.tileX === tx && player.tileY === ty) return true;
+                for (let m of monsters) {
+                    if (m !== this && m.alive && m.tileX === tx && m.tileY === ty) return false;
+                }
+                return true;
+            }
+            
+            // ПОИСК ПУТИ К ИГРОКУ (окружение)
+            moveTowards(playerTileX, playerTileY) {
+                let dx = playerTileX - this.tileX;
+                let dy = playerTileY - this.tileY;
+                
+                let moves = [];
+                if (dx > 0) moves.push({ tx: this.tileX + 1, ty: this.tileY });
+                if (dx < 0) moves.push({ tx: this.tileX - 1, ty: this.tileY });
+                if (dy > 0) moves.push({ tx: this.tileX, ty: this.tileY + 1 });
+                if (dy < 0) moves.push({ tx: this.tileX, ty: this.tileY - 1 });
+                
+                for (let move of moves) {
+                    if (this.canMoveTo(move.tx, move.ty)) {
+                        this.tileX = move.tx;
+                        this.tileY = move.ty;
+                        this.x = this.tileX * TILE_SIZE;
+                        this.y = this.tileY * TILE_SIZE;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
             update(deltaTime, player) {
                 if (!this.alive) return;
                 if (this.attackCooldown > 0) this.attackCooldown -= deltaTime;
                 
-                let dx = player.x - this.x;
-                let dy = player.y - this.y;
-                let dist = Math.hypot(dx, dy);
+                let dist = Math.abs(this.tileX - player.tileX) + Math.abs(this.tileY - player.tileY);
                 
-                if (dist < this.aggroRange) this.aggro = true;
-                if (dist > this.aggroRange + 100) this.aggro = false;
+                if (dist <= this.aggroRange) this.aggro = true;
+                if (dist > this.aggroRange + 2) this.aggro = false;
                 
                 if (this.aggro && player.hp > 0) {
                     if (dist > this.attackRange) {
-                        let angle = Math.atan2(dy, dx);
-                        let move = this.speed * deltaTime;
-                        this.x += Math.cos(angle) * move;
-                        this.y += Math.sin(angle) * move;
+                        this.moveTowards(player.tileX, player.tileY);
                     } else if (dist <= this.attackRange && this.attackCooldown <= 0) {
                         let damage = Math.max(5, this.attack - player.defense + Math.random() * 15);
-                        let actual = player.takeDamage(Math.floor(damage), this);
+                        let actual = player.takeDamage(Math.floor(damage));
                         this.attackCooldown = 1.2;
                         addLog(`💔 ${this.name} атакует! -${actual} HP`);
-                        showDamage(player.x, player.y, actual, '#ff4444');
+                        showDamage(player.x, player.y, actual);
                         updateUI();
                     }
                 }
@@ -883,254 +622,234 @@
             
             die(killer) {
                 this.alive = false;
-                if (this.isBoss) {
-                    document.getElementById('bossBar').style.display = 'none';
-                    addLog(`🏆🏆🏆 ВЕЛИКИЙ ${this.name} ПОВЕРЖЕН! 🏆🏆🏆`);
-                    showNotification(`БОСС ПОБЕЖДЁН! +${this.xp} XP`, '#ffaa44');
-                }
-                setTimeout(() => this.respawn(), this.isBoss ? 120000 : 8000);
+                setTimeout(() => this.respawn(), 8000);
             }
             
             respawn() {
                 this.hp = this.maxHp;
                 this.alive = true;
                 this.aggro = false;
-                this.x = 100 + Math.random() * (WORLD_WIDTH * TILE_SIZE - 200);
-                this.y = 100 + Math.random() * (WORLD_HEIGHT * TILE_SIZE - 200);
-                if (this.isBoss) {
-                    addLog(`🐉 ${this.name} возродился в мире!`);
+                let placed = false;
+                for (let attempt = 0; attempt < 50; attempt++) {
+                    let tx = 5 + Math.floor(Math.random() * (WORLD_WIDTH - 10));
+                    let ty = 5 + Math.floor(Math.random() * (WORLD_HEIGHT - 10));
+                    if (worldMap[ty][tx] === 0 && Math.abs(tx - safeZone.x) > 3) {
+                        let hasMonster = false;
+                        for (let m of monsters) {
+                            if (m !== this && m.alive && m.tileX === tx && m.tileY === ty) hasMonster = true;
+                        }
+                        if (!hasMonster && !(player.tileX === tx && player.tileY === ty)) {
+                            this.tileX = tx;
+                            this.tileY = ty;
+                            this.x = tx * TILE_SIZE;
+                            this.y = ty * TILE_SIZE;
+                            placed = true;
+                            break;
+                        }
+                    }
+                }
+                if (!placed) {
+                    this.tileX = 10;
+                    this.tileY = 10;
+                    this.x = 10 * TILE_SIZE;
+                    this.y = 10 * TILE_SIZE;
                 }
             }
         }
         
         function spawnMonsters() {
-            let types = ['goblin', 'wolf', 'skeleton', 'orc', 'minotaur', 'troll', 'ghost'];
-            for (let i = 0; i < 60; i++) {
+            let types = ['goblin', 'wolf', 'skeleton', 'orc', 'minotaur'];
+            for (let i = 0; i < 45; i++) {
                 let type = types[Math.floor(Math.random() * types.length)];
-                let x = 100 + Math.random() * (WORLD_WIDTH * TILE_SIZE - 200);
-                let y = 100 + Math.random() * (WORLD_HEIGHT * TILE_SIZE - 200);
-                monsters.push(new Monster(type, x, y));
+                let placed = false;
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    let tx = 3 + Math.floor(Math.random() * (WORLD_WIDTH - 6));
+                    let ty = 3 + Math.floor(Math.random() * (WORLD_HEIGHT - 6));
+                    if (worldMap[ty][tx] === 0 && Math.abs(tx - safeZone.x) > 4) {
+                        let hasMonster = false;
+                        for (let m of monsters) {
+                            if (m.tileX === tx && m.tileY === ty) hasMonster = true;
+                        }
+                        if (!hasMonster && !(player.tileX === tx && player.tileY === ty)) {
+                            monsters.push(new Monster(type, tx, ty));
+                            placed = true;
+                            break;
+                        }
+                    }
+                }
+                if (!placed) {
+                    monsters.push(new Monster(type, 10 + i % 10, 10 + Math.floor(i / 10)));
+                }
             }
-            // Босс
-            monsters.push(new Monster('dragon', WORLD_WIDTH/2 * TILE_SIZE, WORLD_HEIGHT/2 * TILE_SIZE));
         }
         
-        // =========================================================================
-        // ЧАСТЬ 4: ПРЕДМЕТЫ
-        // =========================================================================
+        // ==================== ПРЕДМЕТЫ И ЗЕЛЬЯ ====================
+        const SHOP_ITEMS = [
+            { id: 'small_hp', name: 'Малая настойка HP', icon: '🧪', heal: 60, price: 20, type: 'consumable' },
+            { id: 'medium_hp', name: 'Средняя настойка HP', icon: '🧪', heal: 150, price: 50, type: 'consumable' },
+            { id: 'small_mp', name: 'Малая настойка MP', icon: '💙', mana: 40, price: 18, type: 'consumable' },
+            { id: 'medium_mp', name: 'Средняя настойка MP', icon: '💙', mana: 100, price: 45, type: 'consumable' }
+        ];
         
-        const ITEMS = {
-            small_potion: { name: 'Малая настойка', icon: '🧪', heal: 50, price: 15, type: 'consumable' },
-            medium_potion: { name: 'Средняя настойка', icon: '🧪', heal: 120, price: 40, type: 'consumable' },
-            mana_potion: { name: 'Настойка маны', icon: '💙', mana: 60, price: 25, type: 'consumable' },
-            iron_sword: { name: 'Железный меч', icon: '⚔️', damage: 12, price: 200, type: 'weapon' },
-            steel_sword: { name: 'Стальной меч', icon: '⚔️', damage: 20, price: 450, type: 'weapon' },
-            leather_armor: { name: 'Кожаная броня', icon: '🥋', defense: 8, price: 100, type: 'armor' },
-            iron_armor: { name: 'Железная броня', icon: '🛡️', defense: 15, price: 350, type: 'armor' },
-            iron_helmet: { name: 'Железный шлем', icon: '⛑️', defense: 6, price: 120, type: 'helmet' }
-        };
-        
-        function initInventory() {
-            player.inventory.push({ ...ITEMS.iron_sword, count: 1 });
-            player.inventory.push({ ...ITEMS.leather_armor, count: 1 });
-            player.inventory.push({ ...ITEMS.small_potion, count: 5 });
-            player.inventory.push({ ...ITEMS.mana_potion, count: 3 });
-            player.equipment.weapon = { ...ITEMS.iron_sword };
+        function useHealPotion() {
+            let potion = player.inventory.find(i => i.type === 'consumable' && i.heal);
+            if (!potion) {
+                addLog('🧪 Нет зелий лечения! Купите у торговца');
+                return;
+            }
+            player.hp = Math.min(player.maxHp, player.hp + potion.heal);
+            potion.count--;
+            if (potion.count <= 0) {
+                let idx = player.inventory.indexOf(potion);
+                player.inventory.splice(idx, 1);
+            }
+            addLog(`💚 Вылечено +${potion.heal} HP`);
+            updateUI();
+            updateInventoryUI();
         }
         
-        // =========================================================================
-        // ЧАСТЬ 5: НАВЫКИ
-        // =========================================================================
+        function useManaPotion() {
+            let potion = player.inventory.find(i => i.type === 'consumable' && i.mana);
+            if (!potion) {
+                addLog('💙 Нет зелий маны! Купите у торговца');
+                return;
+            }
+            player.mp = Math.min(player.maxMp, player.mp + potion.mana);
+            potion.count--;
+            if (potion.count <= 0) {
+                let idx = player.inventory.indexOf(potion);
+                player.inventory.splice(idx, 1);
+            }
+            addLog(`💙 Восстановлено +${potion.mana} MP`);
+            updateUI();
+            updateInventoryUI();
+        }
         
-        const SKILLS = {
-            knight: [
-                { name: 'Вихревая атака', icon: '🌀', manaCost: 20, cooldown: 4, desc: 'Удар по всем врагам вокруг', damage: 1.6 },
-                { name: 'Удар щитом', icon: '🛡️', manaCost: 15, cooldown: 6, desc: 'Оглушает врага', damage: 1.3, stun: true }
-            ],
-            archer: [
-                { name: 'Множественный выстрел', icon: '🎯', manaCost: 18, cooldown: 3, desc: '3 стрелы по разным врагам', damage: 1.2, arrows: 3 },
-                { name: 'Отравленная стрела', icon: '☠️', manaCost: 22, cooldown: 5, desc: 'Яд на 5 секунд', damage: 1.4, poison: true }
-            ],
-            mage: [
-                { name: 'Огненный шар', icon: '🔥', manaCost: 25, cooldown: 4, desc: 'Взрыв по площади', damage: 1.8, radius: 80 },
-                { name: 'Ледяная стрела', icon: '❄️', manaCost: 20, cooldown: 5, desc: 'Замедляет врага', damage: 1.4, slow: true }
-            ]
-        };
-        
-        let lastSpellTime = 0;
-        
-        function useSpell() {
+        // СУПЕРУДАР (как в Rucoy)
+        let lastSuperTime = 0;
+        function useSuperSkill() {
             let now = Date.now() / 1000;
-            if (now - lastSpellTime < 3) {
-                addLog('⏳ Способность перезаряжается!');
+            if (now - lastSuperTime < 8) {
+                addLog('⏳ Суперудар перезаряжается!');
                 return;
             }
-            
-            let skill = SKILLS[player.className][0];
-            if (player.mp < skill.manaCost) {
-                addLog(`💧 Недостаточно маны (нужно ${skill.manaCost})`);
-                return;
-            }
-            
-            player.mp -= skill.manaCost;
-            lastSpellTime = now;
             
             if (player.className === 'knight') {
                 let hit = false;
                 for (let m of monsters) {
                     if (!m.alive) continue;
-                    let dist = Math.hypot(m.x - player.x, m.y - player.y);
-                    if (dist < 80) {
-                        let dmg = Math.floor(player.attack * skill.damage);
+                    let dist = Math.abs(m.tileX - player.tileX) + Math.abs(m.tileY - player.tileY);
+                    if (dist <= 2) {
+                        let dmg = Math.floor(player.attack * 1.8);
                         m.hp -= dmg;
-                        showDamage(m.x, m.y, dmg, '#ffaa66');
+                        showDamage(m.x, m.y, dmg);
                         hit = true;
                         if (m.hp <= 0) m.die(player);
                     }
                 }
-                if (hit) addLog(`🌀 ${skill.name}!`);
+                if (hit) addLog(`🌀 Вихревая атака!`);
                 else addLog('Рядом нет врагов');
             } 
             else if (player.className === 'archer') {
                 let targets = monsters.filter(m => m.alive).slice(0, 3);
                 for (let m of targets) {
-                    let dmg = Math.floor(player.attack * skill.damage);
+                    let dmg = Math.floor(player.attack * 1.5);
                     m.hp -= dmg;
-                    showDamage(m.x, m.y, dmg, '#88ff88');
+                    showDamage(m.x, m.y, dmg);
                     if (m.hp <= 0) m.die(player);
                 }
-                if (targets.length) addLog(`🏹 ${skill.name} поразил ${targets.length} целей!`);
+                if (targets.length) addLog(`🏹 Залп стрел!`);
                 else addLog('Нет целей');
             }
             else if (player.className === 'mage') {
                 let hit = false;
                 for (let m of monsters) {
                     if (!m.alive) continue;
-                    let dist = Math.hypot(m.x - player.x, m.y - player.y);
-                    if (dist < 100) {
-                        let dmg = Math.floor(player.attack * skill.damage);
+                    let dist = Math.abs(m.tileX - player.tileX) + Math.abs(m.tileY - player.tileY);
+                    if (dist <= 4) {
+                        let dmg = Math.floor(player.attack * 1.9);
                         m.hp -= dmg;
-                        showDamage(m.x, m.y, dmg, '#ff6666');
+                        showDamage(m.x, m.y, dmg);
                         hit = true;
                         if (m.hp <= 0) m.die(player);
                     }
                 }
-                if (hit) addLog(`🔥 ${skill.name}!`);
+                if (hit) addLog(`🔥 Огненный шар!`);
                 else addLog('Нет врагов в радиусе');
             }
             
+            lastSuperTime = now;
             updateUI();
         }
         
-        function heal() {
-            let now = Date.now() / 1000;
-            let healAmount = Math.floor(player.maxHp * 0.35);
-            player.hp = Math.min(player.maxHp, player.hp + healAmount);
-            addLog(`💊 Вылечено +${healAmount} HP`);
-            updateUI();
-        }
+        // РЕГЕНЕРАЦИЯ (раз в 10 секунд)
+        setInterval(() => {
+            if (player.hp > 0 && player.hp < player.maxHp) {
+                let regen = Math.floor(player.maxHp * 0.03);
+                player.hp = Math.min(player.maxHp, player.hp + regen);
+                addLog(`💚 Регенерация +${regen} HP`);
+                updateUI();
+            }
+            if (player.mp < player.maxMp) {
+                let regen = Math.floor(player.maxMp * 0.05);
+                player.mp = Math.min(player.maxMp, player.mp + regen);
+                updateUI();
+            }
+        }, 10000);
         
-        // =========================================================================
-        // ЧАСТЬ 6: UI ФУНКЦИИ
-        // =========================================================================
-        
+        // ==================== UI ФУНКЦИИ ====================
         function updateUI() {
-            document.getElementById('levelVal').innerText = player.level;
-            let hpPercent = (player.hp / player.maxHp) * 100;
-            let mpPercent = (player.mp / player.maxMp) * 100;
-            document.getElementById('hpFill').style.width = hpPercent + '%';
-            document.getElementById('mpFill').style.width = mpPercent + '%';
-            document.getElementById('hpText').innerHTML = `${Math.floor(player.hp)}/${player.maxHp}`;
-            document.getElementById('mpText').innerHTML = `${Math.floor(player.mp)}/${player.maxMp}`;
+            document.getElementById('topLevel').innerText = player.level;
+            document.getElementById('topHp').innerText = `${Math.floor(player.hp)}/${player.maxHp}`;
+            document.getElementById('topMp').innerText = `${Math.floor(player.mp)}/${player.maxMp}`;
+            document.getElementById('topGold').innerText = player.gold;
+            document.getElementById('invGold').innerText = player.gold;
             
             let needXP = 100 + (player.level - 1) * 50;
             let xpPercent = (player.xp / needXP) * 100;
-            document.getElementById('xpFill').style.width = xpPercent + '%';
+            document.getElementById('topXpFill').style.width = xpPercent + '%';
             
-            let classNames = { knight: 'Рыцарь', archer: 'Лучник', mage: 'Маг' };
-            document.getElementById('className').innerText = classNames[player.className];
-            document.getElementById('goldAmount').innerText = player.gold;
-            
-            document.querySelectorAll('.class-btn').forEach(btn => btn.classList.remove('active'));
-            if (player.className === 'knight') document.getElementById('classKnight').classList.add('active');
-            if (player.className === 'archer') document.getElementById('classArcher').classList.add('active');
-            if (player.className === 'mage') document.getElementById('classMage').classList.add('active');
+            // Статистика
+            let statsHtml = `
+                <div class="stat-row"><span>Уровень:</span><span>${player.level}</span></div>
+                <div class="stat-row"><span>Опыт:</span><span>${player.xp}/${needXP}</span></div>
+                <div class="stat-row"><span>Здоровье:</span><span>${player.maxHp}</span></div>
+                <div class="stat-row"><span>Мана:</span><span>${player.maxMp}</span></div>
+                <div class="stat-row"><span>Атака:</span><span>${player.attack}</span></div>
+                <div class="stat-row"><span>Защита:</span><span>${player.defense}</span></div>
+                <div class="stat-row"><span>Класс:</span><span>${player.className === 'knight' ? 'Рыцарь' : player.className === 'archer' ? 'Лучник' : 'Маг'}</span></div>
+            `;
+            document.getElementById('statsContent').innerHTML = statsHtml;
         }
         
         function updateInventoryUI() {
-            let grid = document.getElementById('inventoryGrid');
-            grid.innerHTML = '';
+            let container = document.getElementById('inventorySlots');
+            container.innerHTML = '';
             for (let i = 0; i < 32; i++) {
                 let slot = document.createElement('div');
-                slot.className = 'inventory-slot';
+                slot.className = 'inv-slot';
                 if (player.inventory[i]) {
                     slot.innerHTML = player.inventory[i].icon;
                     if (player.inventory[i].count > 1) {
-                        let countSpan = document.createElement('span');
-                        countSpan.className = 'slot-count';
-                        countSpan.innerText = player.inventory[i].count;
-                        slot.appendChild(countSpan);
+                        let span = document.createElement('span');
+                        span.style.position = 'absolute';
+                        span.style.bottom = '2px';
+                        span.style.right = '4px';
+                        span.style.fontSize = '10px';
+                        span.innerText = player.inventory[i].count;
+                        slot.appendChild(span);
                     }
                 } else {
                     slot.innerHTML = '⬜';
                 }
                 slot.onclick = () => useItem(i);
-                grid.appendChild(slot);
+                container.appendChild(slot);
             }
-            
-            let equipDiv = document.getElementById('equipmentSlots');
-            equipDiv.innerHTML = '';
-            let slots = ['weapon', 'armor', 'helmet', 'boots', 'ring'];
-            for (let slot of slots) {
-                let item = player.equipment[slot];
-                let div = document.createElement('div');
-                div.className = 'inventory-slot';
-                div.style.width = '60px';
-                div.style.height = '60px';
-                div.style.fontSize = '28px';
-                div.innerHTML = item ? item.icon : '⬜';
-                div.title = item ? item.name : 'Пусто';
-                equipDiv.appendChild(div);
-            }
-        }
-        
-        function updateSkillsUI() {
-            let container = document.getElementById('skillsList');
-            container.innerHTML = '';
-            let skills = SKILLS[player.className];
-            for (let s of skills) {
-                let div = document.createElement('div');
-                div.className = 'skill-slot';
-                div.innerHTML = `
-                    <div class="skill-icon">${s.icon}</div>
-                    <div class="skill-info">
-                        <div class="skill-name">${s.name}</div>
-                        <div class="skill-desc">${s.desc} | 💧${s.manaCost}</div>
-                    </div>
-                    <div class="skill-cooldown">${s.cooldown}с</div>
-                `;
-                container.appendChild(div);
-            }
-        }
-        
-        function updateCharacterUI() {
-            let container = document.getElementById('characterStats');
-            container.innerHTML = `
-                <div class="stat-row"><span>Уровень:</span><span>${player.level}</span></div>
-                <div class="stat-row"><span>Опыт:</span><span>${player.xp}/${100 + (player.level-1)*50}</span></div>
-                <div class="stat-row"><span>Здоровье:</span><span>${player.maxHp}</span></div>
-                <div class="stat-row"><span>Мана:</span><span>${player.maxMp}</span></div>
-                <div class="stat-row"><span>Атака:</span><span>${player.attack}</span></div>
-                <div class="stat-row"><span>Защита:</span><span>${player.defense}</span></div>
-                <div class="stat-row"><span>Золото:</span><span>💰 ${player.gold}</span></div>
-                <div class="stat-row"><span>Убито монстров:</span><span>${player.kills || 0}</span></div>
-            `;
         }
         
         function useItem(slot) {
             let item = player.inventory[slot];
             if (!item) return;
-            
             if (item.type === 'consumable') {
                 if (item.heal) {
                     player.hp = Math.min(player.maxHp, player.hp + item.heal);
@@ -1144,100 +863,53 @@
                 if (item.count <= 0) player.inventory[slot] = null;
                 updateUI();
                 updateInventoryUI();
-            } else if (item.type === 'weapon') {
-                if (player.equipment.weapon) {
-                    player.inventory.push(player.equipment.weapon);
-                }
-                player.equipment.weapon = item;
-                player.inventory[slot] = null;
-                addLog(`⚔️ Экипировано: ${item.name}`);
-                updateInventoryUI();
-                updateUI();
-            } else if (item.type === 'armor') {
-                if (player.equipment.armor) player.inventory.push(player.equipment.armor);
-                player.equipment.armor = item;
-                player.inventory[slot] = null;
-                addLog(`🛡️ Экипировано: ${item.name}`);
-                updateInventoryUI();
-                updateUI();
             }
         }
         
-        function addLog(msg) {
-            let logDiv = document.createElement('div');
-            logDiv.className = 'log-message';
-            logDiv.innerText = msg;
-            document.body.appendChild(logDiv);
-            setTimeout(() => logDiv.remove(), 2500);
+        function initInventory() {
+            player.inventory.push({ name: 'Малая настойка HP', icon: '🧪', heal: 60, count: 5, type: 'consumable' });
+            player.inventory.push({ name: 'Малая настойка MP', icon: '💙', mana: 40, count: 3, type: 'consumable' });
         }
         
-        function showNotification(msg, color = '#ffd966') {
-            let div = document.createElement('div');
-            div.className = 'notification';
-            div.innerText = msg;
-            div.style.color = color;
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 2000);
-        }
-        
-        function showDamage(x, y, damage, color = '#ffaa44') {
-            let div = document.createElement('div');
-            div.className = 'damage-number';
-            div.innerText = `-${Math.floor(damage)}`;
-            let screenX = x - camera.x;
-            let screenY = y - camera.y;
-            div.style.left = screenX + 'px';
-            div.style.top = screenY + 'px';
-            div.style.color = color;
-            document.body.appendChild(div);
-            setTimeout(() => div.remove(), 800);
-        }
-        
-        function addChatMessage(sender, msg, isSystem = false) {
-            let container = document.getElementById('chatMessages');
-            let div = document.createElement('div');
-            div.style.color = isSystem ? '#88ff88' : '#ffffff';
-            div.style.fontSize = '11px';
-            div.style.margin = '2px 0';
-            div.innerText = isSystem ? `[Система] ${msg}` : `${sender}: ${msg}`;
-            container.appendChild(div);
-            container.scrollTop = container.scrollHeight;
-            while (container.children.length > 50) container.removeChild(container.firstChild);
-        }
-        
-        // =========================================================================
-        // ЧАСТЬ 7: ДВИЖЕНИЕ И ФИЗИКА
-        // =========================================================================
-        
-        let lastTimestamp = 0;
-        let moveProgress = 1;
-        
-        function updateMovement(deltaTime) {
-            if (player.x !== player.targetX || player.y !== player.targetY) {
-                let dx = player.targetX - player.x;
-                let dy = player.targetY - player.y;
-                let dist = Math.hypot(dx, dy);
-                let step = player.speed * deltaTime;
-                
-                if (dist < step) {
-                    player.x = player.targetX;
-                    player.y = player.targetY;
-                } else {
-                    let angle = Math.atan2(dy, dx);
-                    player.x += Math.cos(angle) * step;
-                    player.y += Math.sin(angle) * step;
-                }
+        function openShop() {
+            let container = document.getElementById('shopItems');
+            container.innerHTML = '';
+            for (let item of SHOP_ITEMS) {
+                let div = document.createElement('div');
+                div.className = 'shop-item';
+                div.innerHTML = `
+                    <span style="font-size:24px;">${item.icon}</span>
+                    <span style="flex:1; margin-left:15px;">${item.name}</span>
+                    <span style="color:#ffd966;">💰 ${item.price}</span>
+                    <button class="buyItemBtn" data-id="${item.id}" style="background:#4a3e2a; color:#ffd966; border:none; padding:5px 15px; border-radius:20px;">Купить</button>
+                `;
+                container.appendChild(div);
             }
+            document.getElementById('shopPanel').style.display = 'block';
+            
+            document.querySelectorAll('.buyItemBtn').forEach(btn => {
+                btn.onclick = () => {
+                    let itemId = btn.dataset.id;
+                    let shopItem = SHOP_ITEMS.find(i => i.id === itemId);
+                    if (player.gold >= shopItem.price) {
+                        player.gold -= shopItem.price;
+                        let existing = player.inventory.find(i => i.name === shopItem.name);
+                        if (existing) existing.count++;
+                        else player.inventory.push({ ...shopItem, count: 1 });
+                        updateUI();
+                        updateInventoryUI();
+                        addLog(`🛒 Куплено: ${shopItem.name}`);
+                    } else {
+                        addLog('💰 Недостаточно золота!');
+                    }
+                };
+            });
         }
         
-        // =========================================================================
-        // ЧАСТЬ 8: ОТРИСОВКА
-        // =========================================================================
-        
+        // ==================== ОТРИСОВКА ====================
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Камера
             camera.x = player.x - canvas.width / 2;
             camera.y = player.y - canvas.height / 2;
             camera.x = Math.max(0, Math.min(camera.x, WORLD_WIDTH * TILE_SIZE - canvas.width));
@@ -1248,7 +920,6 @@
             let endX = Math.min(WORLD_WIDTH, startX + Math.ceil(canvas.width / TILE_SIZE) + 2);
             let endY = Math.min(WORLD_HEIGHT, startY + Math.ceil(canvas.height / TILE_SIZE) + 2);
             
-            // Отрисовка тайлов
             for (let y = startY; y < endY; y++) {
                 for (let x = startX; x < endX; x++) {
                     let screenX = x * TILE_SIZE - camera.x;
@@ -1256,27 +927,33 @@
                     
                     let biome = worldBiome[y][x];
                     if (worldMap[y][x] === 1) {
-                        ctx.fillStyle = '#4a3e35';
+                        if (biome === 'water') ctx.fillStyle = '#4a6a8a';
+                        else if (biome === 'tree') ctx.fillStyle = '#4a6e3a';
+                        else if (biome === 'mountain') ctx.fillStyle = '#8a7a5a';
+                        else ctx.fillStyle = '#4a3e35';
                         ctx.fillRect(screenX, screenY, TILE_SIZE - 1, TILE_SIZE - 1);
-                        ctx.fillStyle = '#2d241e';
-                        ctx.fillRect(screenX + 6, screenY + 6, TILE_SIZE - 13, TILE_SIZE - 13);
                     } else {
                         if (biome === 'grass') ctx.fillStyle = '#5c6e4a';
-                        else if (biome === 'forest') ctx.fillStyle = '#4a6e3a';
-                        else if (biome === 'desert') ctx.fillStyle = '#c9b86a';
-                        else if (biome === 'water') ctx.fillStyle = '#4a6a8a';
-                        else if (biome === 'mountain') ctx.fillStyle = '#8a7a5a';
-                        else if (biome === 'cave') ctx.fillStyle = '#5a5a6a';
+                        else if (biome === 'shop') ctx.fillStyle = '#6a8a5a';
                         else ctx.fillStyle = '#5c6e4a';
-                        
                         ctx.fillRect(screenX, screenY, TILE_SIZE - 1, TILE_SIZE - 1);
                         ctx.fillStyle = '#2c3524';
                         ctx.fillRect(screenX + 4, screenY + 4, TILE_SIZE - 9, TILE_SIZE - 9);
                     }
+                    
+                    // НПС в безопасной зоне
+                    if (x === safeZone.x && y === safeZone.y) {
+                        ctx.fillStyle = '#ffaa66';
+                        ctx.font = 'bold 24px monospace';
+                        ctx.fillText('🏪', screenX + 12, screenY + 38);
+                        ctx.fillStyle = '#ffd966';
+                        ctx.font = '10px monospace';
+                        ctx.fillText('Торговец', screenX + 8, screenY + 58);
+                    }
                 }
             }
             
-            // Отрисовка монстров
+            // Монстры
             for (let m of monsters) {
                 if (!m.alive) continue;
                 let screenX = m.x - camera.x - m.size/2;
@@ -1296,43 +973,27 @@
                 ctx.fillRect(screenX, screenY - 8, m.size * hpPercent, 5);
                 
                 ctx.fillStyle = '#fff';
-                ctx.font = 'bold 11px monospace';
+                ctx.font = 'bold 10px monospace';
                 ctx.fillText(m.name, screenX + 4, screenY - 2);
                 
-                if (m.isBoss) {
-                    ctx.strokeStyle = '#ffaa44';
+                // КРАСНЫЙ КВАДРАТ ДЛЯ ВЫБРАННОГО МОБА
+                if (selectedMonsterId === m.id) {
+                    ctx.strokeStyle = '#ff4444';
                     ctx.lineWidth = 3;
                     ctx.strokeRect(screenX - 2, screenY - 2, m.size + 4, m.size + 4);
                 }
-                if (m.aggro) {
-                    ctx.strokeStyle = '#ff4444';
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(screenX - 1, screenY - 1, m.size + 2, m.size + 2);
-                }
             }
             
-            // Отрисовка игрока
+            // Игрок
             let psx = player.x - camera.x - 20;
             let psy = player.y - camera.y - 20;
             
             ctx.fillStyle = '#3a6ea5';
             ctx.fillRect(psx, psy, 40, 40);
-            
             ctx.fillStyle = '#f9c87a';
             ctx.beginPath();
             ctx.arc(psx + 20, psy + 12, 12, 0, Math.PI * 2);
             ctx.fill();
-            
-            if (player.className === 'knight') {
-                ctx.fillStyle = '#ccccaa';
-                ctx.fillRect(psx + 28, psy + 18, 12, 6);
-            } else if (player.className === 'archer') {
-                ctx.fillStyle = '#6f9e4f';
-                ctx.fillRect(psx + 26, psy + 20, 14, 4);
-            } else {
-                ctx.fillStyle = '#a367c2';
-                ctx.fillRect(psx + 24, psy + 18, 16, 6);
-            }
             
             let hpPercent = player.hp / player.maxHp;
             ctx.fillStyle = '#a13333';
@@ -1345,159 +1006,146 @@
             ctx.fillText('Герой', psx + 12, psy - 12);
         }
         
-        // =========================================================================
-        // ЧАСТЬ 9: ОБРАБОТЧИКИ СОБЫТИЙ
-        // =========================================================================
-        
+        // ==================== ОБРАБОТКА КЛИКОВ ====================
         function handleCanvasClick(e) {
             let rect = canvas.getBoundingClientRect();
             let clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
             let clickY = (e.clientY - rect.top) * (canvas.height / rect.height);
             let worldX = clickX + camera.x;
             let worldY = clickY + camera.y;
+            let tileX = Math.floor(worldX / TILE_SIZE);
+            let tileY = Math.floor(worldY / TILE_SIZE);
             
+            if (tileX < 0 || tileX >= WORLD_WIDTH || tileY < 0 || tileY >= WORLD_HEIGHT) return;
+            
+            // Проверка на монстра
             let clickedMonster = null;
             for (let m of monsters) {
-                if (!m.alive) continue;
-                let dx = Math.abs(worldX - m.x);
-                let dy = Math.abs(worldY - m.y);
-                if (dx < m.size/2 + 10 && dy < m.size/2 + 10) {
+                if (m.alive && m.tileX === tileX && m.tileY === tileY) {
                     clickedMonster = m;
                     break;
                 }
             }
             
             if (clickedMonster) {
+                selectedMonsterId = clickedMonster.id;
                 player.attackMonster(clickedMonster);
             } else {
-                player.moveTo(worldX, worldY);
-            }
-        }
-        
-        // =========================================================================
-        // ЧАСТЬ 10: ИНИЦИАЛИЗАЦИЯ И ЗАПУСК
-        // =========================================================================
-        
-        function startGame() {
-            document.getElementById('mainMenu').style.display = 'none';
-            document.getElementById('uiPanel').style.display = 'flex';
-            
-            generateWorld();
-            spawnMonsters();
-            initInventory();
-            updateUI();
-            updateInventoryUI();
-            updateSkillsUI();
-            
-            canvas.addEventListener('click', handleCanvasClick);
-            
-            // UI кнопки
-            document.getElementById('classKnight').onclick = () => { player.className = 'knight'; updateUI(); updateSkillsUI(); addLog('Класс изменён на Рыцаря'); };
-            document.getElementById('classArcher').onclick = () => { player.className = 'archer'; updateUI(); updateSkillsUI(); addLog('Класс изменён на Лучника'); };
-            document.getElementById('classMage').onclick = () => { player.className = 'mage'; updateUI(); updateSkillsUI(); addLog('Класс изменён на Мага'); };
-            document.getElementById('healBtn').onclick = () => heal();
-            document.getElementById('spellBtn').onclick = () => useSpell();
-            document.getElementById('invBtn').onclick = () => {
-                let p = document.getElementById('inventoryPanel');
-                p.style.display = p.style.display === 'none' ? 'block' : 'none';
-                updateInventoryUI();
-            };
-            document.getElementById('closeInv').onclick = () => document.getElementById('inventoryPanel').style.display = 'none';
-            document.getElementById('skillsBtn').onclick = () => {
-                let p = document.getElementById('skillsPanel');
-                p.style.display = p.style.display === 'none' ? 'block' : 'none';
-                updateSkillsUI();
-            };
-            document.getElementById('closeSkills').onclick = () => document.getElementById('skillsPanel').style.display = 'none';
-            document.getElementById('charBtn').onclick = () => {
-                let p = document.getElementById('characterPanel');
-                p.style.display = p.style.display === 'none' ? 'block' : 'none';
-                updateCharacterUI();
-            };
-            document.getElementById('closeChar').onclick = () => document.getElementById('characterPanel').style.display = 'none';
-            
-            // Чат
-            let chatInput = document.getElementById('chatInput');
-            chatInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && chatInput.value.trim()) {
-                    addChatMessage('Вы', chatInput.value);
-                    chatInput.value = '';
-                }
-            });
-            
-            // Игровой цикл
-            function gameLoop(timestamp) {
-                let deltaTime = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
-                lastTimestamp = timestamp;
-                
-                updateMovement(deltaTime);
-                for (let m of monsters) {
-                    m.update(deltaTime, player);
-                }
-                
-                // Босс бар
-                let boss = monsters.find(m => m.isBoss && m.alive);
-                if (boss) {
-                    document.getElementById('bossBar').style.display = 'block';
-                    document.getElementById('bossName').innerText = boss.name;
-                    let percent = (boss.hp / boss.maxHp) * 100;
-                    document.getElementById('bossHpFill').style.width = percent + '%';
+                selectedMonsterId = null;
+                // Проверка на НПС (торговец)
+                if (tileX === safeZone.x && tileY === safeZone.y) {
+                    openShop();
                 } else {
-                    document.getElementById('bossBar').style.display = 'none';
+                    player.moveToTile(tileX, tileY);
                 }
-                
-                draw();
-                requestAnimationFrame(gameLoop);
             }
-            
-            requestAnimationFrame(gameLoop);
-            addLog('⚔️ Добро пожаловать в Rucoy Online! ⚔️');
-            addLog('🖱️ Клик по врагу - атака | Клик по земле - движение');
-            addLog('💡 Нажми I для инвентаря, K для навыков, C для характеристик');
         }
         
-        // Кнопки меню
-        document.getElementById('startGameBtn').onclick = startGame;
-        document.getElementById('continueBtn').onclick = () => {
-            let save = localStorage.getItem('rucoy_save');
-            if (save) {
-                let data = JSON.parse(save);
-                player.level = data.level;
-                player.xp = data.xp;
-                player.gold = data.gold;
-                player.inventory = data.inventory;
-                player.equipment = data.equipment;
-                startGame();
-            } else {
-                startGame();
+        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
+        function addLog(msg) {
+            let div = document.createElement('div');
+            div.className = 'log-message';
+            div.innerText = msg;
+            div.style.position = 'fixed';
+            div.style.bottom = '100px';
+            div.style.left = '20px';
+            div.style.background = 'rgba(0,0,0,0.7)';
+            div.style.color = '#ffd966';
+            div.style.padding = '5px 12px';
+            div.style.borderRadius = '8px';
+            div.style.fontSize = '12px';
+            div.style.animation = 'fadeOut 2s forwards';
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 2500);
+        }
+        
+        function showDamage(x, y, damage) {
+            let div = document.createElement('div');
+            div.className = 'damage-number';
+            div.innerText = `-${Math.floor(damage)}`;
+            let screenX = x - camera.x;
+            let screenY = y - camera.y;
+            div.style.position = 'fixed';
+            div.style.left = screenX + 'px';
+            div.style.top = screenY + 'px';
+            div.style.color = '#ffaa44';
+            div.style.fontWeight = 'bold';
+            div.style.fontSize = '20px';
+            div.style.textShadow = '2px 2px 0 #000';
+            div.style.pointerEvents = 'none';
+            div.style.animation = 'floatUp 0.8s ease-out forwards';
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 800);
+        }
+        
+        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        generateWorld();
+        spawnMonsters();
+        initInventory();
+        updateUI();
+        updateInventoryUI();
+        
+        canvas.addEventListener('click', handleCanvasClick);
+        
+        // UI КНОПКИ
+        document.getElementById('healPotionBtn').onclick = useHealPotion;
+        document.getElementById('manaPotionBtn').onclick = useManaPotion;
+        document.getElementById('superSkillBtn').onclick = useSuperSkill;
+        document.getElementById('statsBtn').onclick = () => document.getElementById('statsPanel').style.display = 'block';
+        document.getElementById('closeStats').onclick = () => document.getElementById('statsPanel').style.display = 'none';
+        document.getElementById('invTopBtn').onclick = () => {
+            let p = document.getElementById('inventoryPanel');
+            p.style.display = p.style.display === 'none' ? 'block' : 'none';
+            updateInventoryUI();
+        };
+        document.getElementById('closeInv').onclick = () => document.getElementById('inventoryPanel').style.display = 'none';
+        document.getElementById('closeShop').onclick = () => document.getElementById('shopPanel').style.display = 'none';
+        
+        // Кнопки классов
+        document.getElementById('classKnight')?.remove();
+        document.getElementById('classArcher')?.remove();
+        document.getElementById('classMage')?.remove();
+        
+        // Добавляем кнопки классов в верхнюю панель
+        let classDiv = document.createElement('div');
+        classDiv.style.display = 'flex';
+        classDiv.style.gap = '8px';
+        classDiv.innerHTML = `
+            <button id="classKnightBtn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:4px 12px;">🛡️ Рыцарь</button>
+            <button id="classArcherBtn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:4px 12px;">🏹 Лучник</button>
+            <button id="classMageBtn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:4px 12px;">🔮 Маг</button>
+        `;
+        document.querySelector('.top-bar').appendChild(classDiv);
+        
+        document.getElementById('classKnightBtn').onclick = () => { player.className = 'knight'; addLog('Класс изменён на Рыцаря'); updateUI(); };
+        document.getElementById('classArcherBtn').onclick = () => { player.className = 'archer'; addLog('Класс изменён на Лучника'); updateUI(); };
+        document.getElementById('classMageBtn').onclick = () => { player.className = 'mage'; addLog('Класс изменён на Мага'); updateUI(); };
+        
+        // ИГРОВОЙ ЦИКЛ
+        let lastTimestamp = 0;
+        function gameLoop(timestamp) {
+            let deltaTime = Math.min(0.033, (timestamp - lastTimestamp) / 1000);
+            lastTimestamp = timestamp;
+            
+            player.updateMovement(deltaTime);
+            for (let m of monsters) {
+                m.update(deltaTime, player);
             }
-        };
-        document.getElementById('controlsBtn').onclick = () => {
-            addLog('Управление: клик мыши - движение/атака, I - инвентарь, K - навыки, C - персонаж');
-            showNotification('Клик по врагу - атака | По земле - движение', '#88ff88');
-        };
+            
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        requestAnimationFrame(gameLoop);
+        
+        addLog('⚔️ Добро пожаловать в Rucoy Online! ⚔️');
+        addLog('🖱️ Клик по монстру - атака | По земле - движение');
+        addLog('🏪 Торговец в безопасной зоне (зеленый квадрат)');
         
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         });
-        
-        // Автосохранение
-        setInterval(() => {
-            if (player.hp > 0) {
-                let save = {
-                    level: player.level,
-                    xp: player.xp,
-                    gold: player.gold,
-                    inventory: player.inventory,
-                    equipment: player.equipment
-                };
-                localStorage.setItem('rucoy_save', JSON.stringify(save));
-            }
-        }, 30000);
-        
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
     </script>
 </body>
 </html>
