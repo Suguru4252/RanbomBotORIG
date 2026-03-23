@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Rucoy Online - Точная копия</title>
+    <title>Rucoy Online - Полная копия</title>
     <style>
         * {
             margin: 0;
@@ -30,7 +30,7 @@
             left: 0;
             right: 0;
             background: rgba(0,0,0,0.85);
-            padding: 10px 20px;
+            padding: 10px 25px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -40,7 +40,7 @@
 
         .stats-top {
             display: flex;
-            gap: 25px;
+            gap: 20px;
             align-items: center;
         }
 
@@ -48,18 +48,18 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 12px;
-            border-radius: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 5px 15px;
+            border-radius: 30px;
         }
-        .hp-stat span:first-child { color: #ff6a6a; font-size: 18px; }
-        .mp-stat span:first-child { color: #6a9eff; font-size: 18px; }
-        .hp-stat span:last-child, .mp-stat span:last-child { color: #fff; font-size: 16px; }
+        .hp-stat span:first-child { color: #ff6a6a; font-size: 20px; }
+        .mp-stat span:first-child { color: #6a9eff; font-size: 20px; }
+        .hp-stat span:last-child, .mp-stat span:last-child { color: #fff; font-size: 16px; font-weight: bold; }
 
         .level-stat {
             background: #2c2f3f;
-            padding: 4px 16px;
-            border-radius: 20px;
+            padding: 5px 18px;
+            border-radius: 30px;
             color: #ffd966;
             font-weight: bold;
         }
@@ -84,8 +84,8 @@
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 25px;
-            background: rgba(0,0,0,0.8);
+            gap: 20px;
+            background: rgba(0,0,0,0.85);
             padding: 12px 30px;
             border-radius: 60px;
             border: 1px solid #ffd966;
@@ -105,49 +105,79 @@
             cursor: pointer;
             transition: 0.1s;
             font-size: 28px;
+            position: relative;
         }
         .bottom-btn:active { transform: scale(0.95); }
         .bottom-btn span { font-size: 10px; color: #ffd966; margin-top: 4px; }
+        .hotkey-hint {
+            position: absolute;
+            bottom: -20px;
+            font-size: 10px;
+            color: #aaa;
+            background: rgba(0,0,0,0.6);
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
 
-        /* ИНВЕНТАРЬ */
+        /* ИНВЕНТАРЬ (на весь экран) */
         .inventory-panel {
             position: fixed;
-            right: 20px;
-            top: 80px;
-            background: rgba(0,0,0,0.95);
-            border: 2px solid #ffd966;
-            border-radius: 12px;
-            padding: 15px;
-            width: 450px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.96);
+            border: 3px solid #ffd966;
+            border-radius: 20px;
+            padding: 25px;
+            width: 800px;
+            height: 550px;
             display: none;
-            z-index: 300;
+            z-index: 500;
+            flex-direction: column;
         }
 
         .inventory-header {
             display: flex;
             justify-content: space-between;
             color: #ffd966;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ffd966;
-            margin-bottom: 15px;
-            font-size: 18px;
+            font-size: 24px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ffd966;
+            margin-bottom: 20px;
+        }
+
+        .inventory-content {
+            display: flex;
+            gap: 30px;
+            flex: 1;
+        }
+
+        .inventory-left {
+            flex: 2;
+        }
+
+        .inventory-right {
+            flex: 1;
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 15px;
         }
 
         .inventory-slots {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 6px;
+            gap: 8px;
         }
 
         .inv-slot {
             background: rgba(0,0,0,0.6);
             border: 1px solid #ffd966;
-            border-radius: 6px;
+            border-radius: 8px;
             aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
             position: relative;
         }
@@ -156,36 +186,60 @@
             position: absolute;
             bottom: 2px;
             right: 4px;
-            font-size: 10px;
+            font-size: 11px;
             color: #ffd966;
-            background: rgba(0,0,0,0.6);
-            padding: 1px 3px;
-            border-radius: 4px;
+            background: rgba(0,0,0,0.7);
+            padding: 1px 4px;
+            border-radius: 10px;
         }
         .slot-name {
             position: absolute;
-            top: -18px;
+            top: -22px;
             left: 0;
-            font-size: 9px;
+            font-size: 10px;
             color: #ffd966;
             white-space: nowrap;
-            background: rgba(0,0,0,0.7);
-            padding: 2px 5px;
+            background: rgba(0,0,0,0.8);
+            padding: 2px 6px;
             border-radius: 4px;
             display: none;
         }
         .inv-slot:hover .slot-name { display: block; }
 
+        .equipment-slot {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid #ffd966;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .equipment-icon { font-size: 32px; width: 50px; text-align: center; }
+        .equipment-name { color: #ffd966; font-size: 12px; }
+
+        .quick-select-btn {
+            background: #4a3e2a;
+            color: #ffd966;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
         /* СТАТИСТИКА */
         .stats-panel {
             position: fixed;
-            left: 20px;
+            right: 20px;
             top: 80px;
             background: rgba(0,0,0,0.92);
             border: 2px solid #ffd966;
             border-radius: 12px;
             padding: 20px;
-            width: 280px;
+            width: 260px;
             display: none;
             z-index: 300;
         }
@@ -218,7 +272,6 @@
             padding: 12px;
             border-bottom: 1px solid #333;
         }
-        .shop-item span { color: #fff; }
         .buy-btn {
             background: #4a3e2a;
             color: #ffd966;
@@ -228,7 +281,6 @@
             cursor: pointer;
         }
 
-        /* ЛОГИ */
         .log-message {
             position: fixed;
             bottom: 120px;
@@ -277,7 +329,7 @@
             <div class="mp-stat"><span>💙</span><span id="topMp">60/60</span></div>
             <div class="xp-bar-top"><div class="xp-fill-top" id="topXpFill"></div></div>
         </div>
-        <div style="display: flex; gap: 15px; align-items: center;">
+        <div style="display: flex; gap: 15px;">
             <div style="color:#ffd966;">💰 <span id="topGold">0</span></div>
             <button id="statsBtn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:5px 12px; border-radius:20px;">📊</button>
             <button id="invTopBtn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:5px 12px; border-radius:20px;">🎒</button>
@@ -286,26 +338,45 @@
 
     <!-- КНОПКИ КЛАССОВ -->
     <div style="position: fixed; top: 80px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; z-index: 200;">
-        <button id="classKnightBtn" class="class-btn" style="background:#6a3e9e; border:1px solid #ffd966; color:#ffd966; padding:6px 18px; border-radius:30px;">🛡️ Рыцарь</button>
-        <button id="classArcherBtn" class="class-btn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:6px 18px; border-radius:30px;">🏹 Лучник</button>
-        <button id="classMageBtn" class="class-btn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:6px 18px; border-radius:30px;">🔮 Маг</button>
+        <button id="classKnightBtn" style="background:#6a3e9e; border:1px solid #ffd966; color:#ffd966; padding:6px 18px; border-radius:30px;">🛡️ Рыцарь</button>
+        <button id="classArcherBtn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:6px 18px; border-radius:30px;">🏹 Лучник</button>
+        <button id="classMageBtn" style="background:#2c2f3f; border:1px solid #ffd966; color:#ffd966; padding:6px 18px; border-radius:30px;">🔮 Маг</button>
     </div>
 
     <!-- НИЖНЯЯ ПАНЕЛЬ -->
     <div class="bottom-panel">
-        <div class="bottom-btn" id="healPotionBtn">🧪<span>Лечение</span></div>
-        <div class="bottom-btn" id="manaPotionBtn">💙<span>Мана</span></div>
-        <div class="bottom-btn" id="superSkillBtn">⚔️<span>Супер</span></div>
+        <div class="bottom-btn" id="healPotionBtn">
+            🧪<span>Лечение</span>
+            <div class="hotkey-hint">1</div>
+        </div>
+        <div class="bottom-btn" id="manaPotionBtn">
+            💙<span>Мана</span>
+            <div class="hotkey-hint">2</div>
+        </div>
+        <div class="bottom-btn" id="superSkillBtn">
+            ⚔️<span>Супер</span>
+            <div class="hotkey-hint">3</div>
+        </div>
     </div>
 
-    <!-- ИНВЕНТАРЬ -->
+    <!-- ИНВЕНТАРЬ (на весь экран) -->
     <div class="inventory-panel" id="inventoryPanel">
         <div class="inventory-header">
             <span>🎒 ИНВЕНТАРЬ</span>
             <span>💰 <span id="invGold">0</span></span>
         </div>
-        <div class="inventory-slots" id="inventorySlots"></div>
-        <button id="closeInv" style="margin-top:15px; width:100%; background:#4a3e2a; color:#ffd966; border:none; padding:8px; border-radius:20px;">Закрыть</button>
+        <div class="inventory-content">
+            <div class="inventory-left">
+                <div class="inventory-slots" id="inventorySlots"></div>
+            </div>
+            <div class="inventory-right">
+                <div style="color:#ffd966; margin-bottom:15px;">⚔️ ЭКИПИРОВКА</div>
+                <div id="equipmentSlots"></div>
+                <div style="margin-top:20px; color:#ffd966;">🎒 БЫСТРЫЙ ДОСТУП</div>
+                <div id="quickSlots" style="display:flex; gap:10px; margin-top:10px;"></div>
+            </div>
+        </div>
+        <button id="closeInv" style="margin-top:20px; background:#4a3e2a; color:#ffd966; border:none; padding:10px; border-radius:20px;">Закрыть</button>
     </div>
 
     <!-- СТАТИСТИКА -->
@@ -323,28 +394,32 @@
     </div>
 
     <script>
-        // ==================== RUCOY ONLINE - ТОЧНАЯ КОПИЯ ====================
+        // ==================== RUCOY ONLINE - ПОЛНАЯ КОПИЯ ====================
         
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        // ==================== НАСТРОЙКИ МИРА ====================
         const TILE_SIZE = 48;
-        const WORLD_WIDTH = 45;
-        const WORLD_HEIGHT = 45;
+        const WORLD_WIDTH = 50;
+        const WORLD_HEIGHT = 50;
         
         let camera = { x: 0, y: 0 };
         let selectedMonsterId = null;
-        let currentTargetMonster = null; // для постоянной атаки
+        let currentTargetMonster = null;
+        let targetTileX = null, targetTileY = null; // для жёлтого квадрата
+        
+        // БЫСТРЫЙ ДОСТУП (зелья)
+        let quickHealPotion = null;
+        let quickManaPotion = null;
+        let lastPotionTime = 0;
+        const POTION_COOLDOWN = 3;
         
         // КАРТА
         let worldMap = [];
         let worldBiome = [];
-        
-        // БЕЗОПАСНАЯ ЗОНА
-        let safeZone = { x: 22, y: 22, radius: 3 };
+        let safeZone = { x: 25, y: 25, radius: 4 };
         
         function generateWorld() {
             for (let y = 0; y < WORLD_HEIGHT; y++) {
@@ -359,13 +434,13 @@
                         worldMap[y][x] = 0;
                         worldBiome[y][x] = 'shop';
                     }
-                    else if (Math.sin(x * 0.25) * Math.cos(y * 0.25) < -0.5) {
+                    else if (Math.sin(x * 0.2) * Math.cos(y * 0.2) < -0.5) {
                         worldMap[y][x] = 1;
                         worldBiome[y][x] = 'water';
                     }
-                    else if (Math.sin(x * 0.35) * Math.cos(y * 0.35) > 0.65) {
+                    else if (Math.sin(x * 0.3) * Math.cos(y * 0.3) > 0.6) {
                         worldMap[y][x] = 1;
-                        worldBiome[y][x] = 'tree';
+                        worldBiome[y][x] = 'mountain';
                     }
                     else {
                         worldMap[y][x] = 0;
@@ -373,16 +448,27 @@
                     }
                 }
             }
+            // Делаем магазин полностью проходимым
+            for (let dy = -safeZone.radius; dy <= safeZone.radius; dy++) {
+                for (let dx = -safeZone.radius; dx <= safeZone.radius; dx++) {
+                    let nx = safeZone.x + dx;
+                    let ny = safeZone.y + dy;
+                    if (nx >= 0 && nx < WORLD_WIDTH && ny >= 0 && ny < WORLD_HEIGHT) {
+                        worldMap[ny][nx] = 0;
+                        worldBiome[ny][nx] = 'shop';
+                    }
+                }
+            }
         }
         
-        // ==================== ИГРОК ====================
+        // ИГРОК
         let player = {
-            tileX: 22,
-            tileY: 22,
-            x: 22 * TILE_SIZE,
-            y: 22 * TILE_SIZE,
-            targetTileX: 22,
-            targetTileY: 22,
+            tileX: 25,
+            tileY: 25,
+            x: 25 * TILE_SIZE,
+            y: 25 * TILE_SIZE,
+            targetTileX: 25,
+            targetTileY: 25,
             level: 1,
             xp: 0,
             maxHp: 120,
@@ -394,8 +480,7 @@
             className: 'knight',
             gold: 500,
             inventory: [],
-            equipment: { weapon: null, armor: null },
-            moving: false,
+            equipment: { weapon: null, armor: null, helmet: null },
             
             get attack() {
                 let bonus = 0;
@@ -421,6 +506,9 @@
                 }
                 this.targetTileX = tx;
                 this.targetTileY = ty;
+                targetTileX = tx;
+                targetTileY = ty;
+                setTimeout(() => { targetTileX = null; targetTileY = null; }, 500);
                 return true;
             },
             
@@ -431,7 +519,7 @@
                     let dx = targetX - this.x;
                     let dy = targetY - this.y;
                     let dist = Math.hypot(dx, dy);
-                    let step = 220 * deltaTime;
+                    let step = 240 * deltaTime;
                     
                     if (dist < step) {
                         this.x = targetX;
@@ -467,7 +555,7 @@
                     this.y = this.tileY * TILE_SIZE;
                     currentTargetMonster = null;
                     selectedMonsterId = null;
-                    addLog('🌟 Вы возродились в безопасной зоне');
+                    addLog('🌟 Вы возродились');
                     updateUI();
                 }, 3000);
             },
@@ -485,12 +573,12 @@
             
             levelUp() {
                 this.level++;
-                this.maxHp += 25;
+                this.maxHp += 30;
                 this.hp = this.maxHp;
-                this.maxMp += 12;
+                this.maxMp += 15;
                 this.mp = this.maxMp;
-                this.baseAttack += 5;
-                this.baseDefense += 2;
+                this.baseAttack += 6;
+                this.baseDefense += 3;
                 addLog(`✨ УРОВЕНЬ ${this.level}! ✨`);
                 updateUI();
             },
@@ -500,19 +588,11 @@
                 if (now - this.lastAttack < this.attackSpeed) return false;
                 
                 let dist = Math.abs(this.tileX - monster.tileX) + Math.abs(this.tileY - monster.tileY);
-                
-                if (this.className === 'knight' && dist > 1) {
-                    addLog('🏃 Подойдите ближе для атаки мечом!');
-                    return false;
-                }
-                if ((this.className === 'archer' || this.className === 'mage') && dist > 12) {
-                    addLog('📡 Слишком далеко для атаки!');
-                    return false;
-                }
+                if (this.className === 'knight' && dist > 1) return false;
+                if ((this.className === 'archer' || this.className === 'mage') && dist > 12) return false;
                 
                 let damage = this.attack - monster.defense + Math.random() * 20;
                 damage = Math.max(5, Math.floor(damage));
-                
                 monster.hp -= damage;
                 this.lastAttack = now;
                 
@@ -530,21 +610,20 @@
                 updateUI();
                 return true;
             },
-            
             attackSpeed: 0.85,
             lastAttack: 0
         };
         
-        // ==================== МОНСТРЫ (ХОДЯТ ПО КЛЕТКАМ) ====================
+        // МОНСТРЫ (с разными формами)
         let monsters = [];
         let nextMonsterId = 1;
         
         const MONSTER_TYPES = {
-            goblin: { name: 'Гоблин', hp: 45, attack: 16, defense: 3, xp: 35, goldMin: 8, goldMax: 18, size: 32, color: '#6b8c42', aggroRange: 5, attackRange: 1, speed: 1.5 },
-            wolf: { name: 'Волк', hp: 55, attack: 20, defense: 4, xp: 45, goldMin: 12, goldMax: 25, size: 32, color: '#8a8a6a', aggroRange: 6, attackRange: 1, speed: 2 },
-            skeleton: { name: 'Скелет', hp: 75, attack: 24, defense: 6, xp: 60, goldMin: 15, goldMax: 30, size: 34, color: '#bdb28c', aggroRange: 5, attackRange: 1, speed: 1.2 },
-            orc: { name: 'Орк', hp: 110, attack: 30, defense: 8, xp: 95, goldMin: 25, goldMax: 45, size: 38, color: '#7a6a4a', aggroRange: 5, attackRange: 1, speed: 1 },
-            minotaur: { name: 'Минотавр', hp: 180, attack: 40, defense: 12, xp: 150, goldMin: 40, goldMax: 70, size: 42, color: '#9b5e2c', aggroRange: 5, attackRange: 1, speed: 0.9 }
+            goblin: { name: 'Гоблин', hp: 45, attack: 16, defense: 3, xp: 35, goldMin: 8, goldMax: 18, size: 32, color: '#6b8c42', aggroRange: 5, attackRange: 1, speed: 1.5, shape: 'goblin' },
+            wolf: { name: 'Волк', hp: 55, attack: 20, defense: 4, xp: 45, goldMin: 12, goldMax: 25, size: 32, color: '#8a8a6a', aggroRange: 6, attackRange: 1, speed: 2, shape: 'wolf' },
+            skeleton: { name: 'Скелет', hp: 75, attack: 24, defense: 6, xp: 60, goldMin: 15, goldMax: 30, size: 34, color: '#bdb28c', aggroRange: 5, attackRange: 1, speed: 1.2, shape: 'skeleton' },
+            orc: { name: 'Орк', hp: 110, attack: 30, defense: 8, xp: 95, goldMin: 25, goldMax: 45, size: 38, color: '#7a6a4a', aggroRange: 5, attackRange: 1, speed: 1, shape: 'orc' },
+            minotaur: { name: 'Минотавр', hp: 180, attack: 40, defense: 12, xp: 150, goldMin: 40, goldMax: 70, size: 42, color: '#9b5e2c', aggroRange: 5, attackRange: 1, speed: 0.9, shape: 'minotaur' }
         };
         
         class Monster {
@@ -562,6 +641,7 @@
                 this.goldMax = data.goldMax;
                 this.size = data.size;
                 this.color = data.color;
+                this.shape = data.shape;
                 this.aggroRange = data.aggroRange;
                 this.attackRange = data.attackRange;
                 this.speed = data.speed;
@@ -578,6 +658,7 @@
             canMoveTo(tx, ty) {
                 if (tx < 0 || tx >= WORLD_WIDTH || ty < 0 || ty >= WORLD_HEIGHT) return false;
                 if (worldMap[ty][tx] === 1) return false;
+                if (Math.abs(tx - safeZone.x) <= safeZone.radius && Math.abs(ty - safeZone.y) <= safeZone.radius) return false;
                 if (player.tileX === tx && player.tileY === ty) return true;
                 for (let m of monsters) {
                     if (m !== this && m.alive && m.tileX === tx && m.tileY === ty) return false;
@@ -588,15 +669,11 @@
             moveTowards(playerTileX, playerTileY) {
                 let dx = playerTileX - this.tileX;
                 let dy = playerTileY - this.tileY;
-                
                 let moves = [];
-                if (dx > 0) moves.push({ tx: this.tileX + 1, ty: this.tileY, priority: Math.abs(dx) });
-                if (dx < 0) moves.push({ tx: this.tileX - 1, ty: this.tileY, priority: Math.abs(dx) });
-                if (dy > 0) moves.push({ tx: this.tileX, ty: this.tileY + 1, priority: Math.abs(dy) });
-                if (dy < 0) moves.push({ tx: this.tileX, ty: this.tileY - 1, priority: Math.abs(dy) });
-                
-                moves.sort((a, b) => b.priority - a.priority);
-                
+                if (dx > 0) moves.push({ tx: this.tileX + 1, ty: this.tileY });
+                if (dx < 0) moves.push({ tx: this.tileX - 1, ty: this.tileY });
+                if (dy > 0) moves.push({ tx: this.tileX, ty: this.tileY + 1 });
+                if (dy < 0) moves.push({ tx: this.tileX, ty: this.tileY - 1 });
                 for (let move of moves) {
                     if (this.canMoveTo(move.tx, move.ty)) {
                         this.tileX = move.tx;
@@ -615,7 +692,6 @@
                 if (this.moveCooldown > 0) this.moveCooldown -= deltaTime;
                 
                 let dist = Math.abs(this.tileX - player.tileX) + Math.abs(this.tileY - player.tileY);
-                
                 if (dist <= this.aggroRange) this.aggro = true;
                 if (dist > this.aggroRange + 2) this.aggro = false;
                 
@@ -660,10 +736,6 @@
                         }
                     }
                 }
-                this.tileX = 10;
-                this.tileY = 10;
-                this.x = 10 * TILE_SIZE;
-                this.y = 10 * TILE_SIZE;
             }
         }
         
@@ -671,7 +743,6 @@
             let types = ['goblin', 'wolf', 'skeleton', 'orc', 'minotaur'];
             for (let i = 0; i < 55; i++) {
                 let type = types[Math.floor(Math.random() * types.length)];
-                let placed = false;
                 for (let attempt = 0; attempt < 30; attempt++) {
                     let tx = 3 + Math.floor(Math.random() * (WORLD_WIDTH - 6));
                     let ty = 3 + Math.floor(Math.random() * (WORLD_HEIGHT - 6));
@@ -680,41 +751,53 @@
                         for (let m of monsters) {
                             if (m.tileX === tx && m.tileY === ty) hasMonster = true;
                         }
-                        if (!hasMonster && !(player.tileX === tx && player.tileY === ty)) {
+                        if (!hasMonster) {
                             monsters.push(new Monster(type, tx, ty));
-                            placed = true;
                             break;
                         }
                     }
                 }
-                if (!placed) monsters.push(new Monster(type, 12 + i % 10, 12 + Math.floor(i / 10)));
             }
         }
         
-        // ==================== ПРЕДМЕТЫ ====================
+        // ПРЕДМЕТЫ
         const SHOP_ITEMS = [
-            { id: 'small_hp', name: 'Малая настойка HP', icon: '🧪', heal: 60, price: 20, type: 'consumable', desc: 'Восстанавливает 60 HP' },
-            { id: 'medium_hp', name: 'Средняя настойка HP', icon: '🧪', heal: 150, price: 50, type: 'consumable', desc: 'Восстанавливает 150 HP' },
-            { id: 'small_mp', name: 'Малая настойка MP', icon: '💙', mana: 40, price: 18, type: 'consumable', desc: 'Восстанавливает 40 MP' },
-            { id: 'medium_mp', name: 'Средняя настойка MP', icon: '💙', mana: 100, price: 45, type: 'consumable', desc: 'Восстанавливает 100 MP' }
+            { id: 'small_hp', name: 'Малая настойка HP', icon: '🧪', heal: 60, price: 20, type: 'consumable' },
+            { id: 'medium_hp', name: 'Средняя настойка HP', icon: '🧪', heal: 150, price: 50, type: 'consumable' },
+            { id: 'small_mp', name: 'Малая настойка MP', icon: '💙', mana: 40, price: 18, type: 'consumable' },
+            { id: 'medium_mp', name: 'Средняя настойка MP', icon: '💙', mana: 100, price: 45, type: 'consumable' }
         ];
         
         function useHealPotion() {
-            let potion = player.inventory.find(i => i.type === 'consumable' && i.heal);
-            if (!potion) { addLog('🧪 Нет зелий лечения! Купите у торговца'); return; }
+            let now = Date.now() / 1000;
+            if (now - lastPotionTime < POTION_COOLDOWN) { addLog('⏳ Зелье перезаряжается!'); return; }
+            let potion = quickHealPotion || player.inventory.find(i => i.type === 'consumable' && i.heal);
+            if (!potion) { addLog('🧪 Нет зелий лечения!'); return; }
             player.hp = Math.min(player.maxHp, player.hp + potion.heal);
             potion.count--;
-            if (potion.count <= 0) { let idx = player.inventory.indexOf(potion); player.inventory.splice(idx, 1); }
+            if (potion.count <= 0) {
+                let idx = player.inventory.indexOf(potion);
+                if (idx !== -1) player.inventory.splice(idx, 1);
+                if (quickHealPotion === potion) quickHealPotion = null;
+            }
+            lastPotionTime = now;
             addLog(`💚 Вылечено +${potion.heal} HP`);
             updateUI(); updateInventoryUI();
         }
         
         function useManaPotion() {
-            let potion = player.inventory.find(i => i.type === 'consumable' && i.mana);
-            if (!potion) { addLog('💙 Нет зелий маны! Купите у торговца'); return; }
+            let now = Date.now() / 1000;
+            if (now - lastPotionTime < POTION_COOLDOWN) { addLog('⏳ Зелье перезаряжается!'); return; }
+            let potion = quickManaPotion || player.inventory.find(i => i.type === 'consumable' && i.mana);
+            if (!potion) { addLog('💙 Нет зелий маны!'); return; }
             player.mp = Math.min(player.maxMp, player.mp + potion.mana);
             potion.count--;
-            if (potion.count <= 0) { let idx = player.inventory.indexOf(potion); player.inventory.splice(idx, 1); }
+            if (potion.count <= 0) {
+                let idx = player.inventory.indexOf(potion);
+                if (idx !== -1) player.inventory.splice(idx, 1);
+                if (quickManaPotion === potion) quickManaPotion = null;
+            }
+            lastPotionTime = now;
             addLog(`💙 Восстановлено +${potion.mana} MP`);
             updateUI(); updateInventoryUI();
         }
@@ -723,7 +806,9 @@
         function useSuperSkill() {
             let now = Date.now() / 1000;
             if (now - lastSuperTime < 8) { addLog('⏳ Суперудар перезаряжается!'); return; }
+            if (player.mp < 25) { addLog('💧 Недостаточно маны!'); return; }
             
+            player.mp -= 25;
             if (player.className === 'knight') {
                 let hit = false;
                 for (let m of monsters) {
@@ -782,14 +867,13 @@
             }
         }, 10000);
         
-        // ==================== UI ====================
+        // UI
         function updateUI() {
             document.getElementById('topLevel').innerText = player.level;
             document.getElementById('topHp').innerText = `${Math.floor(player.hp)}/${player.maxHp}`;
             document.getElementById('topMp').innerText = `${Math.floor(player.mp)}/${player.maxMp}`;
             document.getElementById('topGold').innerText = player.gold;
             document.getElementById('invGold').innerText = player.gold;
-            
             let needXP = 100 + (player.level - 1) * 50;
             let xpPercent = (player.xp / needXP) * 100;
             document.getElementById('topXpFill').style.width = xpPercent + '%';
@@ -805,6 +889,21 @@
                 <div class="stat-row"><span>Золото:</span><span>💰 ${player.gold}</span></div>
             `;
             document.getElementById('statsContent').innerHTML = statsHtml;
+            
+            // Обновление быстрых слотов
+            let quickDiv = document.getElementById('quickSlots');
+            quickDiv.innerHTML = `
+                <div style="background:#2c2f3f; border:1px solid #ffd966; border-radius:8px; padding:8px; text-align:center; width:80px;">
+                    <div>🧪</div>
+                    <div style="font-size:10px;">${quickHealPotion ? quickHealPotion.name : 'Пусто'}</div>
+                    <div style="font-size:8px;">[1]</div>
+                </div>
+                <div style="background:#2c2f3f; border:1px solid #ffd966; border-radius:8px; padding:8px; text-align:center; width:80px;">
+                    <div>💙</div>
+                    <div style="font-size:10px;">${quickManaPotion ? quickManaPotion.name : 'Пусто'}</div>
+                    <div style="font-size:8px;">[2]</div>
+                </div>
+            `;
         }
         
         function updateInventoryUI() {
@@ -826,11 +925,53 @@
                         countSpan.innerText = item.count;
                         slot.appendChild(countSpan);
                     }
+                    // Кнопка быстрого выбора
+                    if (item.heal || item.mana) {
+                        let quickBtn = document.createElement('button');
+                        quickBtn.innerText = '⚡';
+                        quickBtn.style.position = 'absolute';
+                        quickBtn.style.top = '2px';
+                        quickBtn.style.left = '2px';
+                        quickBtn.style.fontSize = '10px';
+                        quickBtn.style.background = '#4a3e2a';
+                        quickBtn.style.color = '#ffd966';
+                        quickBtn.style.border = 'none';
+                        quickBtn.style.borderRadius = '10px';
+                        quickBtn.style.padding = '2px 4px';
+                        quickBtn.style.cursor = 'pointer';
+                        quickBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            if (item.heal) quickHealPotion = item;
+                            if (item.mana) quickManaPotion = item;
+                            addLog(`✨ ${item.name} установлен на быстрый доступ`);
+                            updateUI();
+                            updateInventoryUI();
+                        };
+                        slot.appendChild(quickBtn);
+                    }
                 } else {
                     slot.innerHTML = '⬜';
                 }
                 slot.onclick = () => useItem(i);
                 container.appendChild(slot);
+            }
+            
+            // Экипировка
+            let equipDiv = document.getElementById('equipmentSlots');
+            equipDiv.innerHTML = '';
+            let equipItems = [
+                { slot: 'weapon', icon: '⚔️', name: 'Оружие', item: player.equipment.weapon },
+                { slot: 'armor', icon: '🛡️', name: 'Броня', item: player.equipment.armor },
+                { slot: 'helmet', icon: '⛑️', name: 'Шлем', item: player.equipment.helmet }
+            ];
+            for (let eq of equipItems) {
+                let div = document.createElement('div');
+                div.className = 'equipment-slot';
+                div.innerHTML = `
+                    <div class="equipment-icon">${eq.icon}</div>
+                    <div class="equipment-name">${eq.name}<br>${eq.item ? eq.item.name : 'Пусто'}</div>
+                `;
+                equipDiv.appendChild(div);
             }
         }
         
@@ -855,6 +996,9 @@
         function initInventory() {
             player.inventory.push({ name: 'Малая настойка HP', icon: '🧪', heal: 60, count: 5, type: 'consumable' });
             player.inventory.push({ name: 'Малая настойка MP', icon: '💙', mana: 40, count: 3, type: 'consumable' });
+            player.inventory.push({ name: 'Средняя настойка HP', icon: '🧪', heal: 150, count: 2, type: 'consumable' });
+            quickHealPotion = player.inventory[0];
+            quickManaPotion = player.inventory[1];
         }
         
         function openShop() {
@@ -866,8 +1010,7 @@
                 div.innerHTML = `
                     <span style="font-size:28px;">${item.icon}</span>
                     <div style="flex:1; margin-left:15px;">
-                        <div style="color:#ffd966; font-weight:bold;">${item.name}</div>
-                        <div style="color:#aaa; font-size:10px;">${item.desc}</div>
+                        <div style="color:#ffd966;">${item.name}</div>
                     </div>
                     <span style="color:#ffd966;">💰 ${item.price}</span>
                     <button class="buy-btn" data-id="${item.id}">Купить</button>
@@ -875,7 +1018,6 @@
                 container.appendChild(div);
             }
             document.getElementById('shopPanel').style.display = 'block';
-            
             document.querySelectorAll('.buy-btn').forEach(btn => {
                 btn.onclick = () => {
                     let itemId = btn.dataset.id;
@@ -887,17 +1029,14 @@
                         else player.inventory.push({ ...shopItem, count: 1 });
                         updateUI(); updateInventoryUI();
                         addLog(`🛒 Куплено: ${shopItem.name}`);
-                    } else {
-                        addLog('💰 Недостаточно золота!');
-                    }
+                    } else addLog('💰 Недостаточно золота!');
                 };
             });
         }
         
-        // ==================== ОТРИСОВКА (С ДЕТАЛЬНОЙ ТРАВОЙ) ====================
+        // ОТРИСОВКА
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             camera.x = player.x - canvas.width / 2;
             camera.y = player.y - canvas.height / 2;
             camera.x = Math.max(0, Math.min(camera.x, WORLD_WIDTH * TILE_SIZE - canvas.width));
@@ -915,23 +1054,21 @@
                     let biome = worldBiome[y][x];
                     
                     if (worldMap[y][x] === 1) {
-                        if (biome === 'water') ctx.fillStyle = '#4a6a8a';
-                        else if (biome === 'tree') ctx.fillStyle = '#3a6e2a';
-                        else ctx.fillStyle = '#4a3e35';
+                        if (biome === 'water') ctx.fillStyle = '#4a7a9a';
+                        else if (biome === 'mountain') ctx.fillStyle = '#8a8a8a';
+                        else ctx.fillStyle = '#5a5a5a';
                         ctx.fillRect(screenX, screenY, TILE_SIZE - 1, TILE_SIZE - 1);
+                        if (biome === 'mountain') {
+                            ctx.fillStyle = '#6a6a6a';
+                            ctx.fillRect(screenX + 8, screenY + 8, 32, 32);
+                        }
                     } else {
                         if (biome === 'grass') {
-                            ctx.fillStyle = '#5c8e4a';
+                            ctx.fillStyle = '#5cae4a';
                             ctx.fillRect(screenX, screenY, TILE_SIZE - 1, TILE_SIZE - 1);
-                            ctx.fillStyle = '#6cae5a';
-                            for (let i = 0; i < 12; i++) {
-                                let gx = screenX + 4 + Math.sin(x * 2 + i) * 8;
-                                let gy = screenY + TILE_SIZE - 8 + Math.cos(y * 2 + i) * 4;
-                                ctx.fillRect(gx, gy, 2, 4 + Math.sin(i) * 2);
-                            }
-                            ctx.fillStyle = '#4a7e3a';
                             for (let i = 0; i < 8; i++) {
-                                ctx.fillRect(screenX + 8 + i * 5, screenY + TILE_SIZE - 12, 2, 6);
+                                ctx.fillStyle = `#6cbe5a`;
+                                ctx.fillRect(screenX + 6 + i * 5, screenY + TILE_SIZE - 12, 2, 8);
                             }
                         } else if (biome === 'shop') {
                             ctx.fillStyle = '#8aae6a';
@@ -942,44 +1079,72 @@
                             ctx.fillStyle = '#5c6e4a';
                             ctx.fillRect(screenX, screenY, TILE_SIZE - 1, TILE_SIZE - 1);
                         }
-                        
-                        ctx.fillStyle = '#2c3524';
-                        ctx.fillRect(screenX + 4, screenY + 4, TILE_SIZE - 9, TILE_SIZE - 9);
                     }
                     
                     if (x === safeZone.x && y === safeZone.y) {
                         ctx.fillStyle = '#ffaa66';
                         ctx.font = 'bold 26px monospace';
                         ctx.fillText('🏪', screenX + 12, screenY + 38);
-                        ctx.fillStyle = '#ffd966';
-                        ctx.font = '10px monospace';
-                        ctx.fillText('Торговец', screenX + 8, screenY + 58);
+                    }
+                    
+                    if (targetTileX === x && targetTileY === y) {
+                        ctx.strokeStyle = '#ffdd88';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(screenX + 2, screenY + 2, TILE_SIZE - 5, TILE_SIZE - 5);
                     }
                 }
             }
             
-            // Монстры
+            // Монстры с разными формами
             for (let m of monsters) {
                 if (!m.alive) continue;
                 let screenX = m.x - camera.x - m.size/2;
                 let screenY = m.y - camera.y - m.size/2;
                 
-                ctx.fillStyle = m.color;
-                ctx.fillRect(screenX, screenY, m.size, m.size);
+                if (m.shape === 'goblin') {
+                    ctx.fillStyle = '#6b8c42';
+                    ctx.fillRect(screenX + 4, screenY + 8, m.size - 8, m.size - 12);
+                    ctx.fillStyle = '#8aae5a';
+                    ctx.fillRect(screenX + 8, screenY + 4, m.size - 16, 8);
+                } else if (m.shape === 'wolf') {
+                    ctx.fillStyle = '#8a8a6a';
+                    ctx.beginPath();
+                    ctx.moveTo(screenX + m.size/2, screenY + 4);
+                    ctx.lineTo(screenX + m.size - 8, screenY + m.size/2);
+                    ctx.lineTo(screenX + m.size/2, screenY + m.size - 4);
+                    ctx.lineTo(screenX + 8, screenY + m.size/2);
+                    ctx.fill();
+                } else if (m.shape === 'skeleton') {
+                    ctx.fillStyle = '#bdb28c';
+                    ctx.fillRect(screenX + 6, screenY + 6, m.size - 12, m.size - 12);
+                    for (let i = 0; i < 3; i++) {
+                        ctx.fillRect(screenX + 6 + i * 8, screenY + 4, 4, 6);
+                    }
+                } else if (m.shape === 'orc') {
+                    ctx.fillStyle = '#7a6a4a';
+                    ctx.fillRect(screenX + 4, screenY + 4, m.size - 8, m.size - 8);
+                    ctx.fillStyle = '#9a8a6a';
+                    ctx.fillRect(screenX + 8, screenY + 2, 8, 6);
+                } else {
+                    ctx.fillStyle = '#9b5e2c';
+                    ctx.fillRect(screenX + 4, screenY + 4, m.size - 8, m.size - 8);
+                    ctx.fillStyle = '#bd7e4a';
+                    ctx.fillRect(screenX + 2, screenY + m.size/2, 8, 6);
+                    ctx.fillRect(screenX + m.size - 10, screenY + m.size/2, 8, 6);
+                }
+                
                 ctx.fillStyle = '#000';
-                ctx.fillRect(screenX + m.size/2 - 8, screenY + m.size/2 - 4, 6, 6);
-                ctx.fillRect(screenX + m.size/2 + 2, screenY + m.size/2 - 4, 6, 6);
+                ctx.fillRect(screenX + m.size/2 - 8, screenY + m.size/2 - 4, 5, 5);
+                ctx.fillRect(screenX + m.size/2 + 3, screenY + m.size/2 - 4, 5, 5);
                 
                 let hpPercent = m.hp / m.maxHp;
                 ctx.fillStyle = '#a13333';
                 ctx.fillRect(screenX, screenY - 8, m.size, 5);
                 ctx.fillStyle = '#d65c5c';
                 ctx.fillRect(screenX, screenY - 8, m.size * hpPercent, 5);
-                
                 ctx.fillStyle = '#fff';
                 ctx.font = 'bold 11px monospace';
                 ctx.fillText(m.name, screenX + 4, screenY - 2);
-                
                 if (selectedMonsterId === m.id) {
                     ctx.strokeStyle = '#ff4444';
                     ctx.lineWidth = 3;
@@ -987,57 +1152,50 @@
                 }
             }
             
-            // Игрок (скин зависит от класса)
+            // Игрок с формой
             let psx = player.x - camera.x - 20;
             let psy = player.y - camera.y - 20;
             
             if (player.className === 'knight') {
                 ctx.fillStyle = '#3a6ea5';
-                ctx.fillRect(psx, psy, 40, 40);
+                ctx.fillRect(psx + 4, psy + 8, 32, 28);
                 ctx.fillStyle = '#f9c87a';
                 ctx.beginPath();
-                ctx.arc(psx + 20, psy + 12, 12, 0, Math.PI * 2);
+                ctx.arc(psx + 20, psy + 14, 10, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.fillStyle = '#ccccaa';
-                ctx.fillRect(psx + 28, psy + 18, 12, 6);
+                ctx.fillRect(psx + 28, psy + 22, 10, 6);
             } else if (player.className === 'archer') {
                 ctx.fillStyle = '#6f9e4f';
-                ctx.fillRect(psx, psy, 40, 40);
+                ctx.fillRect(psx + 4, psy + 8, 32, 28);
                 ctx.fillStyle = '#f9c87a';
                 ctx.beginPath();
-                ctx.arc(psx + 20, psy + 12, 12, 0, Math.PI * 2);
+                ctx.arc(psx + 20, psy + 14, 10, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = '#8aae6a';
-                ctx.fillRect(psx + 26, psy + 20, 14, 4);
                 ctx.fillStyle = '#ccaa66';
-                ctx.fillRect(psx + 32, psy + 18, 8, 8);
+                ctx.fillRect(psx + 28, psy + 20, 12, 4);
             } else {
                 ctx.fillStyle = '#a367c2';
-                ctx.fillRect(psx, psy, 40, 40);
+                ctx.fillRect(psx + 4, psy + 8, 32, 28);
                 ctx.fillStyle = '#f9c87a';
                 ctx.beginPath();
-                ctx.arc(psx + 20, psy + 12, 12, 0, Math.PI * 2);
+                ctx.arc(psx + 20, psy + 14, 10, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.fillStyle = '#ff88aa';
-                ctx.fillRect(psx + 24, psy + 18, 16, 6);
-                ctx.beginPath();
-                ctx.moveTo(psx + 36, psy + 20);
-                ctx.lineTo(psx + 44, psy + 16);
-                ctx.lineTo(psx + 36, psy + 12);
-                ctx.fill();
+                ctx.fillRect(psx + 24, psy + 22, 16, 5);
             }
             
             let hpPercent = player.hp / player.maxHp;
             ctx.fillStyle = '#a13333';
-            ctx.fillRect(psx, psy - 10, 40, 5);
+            ctx.fillRect(psx, psy - 8, 40, 5);
             ctx.fillStyle = '#d65c5c';
-            ctx.fillRect(psx, psy - 10, 40 * hpPercent, 5);
+            ctx.fillRect(psx, psy - 8, 40 * hpPercent, 5);
             ctx.fillStyle = '#ffd966';
             ctx.font = 'bold 10px monospace';
-            ctx.fillText('Герой', psx + 12, psy - 12);
+            ctx.fillText('Герой', psx + 12, psy - 10);
         }
         
-        // ==================== ОБРАБОТКА КЛИКОВ ====================
+        // ОБРАБОТКА КЛИКОВ
         function handleCanvasClick(e) {
             let rect = canvas.getBoundingClientRect();
             let clickX = (e.clientX - rect.left) * (canvas.width / rect.width);
@@ -1062,32 +1220,33 @@
                 currentTargetMonster = clickedMonster;
                 player.attackMonster(clickedMonster);
             } else {
-                if (tileX === safeZone.x && tileY === safeZone.y) {
-                    openShop();
-                } else {
-                    player.moveToTile(tileX, tileY);
-                    if (currentTargetMonster) {
-                        let dist = Math.abs(player.tileX - currentTargetMonster.tileX) + Math.abs(player.tileY - currentTargetMonster.tileY);
-                        if (dist > 8) currentTargetMonster = null;
-                    }
-                }
+                if (tileX === safeZone.x && tileY === safeZone.y) openShop();
+                else player.moveToTile(tileX, tileY);
             }
         }
         
-        // АВТО-АТАКА ПО ЦЕЛИ
+        // АВТО-АТАКА
         setInterval(() => {
             if (currentTargetMonster && currentTargetMonster.alive && player.hp > 0) {
                 let dist = Math.abs(player.tileX - currentTargetMonster.tileX) + Math.abs(player.tileY - currentTargetMonster.tileY);
                 let maxDist = player.className === 'knight' ? 1 : 12;
-                if (dist <= maxDist) {
-                    player.attackMonster(currentTargetMonster);
-                } else if (dist > 10) {
-                    currentTargetMonster = null;
-                }
+                if (dist <= maxDist) player.attackMonster(currentTargetMonster);
+                else if (dist > 10) currentTargetMonster = null;
             }
         }, 500);
         
-        // ==================== ВСПОМОГАТЕЛЬНЫЕ ====================
+        // ГОРЯЧИЕ КЛАВИШИ
+        document.addEventListener('keydown', (e) => {
+            if (e.key === '1') useHealPotion();
+            if (e.key === '2') useManaPotion();
+            if (e.key === '3') useSuperSkill();
+            if (e.key === 'i' || e.key === 'I') {
+                let p = document.getElementById('inventoryPanel');
+                p.style.display = p.style.display === 'none' ? 'flex' : 'none';
+                updateInventoryUI();
+            }
+        });
+        
         function addLog(msg) {
             let div = document.createElement('div');
             div.className = 'log-message';
@@ -1108,7 +1267,7 @@
             setTimeout(() => div.remove(), 800);
         }
         
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
+        // ИНИЦИАЛИЗАЦИЯ
         generateWorld();
         spawnMonsters();
         initInventory();
@@ -1124,15 +1283,15 @@
         document.getElementById('closeStats').onclick = () => document.getElementById('statsPanel').style.display = 'none';
         document.getElementById('invTopBtn').onclick = () => {
             let p = document.getElementById('inventoryPanel');
-            p.style.display = p.style.display === 'none' ? 'block' : 'none';
+            p.style.display = p.style.display === 'none' ? 'flex' : 'none';
             updateInventoryUI();
         };
         document.getElementById('closeInv').onclick = () => document.getElementById('inventoryPanel').style.display = 'none';
         document.getElementById('closeShop').onclick = () => document.getElementById('shopPanel').style.display = 'none';
         
-        document.getElementById('classKnightBtn').onclick = () => { player.className = 'knight'; addLog('Класс изменён на Рыцаря'); updateUI(); };
-        document.getElementById('classArcherBtn').onclick = () => { player.className = 'archer'; addLog('Класс изменён на Лучника'); updateUI(); };
-        document.getElementById('classMageBtn').onclick = () => { player.className = 'mage'; addLog('Класс изменён на Мага'); updateUI(); };
+        document.getElementById('classKnightBtn').onclick = () => { player.className = 'knight'; addLog('Класс: Рыцарь'); updateUI(); };
+        document.getElementById('classArcherBtn').onclick = () => { player.className = 'archer'; addLog('Класс: Лучник'); updateUI(); };
+        document.getElementById('classMageBtn').onclick = () => { player.className = 'mage'; addLog('Класс: Маг'); updateUI(); };
         
         let lastTimestamp = 0;
         function gameLoop(timestamp) {
@@ -1147,6 +1306,7 @@
         requestAnimationFrame(gameLoop);
         addLog('⚔️ Добро пожаловать в Rucoy Online! ⚔️');
         addLog('🖱️ Клик по монстру - атака | По земле - движение');
+        addLog('⌨️ 1 - зелье HP | 2 - зелье MP | 3 - суперудар');
         
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
