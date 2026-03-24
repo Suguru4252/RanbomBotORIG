@@ -111,7 +111,7 @@
             cursor: pointer;
         }
         .class-btn.active { background: #6a3e9e; }
-        /* Нижняя панель */
+        /* Нижняя панель (ПК) */
         .bottom-panel {
             position: fixed;
             bottom: 15px;
@@ -179,7 +179,6 @@
             font-size: 32px;
             cursor: pointer;
             backdrop-filter: blur(5px);
-            transition: 0.05s linear;
         }
         .touch-btn:active { transform: scale(0.95); background: rgba(255,217,102,0.3); }
         .touch-move {
@@ -244,7 +243,7 @@
             font-size: 10px;
             color: #ffd966;
         }
-        .shop-item, .upgrade-item {
+        .shop-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -441,35 +440,46 @@
         </div>
         <div class="settings-row">
             <span>💾 Автосохранение:</span>
-            <div class="toggle-switch" id="autoSaveToggle" class="active"></div>
+            <div class="toggle-switch" id="autoSaveToggle"></div>
         </div>
         <button id="closeSettings" style="margin-top:15px;">Закрыть</button>
     </div>
 
     <script>
         // ==================== RUCOY ONLINE - ПОЛНАЯ ВЕРСИЯ ====================
+        // ИНИЦИАЛИЗАЦИЯ КАНВАСА
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
         
-        // НАСТРОЙКИ
+        // ==================== НАСТРОЙКИ ====================
         let settings = {
-            controlMode: 'pc', // pc или mobile
+            controlMode: 'pc',
             touchEnabled: true,
             soundEnabled: true,
             autoSave: true
         };
         
+        // Функция применения настроек
         function applySettings() {
             const pcPanel = document.getElementById('pcPanel');
             const touchControls = document.getElementById('touchControls');
             const touchToggleRow = document.getElementById('touchToggleRow');
+            if (!pcPanel || !touchControls) return;
             
             if (settings.controlMode === 'pc') {
                 pcPanel.style.display = 'flex';
                 touchControls.style.display = 'none';
-                touchToggleRow.style.display = 'none';
+                if (touchToggleRow) touchToggleRow.style.display = 'none';
             } else {
                 pcPanel.style.display = 'none';
                 touchControls.style.display = 'flex';
-                touchToggleRow.style.display = 'flex';
+                if (touchToggleRow) touchToggleRow.style.display = 'flex';
                 if (!settings.touchEnabled) {
                     touchControls.style.display = 'none';
                 }
@@ -479,18 +489,11 @@
             const touchToggle = document.getElementById('touchToggle');
             const soundToggle = document.getElementById('soundToggle');
             const autoSaveToggle = document.getElementById('autoSaveToggle');
-            
-            if (settings.touchEnabled) touchToggle.classList.add('active');
-            else touchToggle.classList.remove('active');
-            
-            if (settings.soundEnabled) soundToggle.classList.add('active');
-            else soundToggle.classList.remove('active');
-            
-            if (settings.autoSave) autoSaveToggle.classList.add('active');
-            else autoSaveToggle.classList.remove('active');
+            if (touchToggle) settings.touchEnabled ? touchToggle.classList.add('active') : touchToggle.classList.remove('active');
+            if (soundToggle) settings.soundEnabled ? soundToggle.classList.add('active') : soundToggle.classList.remove('active');
+            if (autoSaveToggle) settings.autoSave ? autoSaveToggle.classList.add('active') : autoSaveToggle.classList.remove('active');
         }
         
-        // Загрузка настроек
         function loadSettings() {
             const saved = localStorage.getItem('rucoy_settings');
             if (saved) {
@@ -509,13 +512,7 @@
             localStorage.setItem('rucoy_settings', JSON.stringify(settings));
         }
         
-        // ==================== ИГРОВЫЕ ПЕРЕМЕННЫЕ ====================
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-        
+        // ==================== ИГРОВЫЕ ПАРАМЕТРЫ ====================
         const TILE_SIZE = 44;
         const WORLD_WIDTH = 50;
         const WORLD_HEIGHT = 50;
@@ -528,14 +525,12 @@
         let lastPotionTime = 0, lastSuperTime = 0;
         const POTION_COOLDOWN = 3;
         
-        // Статистика
         let stats = {
             playTime: 0,
             monstersKilled: 0,
             bossesKilled: 0,
             portalOpen: false,
-            bossSpawned: false,
-            bossDefeated: false
+            bossSpawned: false
         };
         
         // Карта
@@ -545,7 +540,8 @@
         
         function generateWorld() {
             for (let y = 0; y < WORLD_HEIGHT; y++) {
-                worldMap[y] = []; worldBiome[y] = [];
+                worldMap[y] = [];
+                worldBiome[y] = [];
                 for (let x = 0; x < WORLD_WIDTH; x++) {
                     if (x === 0 || y === 0 || x === WORLD_WIDTH-1 || y === WORLD_HEIGHT-1) {
                         worldMap[y][x] = 1; worldBiome[y][x] = 'wall';
@@ -559,10 +555,12 @@
                     else if (Math.sin(x*0.3)*Math.cos(y*0.3) > 0.6) {
                         worldMap[y][x] = 1; worldBiome[y][x] = 'mountain';
                     }
-                    else { worldMap[y][x] = 0; worldBiome[y][x] = 'grass'; }
+                    else {
+                        worldMap[y][x] = 0; worldBiome[y][x] = 'grass';
+                    }
                 }
             }
-            // Красивая зона спавна
+            // Зона спавна
             for (let dy = -safeZone.radius; dy <= safeZone.radius; dy++) {
                 for (let dx = -safeZone.radius; dx <= safeZone.radius; dx++) {
                     let nx = safeZone.x+dx, ny = safeZone.y+dy;
@@ -572,26 +570,17 @@
                     }
                 }
             }
-            // Забор вокруг спавна
+            // Украшения: забор вокруг спавна
             for (let i = -safeZone.radius-1; i <= safeZone.radius+1; i++) {
                 let x1 = safeZone.x + i, y1 = safeZone.y - safeZone.radius - 1;
                 let x2 = safeZone.x + i, y2 = safeZone.y + safeZone.radius + 1;
                 let y3 = safeZone.y + i, x3 = safeZone.x - safeZone.radius - 1;
                 let y4 = safeZone.y + i, x4 = safeZone.x + safeZone.radius + 1;
-                if (x1>=0 && x1<WORLD_WIDTH && y1>=0 && y1<WORLD_HEIGHT && worldMap[y1][x1] !== 1) {
-                    worldObjects.push({x:x1, y:y1, type:'fence'});
-                }
-                if (x2>=0 && x2<WORLD_WIDTH && y2>=0 && y2<WORLD_HEIGHT && worldMap[y2][x2] !== 1) {
-                    worldObjects.push({x:x2, y:y2, type:'fence'});
-                }
-                if (x3>=0 && x3<WORLD_WIDTH && y3>=0 && y3<WORLD_HEIGHT && worldMap[y3][x3] !== 1) {
-                    worldObjects.push({x:x3, y:y3, type:'fence'});
-                }
-                if (x4>=0 && x4<WORLD_WIDTH && y4>=0 && y4<WORLD_HEIGHT && worldMap[y4][x4] !== 1) {
-                    worldObjects.push({x:x4, y:y4, type:'fence'});
-                }
+                if (x1>=0 && x1<WORLD_WIDTH && y1>=0 && y1<WORLD_HEIGHT && worldMap[y1][x1] !== 1) worldObjects.push({x:x1, y:y1, type:'fence'});
+                if (x2>=0 && x2<WORLD_WIDTH && y2>=0 && y2<WORLD_HEIGHT && worldMap[y2][x2] !== 1) worldObjects.push({x:x2, y:y2, type:'fence'});
+                if (x3>=0 && x3<WORLD_WIDTH && y3>=0 && y3<WORLD_HEIGHT && worldMap[y3][x3] !== 1) worldObjects.push({x:x3, y:y3, type:'fence'});
+                if (x4>=0 && x4<WORLD_WIDTH && y4>=0 && y4<WORLD_HEIGHT && worldMap[y4][x4] !== 1) worldObjects.push({x:x4, y:y4, type:'fence'});
             }
-            // Ворота
             worldObjects.push({x:safeZone.x, y:safeZone.y-safeZone.radius-1, type:'gate'});
             worldObjects.push({x:safeZone.x, y:safeZone.y+safeZone.radius+1, type:'gate'});
         }
@@ -620,8 +609,10 @@
         }
         
         let player = {
-            tileX: safeZone.x, tileY: safeZone.y, x: safeZone.x*TILE_SIZE, y: safeZone.y*TILE_SIZE,
-            targetTileX: safeZone.x, targetTileY: safeZone.y, path: [],
+            tileX: safeZone.x, tileY: safeZone.y,
+            x: safeZone.x*TILE_SIZE, y: safeZone.y*TILE_SIZE,
+            targetTileX: safeZone.x, targetTileY: safeZone.y,
+            path: [],
             level:1, xp:0, maxHp:120, hp:120, maxMp:60, mp:60,
             baseAttack:22, baseDefense:12, className:'knight', gold:800,
             inventory: [], equipment: { weapon: null, armor: null },
@@ -711,7 +702,7 @@
             attackSpeed:0.85, lastAttack:0
         };
         
-        // Монстры с уровнями
+        // Монстры
         let monsters = [];
         let nextMonsterId=1;
         const MONSTER_TYPES = {
@@ -727,7 +718,7 @@
             constructor(type, tx, ty, isBoss=false) {
                 let d = isBoss ? BOSS : MONSTER_TYPES[type];
                 this.id=nextMonsterId++;
-                this.isBoss=isBoss||false;
+                this.isBoss=isBoss;
                 this.name=d.name;
                 this.hp=d.hp; this.maxHp=d.hp;
                 this.attack=d.attack; this.defense=d.defense;
@@ -778,7 +769,7 @@
             }
             die(killer){
                 this.alive=false;
-                if(this.isBoss){ stats.bossesKilled++; stats.portalOpen=true; portalPos.active=true; addLog(`🏆 БОСС ${this.name} ПОВЕРЖЕН! ОТКРЫТ ПОРТАЛ! 🏆`); }
+                if(this.isBoss){ stats.bossesKilled++; portalPos.active=true; addLog(`🏆 БОСС ${this.name} ПОВЕРЖЕН! ОТКРЫТ ПОРТАЛ! 🏆`); }
                 setTimeout(()=>this.respawn(), this.isBoss?120000:8000);
             }
             respawn(){
@@ -830,8 +821,7 @@
             {id:'small_mp', name:'Малая настойка MP', icon:'💙', mana:40, price:18},
             {id:'medium_mp', name:'Средняя настойка MP', icon:'💙', mana:100, price:45},
             {id:'iron_sword', name:'Железный меч', icon:'⚔️', damage:12, price:200, type:'weapon'},
-            {id:'steel_armor', name:'Стальная броня', icon:'🛡️', defense:12, price:300, type:'armor'},
-            {id:'bag_upgrade', name:'Увеличение рюкзака', icon:'🎒', bagSlots:5, price:500, type:'upgrade'}
+            {id:'steel_armor', name:'Стальная броня', icon:'🛡️', defense:12, price:300, type:'armor'}
         ];
         
         function useHealPotion(){
@@ -876,6 +866,7 @@
             updateUI();
         }
         
+        // Регенерация
         setInterval(()=>{
             stats.playTime++;
             if(player.hp>0 && player.hp<player.maxHp){ let regen=Math.floor(player.maxHp*0.03); player.hp=Math.min(player.maxHp,player.hp+regen); updateUI(); }
@@ -949,6 +940,7 @@
         
         function updateInventoryUI(){
             let container=document.getElementById('inventorySlots');
+            if(!container) return;
             container.innerHTML='';
             for(let i=0;i<player.inventory.length;i++){
                 let item=player.inventory[i];
@@ -968,6 +960,7 @@
         
         function openShop(){
             let container=document.getElementById('shopItems');
+            if(!container) return;
             container.innerHTML='';
             for(let item of SHOP_ITEMS){
                 let div=document.createElement('div');
@@ -983,7 +976,6 @@
                         player.gold-=shopItem.price;
                         if(shopItem.type==='weapon'){ if(player.equipment.weapon) player.inventory.push(player.equipment.weapon); player.equipment.weapon={name:shopItem.name, icon:shopItem.icon, damage:shopItem.damage}; }
                         else if(shopItem.type==='armor'){ if(player.equipment.armor) player.inventory.push(player.equipment.armor); player.equipment.armor={name:shopItem.name, icon:shopItem.icon, defense:shopItem.defense}; }
-                        else if(shopItem.bagSlots){ addLog('🎒 Место в инвентаре увеличено!'); }
                         else{
                             let exist=player.inventory.find(i=>i.name===shopItem.name);
                             if(exist) exist.count++;
@@ -1002,6 +994,7 @@
             quickHealPotion=player.inventory[0]; quickManaPotion=player.inventory[1];
         }
         
+        // Отрисовка
         function draw(){
             ctx.clearRect(0,0,canvas.width,canvas.height);
             camera.x=player.x-canvas.width/2; camera.y=player.y-canvas.height/2;
@@ -1060,7 +1053,6 @@
             else{ if(tx===safeZone.x && ty===safeZone.y) openShop(); else if(portalPos.active && tx===portalPos.x && ty===portalPos.y){ addLog('🌊 Портал ведет в новое измерение...'); } else player.moveToTile(tx,ty); }
         }
         
-        // Сенсорное управление
         function setupTouchControls() {
             const touchUp = document.getElementById('touchUp');
             const touchDown = document.getElementById('touchDown');
@@ -1069,7 +1061,6 @@
             const touchHeal = document.getElementById('touchHeal');
             const touchMana = document.getElementById('touchMana');
             const touchSuper = document.getElementById('touchSuper');
-            
             if(touchUp) touchUp.onclick = () => player.moveToTile(player.tileX, player.tileY-1);
             if(touchDown) touchDown.onclick = () => player.moveToTile(player.tileX, player.tileY+1);
             if(touchLeft) touchLeft.onclick = () => player.moveToTile(player.tileX-1, player.tileY);
@@ -1087,12 +1078,19 @@
         function showDamage(x,y,d){ let dmg=document.createElement('div'); dmg.className='damage-number'; dmg.innerText=`-${Math.floor(d)}`; let sx=x-camera.x, sy=y-camera.y; dmg.style.left=sx+'px'; dmg.style.top=sy+'px'; document.body.appendChild(dmg); setTimeout(()=>dmg.remove(),700); }
         
         // Инициализация
-        generateWorld(); spawnMonsters(); initInventory(); loadSettings(); loadGame(); updateUI(); updateInventoryUI(); setupTouchControls();
+        generateWorld();
+        spawnMonsters();
+        initInventory();
+        loadSettings();
+        loadGame();
+        updateUI();
+        updateInventoryUI();
+        setupTouchControls();
         
-        canvas.addEventListener('click',handleClick);
+        canvas.addEventListener('click', handleClick);
         canvas.addEventListener('touchstart',(e)=>{ e.preventDefault(); let t=e.touches[0]; let rect=canvas.getBoundingClientRect(); let cx=(t.clientX-rect.left)*(canvas.width/rect.width); let cy=(t.clientY-rect.top)*(canvas.height/rect.height); let wx=cx+camera.x, wy=cy+camera.y; let tx=Math.floor(wx/TILE_SIZE), ty=Math.floor(wy/TILE_SIZE); if(tx<0||tx>=WORLD_WIDTH||ty<0||ty>=WORLD_HEIGHT) return; let clicked=null; for(let m of monsters) if(m.alive && m.tileX===tx && m.tileY===ty){ clicked=m; break; } if(clicked){ selectedMonsterId=clicked.id; currentTargetMonster=clicked; player.attackMonster(clicked); } else{ if(tx===safeZone.x && ty===safeZone.y) openShop(); else if(portalPos.active && tx===portalPos.x && ty===portalPos.y) addLog('🌊 Портал ведет в новое измерение...'); else player.moveToTile(tx,ty); } });
         
-        // Кнопки управления
+        // Кнопки интерфейса
         document.getElementById('healPotionBtn').onclick=useHealPotion;
         document.getElementById('manaPotionBtn').onclick=useManaPotion;
         document.getElementById('superSkillBtn').onclick=useSuperSkill;
@@ -1104,10 +1102,8 @@
         document.getElementById('settingsBtn').onclick=()=>document.getElementById('settingsPanel').style.display='block';
         document.getElementById('closeSettings').onclick=()=>document.getElementById('settingsPanel').style.display='none';
         
-        // Переключение режимов
         document.getElementById('modePcBtn').onclick=()=>{ settings.controlMode='pc'; applySettings(); saveSettings(); };
         document.getElementById('modeMobileBtn').onclick=()=>{ settings.controlMode='mobile'; applySettings(); saveSettings(); };
-        
         document.getElementById('touchToggle').onclick=()=>{ settings.touchEnabled=!settings.touchEnabled; applySettings(); saveSettings(); };
         document.getElementById('soundToggle').onclick=()=>{ settings.soundEnabled=!settings.soundEnabled; applySettings(); saveSettings(); };
         document.getElementById('autoSaveToggle').onclick=()=>{ settings.autoSave=!settings.autoSave; applySettings(); saveSettings(); };
