@@ -10,8 +10,8 @@
             padding: 0;
             box-sizing: border-box;
             user-select: none;
-            image-rendering: pixelated;
             image-rendering: crisp-edges;
+            image-rendering: pixelated;
         }
         body {
             background: #0a2a0a;
@@ -20,111 +20,81 @@
         }
         canvas {
             display: block;
-            background: #2a5a2a;
             cursor: crosshair;
         }
         
-        /* КНОПКИ ПО УГЛАМ - ПИКСЕЛЬНЫЙ СТИЛЬ */
-        .corner-btn {
+        /* ПИКСЕЛЬНЫЕ КНОПКИ ПО УГЛАМ */
+        .pixel-btn {
             position: fixed;
             background: #2c2f3f;
             border: 2px solid #ffd966;
             color: #ffd966;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 16px;
-            padding: 8px 16px;
+            font-size: 14px;
+            padding: 6px 14px;
             cursor: pointer;
             text-align: center;
-            box-shadow: 3px 3px 0 #00000066;
-            transition: 0.05s linear;
+            box-shadow: 2px 2px 0 #000;
             z-index: 200;
         }
-        .corner-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0 #00000066;
+        .pixel-btn:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0 #000;
         }
         
-        /* ЛЕВЫЙ ВЕРХНИЙ УГОЛ */
-        .top-left {
-            top: 15px;
-            left: 15px;
-            display: flex;
-            gap: 8px;
-        }
-        /* ПРАВЫЙ ВЕРХНИЙ УГОЛ */
-        .top-right {
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 8px;
-        }
-        /* ЛЕВЫЙ НИЖНИЙ УГОЛ */
-        .bottom-left {
-            bottom: 15px;
-            left: 15px;
-            display: flex;
-            gap: 8px;
-        }
-        /* ПРАВЫЙ НИЖНИЙ УГОЛ */
-        .bottom-right {
-            bottom: 15px;
-            right: 15px;
-            display: flex;
-            gap: 8px;
-        }
+        /* УГЛЫ */
+        .top-left { top: 10px; left: 10px; }
+        .top-right { top: 10px; right: 10px; }
+        .bottom-left { bottom: 10px; left: 10px; }
+        .bottom-right { bottom: 10px; right: 10px; }
         
-        /* СТАТИСТИКА ВВЕРХУ ПО ЦЕНТРУ */
-        .stats-center {
+        /* ПИКСЕЛЬНАЯ ПАНЕЛЬ ЗДОРОВЬЯ */
+        .pixel-stats {
             position: fixed;
-            top: 15px;
+            top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
+            background: #000000aa;
             border: 2px solid #ffd966;
             padding: 5px 15px;
             display: flex;
             gap: 20px;
-            z-index: 200;
             font-family: 'Courier New', monospace;
-            font-weight: bold;
-        }
-        .stat-item {
-            color: #ffd966;
             font-size: 14px;
+            font-weight: bold;
+            z-index: 200;
         }
-        .stat-item span {
-            color: white;
-        }
-        .hp-stat { color: #ff6a6a; }
-        .mp-stat { color: #6a9eff; }
+        .pixel-stats span { color: #ffd966; }
+        .pixel-stats .hp { color: #ff6a6a; }
+        .pixel-stats .mp { color: #6a9eff; }
         
-        /* ПОЛОСКИ XP/HP */
-        .bar-container {
+        /* ПОЛОСКИ */
+        .pixel-bars {
             position: fixed;
-            bottom: 15px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 300px;
-            background: #2a2a2a;
+            width: 280px;
+            background: #1a1a1a;
             border: 2px solid #ffd966;
-            padding: 4px;
+            padding: 3px;
             z-index: 200;
         }
-        .hp-bar-big {
+        .hp-pixel {
             height: 12px;
             background: #d44a4a;
             width: 100%;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
-        .xp-bar-big {
+        .xp-pixel {
             height: 8px;
             background: #6a9eff;
             width: 0%;
         }
         
         /* ПАНЕЛИ */
-        .panel {
+        .pixel-panel {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -132,17 +102,16 @@
             background: #000000dd;
             border: 3px solid #ffd966;
             padding: 20px;
-            min-width: 250px;
+            min-width: 260px;
             display: none;
             z-index: 300;
-            color: white;
             font-family: monospace;
         }
-        .panel button {
+        .pixel-panel button {
             background: #4a3e2a;
             border: 1px solid #ffd966;
             color: #ffd966;
-            padding: 5px 15px;
+            padding: 5px 12px;
             margin-top: 15px;
             cursor: pointer;
             font-family: monospace;
@@ -151,32 +120,30 @@
         /* ЛОГИ */
         .log {
             position: fixed;
-            bottom: 80px;
-            left: 15px;
+            bottom: 70px;
+            left: 10px;
             background: #000000aa;
-            border-left: 4px solid #ffd966;
-            padding: 5px 10px;
+            border-left: 3px solid #ffd966;
+            padding: 4px 8px;
             color: #ffd966;
-            font-size: 11px;
+            font-size: 10px;
             animation: fadeOut 2s forwards;
             pointer-events: none;
-            z-index: 150;
         }
         
         /* УРОН */
         .damage {
             position: fixed;
             font-weight: bold;
-            font-size: 20px;
+            font-size: 18px;
             color: #ffaa44;
-            text-shadow: 2px 2px 0 black;
+            text-shadow: 1px 1px 0 black;
             pointer-events: none;
             animation: floatUp 0.8s forwards;
-            z-index: 250;
         }
         
-        /* ЭКРАН СМЕРТИ */
-        .death-screen {
+        /* СМЕРТЬ */
+        .death {
             position: fixed;
             top: 0;
             left: 0;
@@ -188,27 +155,21 @@
             align-items: center;
             flex-direction: column;
             z-index: 500;
-            font-family: monospace;
         }
-        .death-screen h1 {
+        .death h1 {
             color: #ff4444;
             font-size: 48px;
-            margin-bottom: 20px;
-            text-shadow: 3px 3px 0 #660000;
+            font-family: monospace;
         }
-        .death-screen p {
+        .death p {
             color: #ffd966;
             font-size: 24px;
-        }
-        .death-screen .timer {
-            font-size: 48px;
-            color: white;
             margin-top: 20px;
         }
         
         @keyframes floatUp {
             0% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-45px); }
+            100% { opacity: 0; transform: translateY(-40px); }
         }
         @keyframes fadeOut {
             0% { opacity: 1; }
@@ -219,106 +180,105 @@
 </head>
 <body>
     <canvas id="canvas"></canvas>
-
+    
     <!-- КНОПКИ ПО УГЛАМ -->
-    <div class="corner-btn top-left">
-        <button id="btnKnight" class="corner-btn" style="position:relative; top:0; left:0;">⚔️ РЫЦАРЬ</button>
-        <button id="btnArcher" class="corner-btn" style="position:relative; top:0; left:0;">🏹 ЛУЧНИК</button>
-        <button id="btnMage" class="corner-btn" style="position:relative; top:0; left:0;">🔮 МАГ</button>
+    <button class="pixel-btn top-left" id="btnKnight">⚔️ РЫЦАРЬ</button>
+    <button class="pixel-btn top-left" id="btnArcher" style="left: 100px;">🏹 ЛУЧНИК</button>
+    <button class="pixel-btn top-left" id="btnMage" style="left: 190px;">🔮 МАГ</button>
+    
+    <button class="pixel-btn top-right" id="btnInv">🎒 ИНВ</button>
+    <button class="pixel-btn top-right" id="btnStats" style="right: 100px;">📊 СТАТ</button>
+    
+    <button class="pixel-btn bottom-left" id="btnHeal">💊 ЛЕЧЕНИЕ</button>
+    <button class="pixel-btn bottom-left" id="btnMana" style="left: 100px;">💙 МАНА</button>
+    
+    <button class="pixel-btn bottom-right" id="btnSpell">✨ УДАР</button>
+    
+    <!-- ПАНЕЛЬ ЗДОРОВЬЯ -->
+    <div class="pixel-stats">
+        <span>Lv.<span id="lv">1</span></span>
+        <span class="hp">❤️ <span id="hpText">120/120</span></span>
+        <span class="mp">💙 <span id="mpText">60/60</span></span>
+        <span>💰 <span id="gold">500</span></span>
     </div>
     
-    <div class="corner-btn top-right">
-        <button id="btnInv" class="corner-btn" style="position:relative; top:0; right:0;">🎒 ИНВ</button>
-        <button id="btnStats" class="corner-btn" style="position:relative; top:0; right:0;">📊 СТАТ</button>
-    </div>
-    
-    <div class="corner-btn bottom-left">
-        <button id="btnHeal" class="corner-btn" style="position:relative; bottom:0; left:0;">💊 ЛЕЧЕНИЕ</button>
-        <button id="btnMana" class="corner-btn" style="position:relative; bottom:0; left:0;">💙 МАНА</button>
-    </div>
-    
-    <div class="corner-btn bottom-right">
-        <button id="btnSpell" class="corner-btn" style="position:relative; bottom:0; right:0;">✨ СУПЕРУДАР</button>
-    </div>
-    
-    <!-- СТАТИСТИКА ПО ЦЕНТРУ ВВЕРХУ -->
-    <div class="stats-center">
-        <div class="stat-item">Lv.<span id="lv">1</span></div>
-        <div class="stat-item hp-stat">❤️ <span id="hpText">120/120</span></div>
-        <div class="stat-item mp-stat">💙 <span id="mpText">60/60</span></div>
-        <div class="stat-item">💰 <span id="gold">500</span></div>
-    </div>
-    
-    <!-- ПОЛОСКИ HP И XP -->
-    <div class="bar-container">
-        <div class="hp-bar-big" id="hpBarBig" style="width:100%"></div>
-        <div class="xp-bar-big" id="xpBarBig" style="width:0%"></div>
+    <!-- ПОЛОСКИ -->
+    <div class="pixel-bars">
+        <div class="hp-pixel" id="hpBar"></div>
+        <div class="xp-pixel" id="xpBar"></div>
     </div>
     
     <!-- ПАНЕЛИ -->
-    <div class="panel" id="invPanel">
+    <div class="pixel-panel" id="invPanel">
         <h3 style="color:#ffd966;">🎒 ИНВЕНТАРЬ</h3>
         <div id="invList" style="margin: 15px 0;"></div>
         <button id="closeInv">ЗАКРЫТЬ</button>
     </div>
     
-    <div class="panel" id="statsPanel">
+    <div class="pixel-panel" id="statsPanel">
         <h3 style="color:#ffd966;">📊 СТАТИСТИКА</h3>
         <div id="statsList"></div>
         <button id="closeStats">ЗАКРЫТЬ</button>
     </div>
     
-    <div class="panel" id="shopPanel">
+    <div class="pixel-panel" id="shopPanel">
         <h3 style="color:#ffd966;">🏪 ТОРГОВЕЦ</h3>
         <div id="shopList"></div>
         <button id="closeShop">ЗАКРЫТЬ</button>
     </div>
     
-    <!-- ЭКРАН СМЕРТИ -->
-    <div class="death-screen" id="deathScreen">
+    <!-- СМЕРТЬ -->
+    <div class="death" id="deathScreen">
         <h1>💀 ВЫ УМЕРЛИ 💀</h1>
-        <p>ВОЗРОЖДЕНИЕ ЧЕРЕЗ</p>
-        <div class="timer" id="deathTimer">10</div>
+        <p>ВОЗРОЖДЕНИЕ ЧЕРЕЗ <span id="deathTimer">10</span> СЕК</p>
     </div>
     
     <script>
-        // ==================== RUCOY ONLINE - РАБОЧАЯ ВЕРСИЯ ====================
-        
-        // ----- КАНВАС -----
+        // ========== КАНВАС ==========
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         
-        function setSize() {
+        function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-        setSize();
-        window.addEventListener('resize', setSize);
+        resize();
+        window.addEventListener('resize', resize);
         
-        // ----- МИР -----
+        // ========== МИР ==========
         const TILE = 48;
-        const W = 40;
-        const H = 40;
+        const W = 45;
+        const H = 45;
         
         let cam = { x: 0, y: 0 };
         let selectedMonster = null;
         let targetTile = null;
         
-        // КАРТА
+        // КАРТА С ТРАВОЙ И ДЕРЕВЬЯМИ
         let map = [];
-        const safeX = 20, safeY = 20;
+        let trees = [];
+        const safeX = 22, safeY = 22;
         
         for (let y = 0; y < H; y++) {
             map[y] = [];
             for (let x = 0; x < W; x++) {
-                if (x === 0 || y === 0 || x === W-1 || y === H-1) map[y][x] = 1;
-                else if (Math.abs(x - safeX) <= 3 && Math.abs(y - safeY) <= 3) map[y][x] = 0;
-                else if (Math.random() < 0.03) map[y][x] = 1;
-                else map[y][x] = 0;
+                if (x === 0 || y === 0 || x === W-1 || y === H-1) {
+                    map[y][x] = 1;
+                }
+                else if (Math.abs(x - safeX) <= 3 && Math.abs(y - safeY) <= 3) {
+                    map[y][x] = 0;
+                }
+                else if (Math.random() < 0.04) {
+                    map[y][x] = 1;
+                    trees.push({ x, y });
+                }
+                else {
+                    map[y][x] = 0;
+                }
             }
         }
         
-        // ----- ИГРОК -----
+        // ========== ИГРОК ==========
         let player = {
             x: safeX * TILE, y: safeY * TILE,
             tx: safeX, ty: safeY,
@@ -452,15 +412,14 @@
             }
         };
         
-        // ----- МОНСТРЫ -----
+        // ========== МОНСТРЫ (как на фото: Rat, Crab) ==========
         let monsters = [];
         
         const MONSTER_DATA = {
-            goblin: { name: 'ГОБЛИН', hp: 45, attack: 16, defense: 3, xp: 35, gold: 12, color: '#6b8c42', size: 30 },
-            wolf: { name: 'ВОЛК', hp: 55, attack: 20, defense: 4, xp: 45, gold: 18, color: '#8a8a6a', size: 30 },
-            skeleton: { name: 'СКЕЛЕТ', hp: 75, attack: 24, defense: 6, xp: 60, gold: 25, color: '#bdb28c', size: 32 },
-            orc: { name: 'ОРК', hp: 110, attack: 30, defense: 8, xp: 95, gold: 35, color: '#7a6a4a', size: 36 },
-            minotaur: { name: 'МИНОТАВР', hp: 180, attack: 38, defense: 12, xp: 150, gold: 55, color: '#9b5e2c', size: 40 }
+            rat: { name: 'Rat Lv.1', hp: 45, attack: 16, defense: 3, xp: 35, gold: 12, color: '#8b5a2b', size: 28 },
+            crab: { name: 'Crab Lv.1', hp: 55, attack: 20, defense: 4, xp: 45, gold: 18, color: '#b86f2c', size: 32 },
+            goblin: { name: 'Goblin Lv.2', hp: 75, attack: 24, defense: 6, xp: 60, gold: 25, color: '#6b8c42', size: 32 },
+            wolf: { name: 'Wolf Lv.3', hp: 95, attack: 28, defense: 8, xp: 80, gold: 35, color: '#8a8a6a', size: 34 }
         };
         
         class MonsterObj {
@@ -562,8 +521,8 @@
         }
         
         function spawnMonsters() {
-            let types = ['goblin', 'wolf', 'skeleton', 'orc', 'minotaur'];
-            for (let i = 0; i < 30; i++) {
+            let types = ['rat', 'crab', 'goblin', 'wolf'];
+            for (let i = 0; i < 35; i++) {
                 let type = types[Math.floor(Math.random() * types.length)];
                 for (let a = 0; a < 30; a++) {
                     let tx = 3 + Math.random() * (W - 6);
@@ -580,7 +539,7 @@
             }
         }
         
-        // ----- ИНВЕНТАРЬ -----
+        // ========== ИНВЕНТАРЬ ==========
         function initInv() {
             player.inventory.push({ name: 'МАЛАЯ НАСТОЙКА HP', icon: '🧪', heal: 60, count: 3 });
             player.inventory.push({ name: 'МАЛАЯ НАСТОЙКА MP', icon: '💙', mana: 40, count: 2 });
@@ -645,7 +604,7 @@
             updateUI();
         }
         
-        // ----- МАГАЗИН -----
+        // ========== МАГАЗИН ==========
         const SHOP = [
             { name: 'МАЛАЯ НАСТОЙКА HP', icon: '🧪', heal: 60, price: 20 },
             { name: 'МАЛАЯ НАСТОЙКА MP', icon: '💙', mana: 40, price: 18 }
@@ -687,15 +646,15 @@
             });
         }
         
-        // ----- UI -----
+        // ========== UI ==========
         function updateUI() {
             document.getElementById('lv').innerText = player.level;
             document.getElementById('hpText').innerHTML = `${Math.floor(player.hp)}/${player.maxHp}`;
             document.getElementById('mpText').innerHTML = `${Math.floor(player.mp)}/${player.maxMp}`;
             document.getElementById('gold').innerText = player.gold;
-            document.getElementById('hpBarBig').style.width = (player.hp / player.maxHp * 100) + '%';
+            document.getElementById('hpBar').style.width = (player.hp / player.maxHp * 100) + '%';
             let need = 100 + (player.level - 1) * 50;
-            document.getElementById('xpBarBig').style.width = (player.xp / need * 100) + '%';
+            document.getElementById('xpBar').style.width = (player.xp / need * 100) + '%';
             
             let statsHtml = `
                 <div style="display:flex; justify-content:space-between; padding:5px 0;"><span>УРОВЕНЬ:</span><span>${player.level}</span></div>
@@ -728,7 +687,7 @@
             }
         }
         
-        // ----- ОТРИСОВКА -----
+        // ========== ОТРИСОВКА (ТРАВА, ДЕРЕВЬЯ, МОБЫ) ==========
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -746,21 +705,48 @@
                 for (let x = sx; x < ex; x++) {
                     let cx = x * TILE - cam.x;
                     let cy = y * TILE - cam.y;
+                    
+                    // ТРАВА
                     if (map[y][x] === 1) {
                         ctx.fillStyle = '#4a3e35';
                         ctx.fillRect(cx, cy, TILE - 1, TILE - 1);
                     } else {
-                        if (Math.abs(x - safeX) <= 3 && Math.abs(y - safeY) <= 3) ctx.fillStyle = '#8aae6a';
-                        else ctx.fillStyle = '#5cae4a';
+                        // ЗЕЛЁНАЯ ТРАВА
+                        ctx.fillStyle = '#5cae4a';
                         ctx.fillRect(cx, cy, TILE - 1, TILE - 1);
                         ctx.fillStyle = '#6cbe5a';
                         ctx.fillRect(cx + 4, cy + 4, TILE - 9, TILE - 9);
+                        
+                        // ТРАВИНКИ
+                        ctx.fillStyle = '#4c8e3a';
+                        for (let i = 0; i < 6; i++) {
+                            ctx.fillRect(cx + 6 + i * 6, cy + TILE - 8, 2, 6);
+                        }
                     }
+                    
+                    // ДЕРЕВЬЯ
+                    let isTree = false;
+                    for (let t of trees) {
+                        if (t.x === x && t.y === y && map[y][x] === 1) {
+                            isTree = true;
+                            ctx.fillStyle = '#6b4c2a';
+                            ctx.fillRect(cx + 8, cy + 12, 32, 28);
+                            ctx.fillStyle = '#4c8e3a';
+                            ctx.beginPath();
+                            ctx.arc(cx + 24, cy + 16, 14, 0, Math.PI * 2);
+                            ctx.fill();
+                            break;
+                        }
+                    }
+                    
+                    // ТОРГОВЕЦ
                     if (x === safeX && y === safeY) {
                         ctx.fillStyle = '#ffaa66';
                         ctx.font = '24px monospace';
                         ctx.fillText('🏪', cx + 14, cy + 34);
                     }
+                    
+                    // ЖЁЛТЫЙ КВАДРАТ ДВИЖЕНИЯ
                     if (targetTile && targetTile.x === x && targetTile.y === y) {
                         ctx.strokeStyle = '#ffdd88';
                         ctx.lineWidth = 2;
@@ -769,6 +755,7 @@
                 }
             }
             
+            // МОНСТРЫ
             for (let m of monsters) {
                 if (!m.alive) continue;
                 let cx = m.x - cam.x - m.size / 2;
@@ -778,14 +765,18 @@
                 ctx.fillStyle = 'black';
                 ctx.fillRect(cx + m.size/2 - 6, cy + m.size/2 - 4, 4, 4);
                 ctx.fillRect(cx + m.size/2 + 2, cy + m.size/2 - 4, 4, 4);
+                
                 let hpP = m.hp / m.maxHp;
                 ctx.fillStyle = '#a13333';
                 ctx.fillRect(cx, cy - 6, m.size, 4);
                 ctx.fillStyle = '#d65c5c';
                 ctx.fillRect(cx, cy - 6, m.size * hpP, 4);
+                
                 ctx.fillStyle = 'white';
-                ctx.font = 'bold 10px monospace';
+                ctx.font = 'bold 9px monospace';
                 ctx.fillText(m.name, cx + 4, cy - 2);
+                
+                // КРАСНЫЙ КВАДРАТ ВЫБОРА
                 if (selectedMonster === m) {
                     ctx.strokeStyle = 'red';
                     ctx.lineWidth = 2;
@@ -793,6 +784,7 @@
                 }
             }
             
+            // ИГРОК С ОРУЖИЕМ
             let px = player.x - cam.x - 18;
             let py = player.y - cam.y - 18;
             ctx.fillStyle = '#3a6ea5';
@@ -801,6 +793,8 @@
             ctx.beginPath();
             ctx.arc(px + 18, py + 12, 8, 0, Math.PI * 2);
             ctx.fill();
+            
+            // ОРУЖИЕ ПО УГЛАМ ПЕРСОНАЖА
             if (player.class === 'knight') {
                 ctx.fillStyle = '#ccccaa';
                 ctx.fillRect(px + 26, py + 18, 10, 5);
@@ -811,6 +805,7 @@
                 ctx.fillStyle = '#ff88aa';
                 ctx.fillRect(px + 22, py + 20, 16, 5);
             }
+            
             let hpP = player.hp / player.maxHp;
             ctx.fillStyle = '#a13333';
             ctx.fillRect(px, py - 6, 36, 4);
@@ -818,7 +813,7 @@
             ctx.fillRect(px, py - 6, 36 * hpP, 4);
         }
         
-        // ----- КЛИКИ -----
+        // ========== КЛИКИ ==========
         function onClick(e) {
             let rect = canvas.getBoundingClientRect();
             let cx = (e.clientX - rect.left) * (canvas.width / rect.width);
@@ -884,7 +879,7 @@
             setTimeout(() => d.remove(), 700);
         }
         
-        // ----- ЗАПУСК -----
+        // ========== ЗАПУСК ==========
         spawnMonsters();
         initInv();
         updateUI();
@@ -938,10 +933,9 @@
         }
         requestAnimationFrame(loop);
         
-        addLog('⚔️ ДОБРО ПОЖАЛОВАТЬ В RUCOY ONLINE! ⚔️');
+        addLog('⚔️ ДОБРО ПОЖАЛОВАТЬ! ⚔️');
         addLog('👆 НАЖМИ НА МОНСТРА - АТАКА | НА ЗЕМЛЮ - ДВИЖЕНИЕ');
         addLog('🏪 НАЖМИ НА 🏪 ЧТОБЫ КУПИТЬ ЗЕЛЬЯ');
-        addLog('💀 ПРИ СМЕРТИ ЭКРАН НА 10 СЕКУНД');
     </script>
 </body>
 </html>
