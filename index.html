@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
-    <title>Rucoy Online - Mobile Horizontal RPG</title>
+    <title>Rucoy Online - Mobile RPG</title>
     <style>
         * {
             margin: 0;
@@ -34,139 +34,112 @@
             background: #1a2a1a;
         }
         
-        /* Правые кнопки управления (атака, способность) */
-        .right-controls {
+        /* Маленькие кнопки по углам */
+        .corner-buttons {
             position: fixed;
-            right: 15px;
-            bottom: 50%;
-            transform: translateY(50%);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
             z-index: 100;
             pointer-events: auto;
         }
         
-        .fight-btn {
-            width: 70px;
-            height: 70px;
-            background: rgba(44, 47, 74, 0.9);
-            backdrop-filter: blur(8px);
-            border: 3px solid #ffaa55;
-            border-radius: 50%;
-            color: #ffcc88;
-            font-size: 32px;
-            font-weight: bold;
+        /* Левый верхний угол */
+        .top-left {
+            top: 12px;
+            left: 12px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 5px 0 #1a1c2a;
-            touch-action: manipulation;
-            cursor: pointer;
-            transition: 0.03s linear;
+            gap: 8px;
         }
         
-        .fight-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0 #1a1c2a;
-        }
-        
-        .skill-btn {
-            background: rgba(106, 78, 158, 0.9);
-            border-color: #c88eff;
-            font-size: 28px;
-        }
-        
-        /* Левая нижняя панель (зелья, магазин, класс) */
-        .left-bottom-panel {
-            position: fixed;
-            left: 15px;
-            bottom: 15px;
+        /* Правый верхний угол */
+        .top-right {
+            top: 12px;
+            right: 12px;
             display: flex;
-            gap: 10px;
-            z-index: 100;
-            pointer-events: auto;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(8px);
-            padding: 8px 12px;
-            border-radius: 40px;
+            gap: 8px;
         }
         
-        .action-btn {
-            background: #2c2f4a;
-            border: none;
+        /* Левый нижний угол */
+        .bottom-left {
+            bottom: 12px;
+            left: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        /* Правый нижний угол */
+        .bottom-right {
+            bottom: 12px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .mini-btn {
+            background: rgba(44, 47, 74, 0.85);
+            backdrop-filter: blur(4px);
+            border: 1px solid #ffaa55;
             color: #ffcc88;
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
-            padding: 8px 14px;
-            border-radius: 30px;
+            padding: 6px 10px;
+            border-radius: 20px;
             box-shadow: 0 2px 0 #121420;
             touch-action: manipulation;
             cursor: pointer;
             font-family: monospace;
             transition: 0.03s linear;
+            text-align: center;
+            min-width: 55px;
         }
         
-        .action-btn:active {
+        .mini-btn:active {
             transform: translateY(2px);
         }
         
-        /* Шестеренка статистики */
-        .stats-btn {
-            position: fixed;
-            right: 15px;
-            top: 15px;
-            background: #2c2f4a;
-            border: none;
-            color: #ffcc88;
-            font-size: 24px;
-            padding: 10px 14px;
-            border-radius: 40px;
-            font-weight: bold;
-            box-shadow: 0 3px 0 #121420;
-            z-index: 100;
-            pointer-events: auto;
-            cursor: pointer;
-            font-family: monospace;
+        .fight-mini {
+            background: rgba(200, 80, 60, 0.85);
+            border-color: #ff8866;
+            color: white;
         }
         
-        .stats-btn:active {
-            transform: translateY(2px);
+        .skill-mini {
+            background: rgba(106, 78, 158, 0.85);
+            border-color: #c88eff;
         }
         
-        @media (max-width: 800px) {
-            .fight-btn { width: 55px; height: 55px; font-size: 26px; }
-            .skill-btn { font-size: 22px; }
-            .action-btn { font-size: 12px; padding: 6px 10px; }
-            .stats-btn { font-size: 18px; padding: 8px 12px; top: 10px; right: 10px; }
-            .left-bottom-panel { gap: 6px; padding: 6px 10px; }
-        }
-        
-        @media (orientation: portrait) {
-            .right-controls { right: 10px; gap: 10px; }
-            .fight-btn { width: 50px; height: 50px; font-size: 24px; }
+        @media (max-width: 700px) {
+            .mini-btn { font-size: 10px; padding: 4px 8px; min-width: 45px; }
+            .top-left { top: 8px; left: 8px; gap: 5px; }
+            .top-right { top: 8px; right: 8px; gap: 5px; }
+            .bottom-left { bottom: 8px; left: 8px; gap: 5px; }
+            .bottom-right { bottom: 8px; right: 8px; gap: 5px; }
         }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     
-    <!-- Правая панель боевых кнопок -->
-    <div class="right-controls">
-        <div class="fight-btn" id="attackBtn">⚔️</div>
-        <div class="fight-btn skill-btn" id="skillBtn">✨</div>
+    <!-- Левый верхний угол -->
+    <div class="corner-buttons top-left">
+        <button class="mini-btn" id="classBtn">🔄 КЛАСС</button>
+        <button class="mini-btn" id="shopBtn">🏪 МАГ</button>
     </div>
     
-    <!-- Левая нижняя панель -->
-    <div class="left-bottom-panel">
-        <button class="action-btn" id="hpBtn">❤️ HP</button>
-        <button class="action-btn" id="mpBtn">💙 MP</button>
-        <button class="action-btn" id="shopBtn">🏪 МАГ</button>
-        <button class="action-btn" id="classBtn">🔄 КЛАСС</button>
+    <!-- Правый верхний угол -->
+    <div class="corner-buttons top-right">
+        <button class="mini-btn" id="statsBtn">⚙️ СТАТ</button>
     </div>
     
-    <!-- Шестеренка статистики -->
-    <button class="stats-btn" id="statsBtn">⚙️</button>
+    <!-- Левый нижний угол -->
+    <div class="corner-buttons bottom-left">
+        <button class="mini-btn" id="hpBtn">❤️ HP</button>
+        <button class="mini-btn" id="mpBtn">💙 MP</button>
+    </div>
+    
+    <!-- Правый нижний угол -->
+    <div class="corner-buttons bottom-right">
+        <button class="mini-btn fight-mini" id="attackBtn">⚔️ АТАКА</button>
+        <button class="mini-btn skill-mini" id="skillBtn">✨ СКИЛЛ</button>
+    </div>
 
 <script>
     (function(){
@@ -310,7 +283,7 @@
                 range: 140, skillRange: 170, isMelee: false }
         };
         
-        // ========== МОБЫ (КРАСИВЫЕ) ==========
+        // ========== МОБЫ ==========
         const MOB_TYPES = [
             { name: "Гоблин", hp: 70, dmg: 16, exp: 38, color: "#6f8c5a", skin: "#8cae6a", icon: "👺", speed: 1.0, range: 55 },
             { name: "Тролль", hp: 130, dmg: 26, exp: 65, color: "#7a6a4a", skin: "#9a8a62", icon: "👹", speed: 0.75, range: 60 },
@@ -970,7 +943,7 @@
             
             if(spawnTimer <= 0) {
                 if(mobs.length < MAX_MOBS) {
-                    for(let i=0; i<2; i++) spawnMob(); // Чаще спавн
+                    for(let i=0; i<2; i++) spawnMob();
                 }
                 spawnTimer = 18;
             } else {
@@ -1026,7 +999,7 @@
         document.getElementById('classBtn').addEventListener('click', () => switchClass());
         document.getElementById('statsBtn').addEventListener('click', () => { showStats = !showStats; });
         
-        // Клавиатура (ПК)
+        // Клавиатура
         window.addEventListener('keydown', (e) => {
             if(e.key === 's') useSkill();
             if(e.key === 'q') useHp();
