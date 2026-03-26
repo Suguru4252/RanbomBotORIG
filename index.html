@@ -76,7 +76,6 @@
     
     <div class="corner-buttons top-left">
         <button class="mini-btn" id="classBtn">🔄 КЛАСС</button>
-        <button class="mini-btn" id="shopBtn">🏪 МАГ</button>
     </div>
     
     <div class="corner-buttons top-right">
@@ -93,7 +92,6 @@
         <button class="mini-btn skill-mini" id="skillBtn">✨ СКИЛЛ</button>
     </div>
     
-    <!-- Кнопки классов справа внизу -->
     <div class="corner-buttons" style="bottom: 12px; right: 90px; display: flex; gap: 6px;">
         <button class="mini-btn class-mini" id="classWarriorBtn">⚔️</button>
         <button class="mini-btn class-mini" id="classArcherBtn">🏹</button>
@@ -135,6 +133,10 @@
         }
         
         let safeZone = { x: 500, y: 420, width: 560, height: 440 };
+        
+        // NPC Торговец
+        let shopNPC = { x: safeZone.x + safeZone.width - 80, y: safeZone.y + safeZone.height - 60, radius: 28 };
+        
         let gates = [
             { x: safeZone.x + safeZone.width/2 - 50, y: safeZone.y - 30, width: 100, height: 40 },
             { x: safeZone.x + safeZone.width/2 - 50, y: safeZone.y + safeZone.height - 10, width: 100, height: 40 },
@@ -202,6 +204,7 @@
             return true;
         }
         
+        // КЛАССЫ С РАЗНОЙ ДАЛЬНОСТЬЮ
         const CLASSES = {
             warrior: { name: "Мечник", icon: "⚔️", color: "#6c8cae", armor: "#5a7a9a", 
                 hp: 320, mp: 75, dmgMin: 34, dmgMax: 60, skill: "Вихрь", 
@@ -214,14 +217,63 @@
                 range: 140, skillRange: 170, isMelee: false }
         };
         
+        // ПИКСЕЛЬНЫЕ МОДЕЛИ МОБОВ
         const MOB_TYPES = [
-            { name: "Гоблин", hp: 70, dmg: 16, exp: 38, color: "#6f8c5a", skin: "#8cae6a", icon: "👺", speed: 1.0, range: 55 },
-            { name: "Тролль", hp: 130, dmg: 26, exp: 65, color: "#7a6a4a", skin: "#9a8a62", icon: "👹", speed: 0.75, range: 60 },
-            { name: "Скелет", hp: 170, dmg: 32, exp: 95, color: "#b8b8cc", skin: "#d0d0e0", icon: "💀", speed: 1.1, range: 55 },
-            { name: "Орк", hp: 240, dmg: 45, exp: 132, color: "#8a6a4a", skin: "#aa8262", icon: "👺", speed: 0.85, range: 58 },
-            { name: "Волк", hp: 95, dmg: 24, exp: 55, color: "#8a7a6a", skin: "#c0a890", icon: "🐺", speed: 1.3, range: 50 },
-            { name: "Дракон", hp: 310, dmg: 58, exp: 210, color: "#c97a3a", skin: "#e09a5a", icon: "🐉", speed: 0.6, range: 65 }
+            { name: "Гоблин", hp: 70, dmg: 16, exp: 38, color: "#6f8c5a", skin: "#8cae6a", icon: "👺", speed: 1.0, range: 55, draw: drawGoblin },
+            { name: "Волк", hp: 95, dmg: 24, exp: 55, color: "#8a7a6a", skin: "#c0a890", icon: "🐺", speed: 1.3, range: 50, draw: drawWolf },
+            { name: "Медведь", hp: 150, dmg: 32, exp: 78, color: "#8b5a3a", skin: "#b87a4a", icon: "🐻", speed: 0.9, range: 58, draw: drawBear },
+            { name: "Скелет", hp: 170, dmg: 32, exp: 95, color: "#b8b8cc", skin: "#d0d0e0", icon: "💀", speed: 1.1, range: 55, draw: drawSkeleton },
+            { name: "Орк", hp: 240, dmg: 45, exp: 132, color: "#8a6a4a", skin: "#aa8262", icon: "👺", speed: 0.85, range: 58, draw: drawOrc },
+            { name: "Дракон", hp: 310, dmg: 58, exp: 210, color: "#c97a3a", skin: "#e09a5a", icon: "🐉", speed: 0.6, range: 65, draw: drawDragon }
         ];
+        
+        // ФУНКЦИИ ОТРИСОВКИ МОБОВ
+        function drawGoblin(x, y, color, skin) {
+            ctx.fillStyle = skin; ctx.fillRect(x-12, y-18, 24, 32);
+            ctx.fillStyle = color; ctx.fillRect(x-10, y-10, 20, 24);
+            ctx.fillStyle = "#000"; ctx.fillRect(x-6, y-12, 4, 4); ctx.fillRect(x+2, y-12, 4, 4);
+            ctx.fillStyle = "#8b5a2b"; ctx.fillRect(x-8, y+4, 16, 8);
+            ctx.fillStyle = "#fff"; ctx.fillRect(x-4, y-4, 2, 2); ctx.fillRect(x+2, y-4, 2, 2);
+        }
+        
+        function drawWolf(x, y, color, skin) {
+            ctx.fillStyle = skin; ctx.fillRect(x-14, y-16, 28, 28);
+            ctx.fillStyle = color; ctx.fillRect(x-12, y-12, 24, 22);
+            ctx.fillStyle = "#000"; ctx.fillRect(x-8, y-10, 4, 4); ctx.fillRect(x+4, y-10, 4, 4);
+            ctx.fillStyle = "#4a3a2a"; ctx.fillRect(x-4, y+2, 8, 6);
+            for(let i=0;i<2;i++) ctx.fillRect(x-10+i*16, y-4, 4, 4);
+        }
+        
+        function drawBear(x, y, color, skin) {
+            ctx.fillStyle = skin; ctx.fillRect(x-16, y-20, 32, 36);
+            ctx.fillStyle = color; ctx.fillRect(x-14, y-12, 28, 28);
+            ctx.fillStyle = "#000"; ctx.fillRect(x-8, y-14, 5, 5); ctx.fillRect(x+3, y-14, 5, 5);
+            ctx.fillStyle = "#5a3a2a"; ctx.fillRect(x-6, y+2, 12, 8);
+        }
+        
+        function drawSkeleton(x, y, color, skin) {
+            ctx.fillStyle = skin; ctx.fillRect(x-12, y-20, 24, 36);
+            ctx.fillStyle = color; ctx.fillRect(x-10, y-12, 20, 28);
+            ctx.fillStyle = "#000"; ctx.fillRect(x-6, y-14, 4, 4); ctx.fillRect(x+2, y-14, 4, 4);
+            ctx.fillStyle = "#8a8a8a"; ctx.fillRect(x-8, y+2, 16, 6);
+            for(let i=0;i<2;i++) ctx.fillRect(x-4+i*8, y-2, 3, 8);
+        }
+        
+        function drawOrc(x, y, color, skin) {
+            ctx.fillStyle = skin; ctx.fillRect(x-14, y-20, 28, 36);
+            ctx.fillStyle = color; ctx.fillRect(x-12, y-12, 24, 28);
+            ctx.fillStyle = "#000"; ctx.fillRect(x-8, y-14, 5, 5); ctx.fillRect(x+3, y-14, 5, 5);
+            ctx.fillStyle = "#b87c3a"; ctx.fillRect(x-10, y+2, 20, 10);
+            for(let i=0;i<2;i++) ctx.fillRect(x-6+i*12, y-4, 4, 8);
+        }
+        
+        function drawDragon(x, y, color, skin) {
+            ctx.fillStyle = skin; ctx.fillRect(x-16, y-22, 32, 40);
+            ctx.fillStyle = color; ctx.fillRect(x-14, y-14, 28, 32);
+            ctx.fillStyle = "#000"; ctx.fillRect(x-8, y-16, 5, 5); ctx.fillRect(x+3, y-16, 5, 5);
+            ctx.fillStyle = "#d97a3a"; ctx.fillRect(x-12, y-2, 24, 8);
+            ctx.fillStyle = "#ffaa66"; ctx.fillRect(x-4, y-22, 8, 8);
+        }
         
         let mobs = [], spawnTimer = 0;
         const MAX_MOBS = 30;
@@ -237,6 +289,7 @@
                 exp: Math.floor(t.exp * (0.85 + lvl*0.12)),
                 color: t.color, skin: t.skin, icon: t.icon,
                 speed: t.speed, attackRange: t.range,
+                drawFunc: t.draw,
                 x: 0, y: 0, attackTimer: 0
             };
         }
@@ -262,7 +315,7 @@
             attackTimer: 0, superCooldown: 0
         };
         
-        // ПРОСТОЕ ДВИЖЕНИЕ (без A*)
+        // ДВИЖЕНИЕ
         function moveTo(x, y) {
             player.targetX = x;
             player.targetY = y;
@@ -376,11 +429,14 @@
         
         function playerAttack() {
             if(!selectedMob || selectedMob.hp<=0) { selectedMob=null; return false; }
-            if(player.attackTimer>0) return false;
+            if(player.attackTimer > 0) return false;
             let c=CLASSES[player.classType], dist=Math.hypot(player.x-selectedMob.x,player.y-selectedMob.y);
-            if(dist>c.range) { addMsg(`🏃 Слишком далеко! (${Math.floor(dist)}/${c.range}px)`, true); return false; }
+            if(dist > c.range) { 
+                addMsg(`🏃 Слишком далеко! (нужно ${c.range}px, у вас ${Math.floor(dist)}px)`, true); 
+                return false; 
+            }
             let {min,max}=getDamageRange(), dmg=Math.floor(Math.random()*(max-min+1)+min);
-            selectedMob.hp-=dmg; stats.totalDamage+=dmg; player.attackTimer=30;
+            selectedMob.hp-=dmg; stats.totalDamage+=dmg; player.attackTimer = 30;
             addMsg(`⚔️ ${c.name} → ${dmg} урона ${selectedMob.name}!`);
             showDamage(selectedMob.x,selectedMob.y,dmg);
             if(selectedMob.hp<=0) killMob(selectedMob);
@@ -390,7 +446,7 @@
         function useSkill() {
             if(!selectedMob || selectedMob.hp<=0) { addMsg(`🎯 Выберите цель!`, true); return; }
             let c=CLASSES[player.classType], dist=Math.hypot(player.x-selectedMob.x,player.y-selectedMob.y);
-            if(dist>c.skillRange) { addMsg(`🏃 Слишком далеко!`, true); return; }
+            if(dist>c.skillRange) { addMsg(`🏃 Слишком далеко для способности!`, true); return; }
             let manaCost=30+Math.floor(player.level/2);
             if(player.mp<manaCost) { addMsg(`💙 Не хватает маны! (${manaCost} MP)`, true); return; }
             player.mp-=manaCost;
@@ -409,9 +465,9 @@
                     let ang=Math.atan2(dy,dx), step=Math.min(m.speed,dist-48);
                     if(step>0) { let nx=m.x+Math.cos(ang)*step, ny=m.y+Math.sin(ang)*step; if(isWalkable(nx,ny,26) && !isInSafeZone(nx,ny)) { m.x=nx; m.y=ny; } }
                     if(dist<m.attackRange+15) {
-                        if(m.attackTimer<=0) {
+                        if(m.attackTimer <= 0) {
                             let dmg=Math.max(5,m.dmg-Math.floor(player.defense/3));
-                            player.hp-=dmg; stats.totalDamageTaken+=dmg; m.attackTimer=30;
+                            player.hp-=dmg; stats.totalDamageTaken+=dmg; m.attackTimer = 30;
                             addMsg(`💀 ${m.name} нанес ${dmg} урона!`, true);
                             showDamage(m.x,m.y,dmg,true);
                             if(player.hp<=0) {
@@ -428,7 +484,7 @@
         
         function useHp() {
             if(!isInSafeZone(player.x,player.y)) { addMsg(`🏪 Зелья только в безопасной зоне!`, true); return; }
-            if(player.potionHp<=0) { addMsg(`❌ Нет зелий HP!`, true); return; }
+            if(player.potionHp<=0) { addMsg(`❌ Нет зелий HP! Купите у торговца`, true); return; }
             let heal=Math.floor(player.maxHp*0.75);
             player.hp=Math.min(player.maxHp,player.hp+heal); player.potionHp--;
             addMsg(`❤️ +${heal} HP (осталось ${player.potionHp})`);
@@ -436,12 +492,13 @@
         
         function useMp() {
             if(!isInSafeZone(player.x,player.y)) { addMsg(`🏪 Зелья только в безопасной зоне!`, true); return; }
-            if(player.potionMp<=0) { addMsg(`❌ Нет зелий MP!`, true); return; }
+            if(player.potionMp<=0) { addMsg(`❌ Нет зелий MP! Купите у торговца`, true); return; }
             let mana=Math.floor(player.maxMp*0.8);
             player.mp=Math.min(player.maxMp,player.mp+mana); player.potionMp--;
             addMsg(`💙 +${mana} MP (осталось ${player.potionMp})`);
         }
         
+        // МАГАЗИН NPC
         const SHOP = [
             { name: "Зелье HP", type: "hp", price: 60, icon: "❤️" },
             { name: "Зелье MP", type: "mp", price: 55, icon: "💙" },
@@ -449,9 +506,13 @@
             { name: "Большое MP", type: "mp_big", price: 150, icon: "💙✨" }
         ];
         
-        function toggleShop() {
-            if(isInSafeZone(player.x,player.y)) { shopOpen=!shopOpen; addMsg(shopOpen?"🏪 Магазин открыт":"🏪 Магазин закрыт"); }
-            else addMsg(`🏪 Магазин только в безопасной зоне!`, true);
+        function openShop() {
+            if(isInSafeZone(player.x,player.y)) { 
+                shopOpen = !shopOpen; 
+                addMsg(shopOpen ? "🏪 Магазин открыт" : "🏪 Магазин закрыт"); 
+            } else { 
+                addMsg(`🏪 Подойдите к торговцу в безопасной зоне!`, true); 
+            }
         }
         
         function buyItem(item) {
@@ -475,7 +536,16 @@
             player.maxMp=CLASSES[newClass].mp+player.level*11;
             player.hp=Math.max(1,Math.min(player.maxHp,Math.floor(player.maxHp*hpPercent)));
             player.mp=Math.max(1,Math.min(player.maxMp,Math.floor(player.maxMp*mpPercent)));
-            addMsg(`🔄 Класс: ${CLASSES[newClass].name} ${CLASSES[newClass].icon}`);
+            addMsg(`🔄 Класс: ${CLASSES[newClass].name} ${CLASSES[newClass].icon} | Дальность: ${CLASSES[newClass].range}px`);
+        }
+        
+        function isClickOnNPC(wx, wy) {
+            let distToNPC = Math.hypot(wx - shopNPC.x, wy - shopNPC.y);
+            if(distToNPC < shopNPC.radius + 15) {
+                openShop();
+                return true;
+            }
+            return false;
         }
         
         function selectMobAt(wx,wy) {
@@ -491,6 +561,7 @@
                 shopOpen=false; return;
             }
             if(explosionTarget?.active) { castExplosion(wx,wy); return; }
+            if(isClickOnNPC(wx,wy)) return;
             if(selectMobAt(wx,wy)) return;
             moveTo(wx,wy);
         }
@@ -526,6 +597,24 @@
             }
             let szX=safeZone.x-cameraX, szY=safeZone.y-cameraY;
             ctx.fillStyle="#88aa66aa"; ctx.fillRect(szX,szY,safeZone.width,safeZone.height);
+            
+            // NPC Торговец
+            let npcX = shopNPC.x - cameraX;
+            let npcY = shopNPC.y - cameraY;
+            ctx.fillStyle = "#c99e6f";
+            ctx.fillRect(npcX-18, npcY-25, 36, 45);
+            ctx.fillStyle = "#e8c28a";
+            ctx.fillRect(npcX-12, npcY-15, 24, 30);
+            ctx.fillStyle = "#000";
+            ctx.fillRect(npcX-8, npcY-10, 5, 5);
+            ctx.fillRect(npcX+3, npcY-10, 5, 5);
+            ctx.font = "24px monospace";
+            ctx.fillStyle = "#ffdd99";
+            ctx.fillText("🏪", npcX-12, npcY+5);
+            ctx.font = "10px monospace";
+            ctx.fillStyle = "#ffffaa";
+            ctx.fillText("Торговец", npcX-20, npcY-28);
+            
             for(let g of gates) {
                 let gx=g.x-cameraX, gy=g.y-cameraY;
                 ctx.fillStyle="#c9a87a"; ctx.fillRect(gx,gy,g.width,g.height);
@@ -537,25 +626,64 @@
         
         function drawPlayer() {
             let x=player.x-cameraX, y=player.y-cameraY, c=CLASSES[player.classType];
-            ctx.fillStyle="#e0c8a0"; ctx.fillRect(x-16,y-22,32,44);
-            ctx.fillStyle=c.color; ctx.fillRect(x-14,y-14,28,32);
-            ctx.fillStyle=c.armor; ctx.fillRect(x-12,y-8,24,24);
-            ctx.fillStyle="#fff"; ctx.fillRect(x-9,y-16,6,6); ctx.fillRect(x+3,y-16,6,6);
-            ctx.fillStyle="#000"; ctx.fillRect(x-8,y-15,4,4); ctx.fillRect(x+4,y-15,4,4);
-            ctx.font=`${Math.min(24,canvasWidth/32)}px monospace`; ctx.fillStyle="#ffffaa"; ctx.fillText(c.icon,x-12,y+8);
-            ctx.fillStyle="#a33"; ctx.fillRect(x-24,y-36,64,8);
-            ctx.fillStyle="#4f6"; ctx.fillRect(x-24,y-36,64*(player.hp/player.maxHp),8);
-            if(whirlwindActive) { ctx.fillStyle="#ffaa44aa"; ctx.beginPath(); ctx.arc(x,y,50,0,Math.PI*2); ctx.fill(); whirlwindTimer--; if(whirlwindTimer<=0) whirlwindActive=false; }
+            // Тело человека
+            ctx.fillStyle = "#e0c8a0";
+            ctx.fillRect(x-12, y-24, 24, 44);
+            // Одежда/броня
+            ctx.fillStyle = c.color;
+            ctx.fillRect(x-10, y-16, 20, 32);
+            ctx.fillStyle = c.armor;
+            ctx.fillRect(x-8, y-8, 16, 24);
+            // Голова
+            ctx.fillStyle = "#e0c8a0";
+            ctx.fillRect(x-8, y-28, 16, 16);
+            // Глаза
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(x-5, y-24, 4, 4);
+            ctx.fillRect(x+1, y-24, 4, 4);
+            ctx.fillStyle = "#000";
+            ctx.fillRect(x-4, y-23, 2, 2);
+            ctx.fillRect(x+2, y-23, 2, 2);
+            // Оружие
+            ctx.fillStyle = "#ccaaff";
+            if(c.name === "Мечник") ctx.fillRect(x+8, y-12, 8, 24);
+            else if(c.name === "Лучник") ctx.fillRect(x+8, y-14, 12, 6);
+            else if(c.name === "Маг") { ctx.fillStyle = "#ffaa66"; ctx.fillRect(x+6, y-14, 10, 10); }
+            // Иконка класса
+            ctx.font = "16px monospace";
+            ctx.fillStyle = "#ffffaa";
+            ctx.fillText(c.icon, x-6, y+2);
+            // Полоска HP
+            ctx.fillStyle = "#a33";
+            ctx.fillRect(x-20, y-36, 56, 7);
+            ctx.fillStyle = "#4f6";
+            ctx.fillRect(x-20, y-36, 56 * (player.hp/player.maxHp), 7);
+            // Эффект вихря
+            if(whirlwindActive) {
+                ctx.fillStyle = "#ffaa44aa";
+                ctx.beginPath();
+                ctx.arc(x, y, 45, 0, Math.PI*2);
+                ctx.fill();
+                whirlwindTimer--;
+                if(whirlwindTimer <= 0) whirlwindActive = false;
+            }
         }
         
         function drawMob(m) {
-            let x=m.x-cameraX, y=m.y-cameraY;
-            if(x<-100||x>canvasWidth+100) return;
-            ctx.fillStyle=m.skin; ctx.fillRect(x-16,y-22,32,44);
-            ctx.fillStyle=m.color; ctx.fillRect(x-14,y-14,28,32);
-            ctx.fillStyle="#000"; ctx.fillRect(x-9,y-16,5,5); ctx.fillRect(x+4,y-16,5,5);
-            ctx.font=`${Math.min(24,canvasWidth/32)}px monospace`; ctx.fillStyle="#fff"; ctx.fillText(m.icon,x-10,y+6);
-            let percent=m.hp/m.maxHp; ctx.fillStyle="#a33"; ctx.fillRect(x-24,y-36,64,6); ctx.fillStyle="#4f6"; ctx.fillRect(x-24,y-36,64*percent,6);
+            let x = m.x - cameraX;
+            let y = m.y - cameraY;
+            if(x < -80 || x > canvasWidth+80) return;
+            m.drawFunc(x, y, m.color, m.skin);
+            // Полоска HP
+            let percent = m.hp / m.maxHp;
+            ctx.fillStyle = "#a33";
+            ctx.fillRect(x-24, y-32, 48, 6);
+            ctx.fillStyle = "#4f6";
+            ctx.fillRect(x-24, y-32, 48 * percent, 6);
+            // Имя и уровень
+            ctx.font = "9px monospace";
+            ctx.fillStyle = "#ffffaa";
+            ctx.fillText(m.name, x-20, y-38);
         }
         
         function drawUI() {
@@ -587,8 +715,8 @@
         
         function update() {
             updateMove(); updateMobs(); updateCamera();
-            if(player.attackTimer>0) player.attackTimer--;
-            if(player.superCooldown>0) player.superCooldown--;
+            if(player.attackTimer > 0) player.attackTimer--;
+            if(player.superCooldown > 0) player.superCooldown--;
             if(spawnTimer<=0) { if(mobs.length<MAX_MOBS) for(let i=0;i<2;i++) spawnMob(); spawnTimer=18; } else spawnTimer--;
             for(let i=0;i<messages.length;i++) if(messages[i].life) messages[i].life--;
             messages=messages.filter(m=>!m.life||m.life>0);
@@ -603,7 +731,6 @@
         document.getElementById('skillBtn').onclick=()=>useSkill();
         document.getElementById('hpBtn').onclick=()=>useHp();
         document.getElementById('mpBtn').onclick=()=>useMp();
-        document.getElementById('shopBtn').onclick=()=>toggleShop();
         document.getElementById('classBtn').onclick=()=>switchClass();
         document.getElementById('statsBtn').onclick=()=>{ showStats=!showStats; };
         document.getElementById('classWarriorBtn').onclick=()=>switchClass('warrior');
@@ -615,7 +742,6 @@
             if(e.key==='2') useHp();
             if(e.key==='3') useMp();
             if(e.key==='s') useSkill();
-            if(e.key==='p') toggleShop();
             if(e.key==='c') switchClass();
         });
         
@@ -625,9 +751,11 @@
             player.hp=player.maxHp; player.mp=player.maxMp;
             for(let i=0;i<12;i++) spawnMob();
             addMsg("✨ Добро пожаловать!");
-            addMsg("🗡️ Нажмите на моба → автоатака раз в 2 сек");
+            addMsg(`🗡️ ${CLASSES.warrior.name} - ближний бой (${CLASSES.warrior.range}px)`);
+            addMsg(`🏹 ${CLASSES.archer.name} - дальний бой (${CLASSES.archer.range}px)`);
+            addMsg(`🔮 ${CLASSES.mage.name} - дальний бой (${CLASSES.mage.range}px)`);
             addMsg("🌟 1 - СУПЕРСИЛА | 2 - ЗЕЛЬЕ HP | 3 - ЗЕЛЬЕ MP");
-            addMsg("🎯 Кнопки классов справа внизу");
+            addMsg("🏪 Торговец в безопасной зоне (иконка 🏪)");
         }
         init();
         
