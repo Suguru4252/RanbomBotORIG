@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Rucoy Online 2D - Open World | NetErrror</title>
+    <title>Rucoy Online - Grid RPG | NetErrror</title>
     <style>
         * {
             margin: 0;
@@ -13,156 +13,36 @@
             -webkit-tap-highlight-color: transparent;
         }
         body {
-            background: #0a0f1e;
+            background: #0a0c12;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', 'Press Start 2P', monospace;
+            touch-action: manipulation;
             overflow: hidden;
-            touch-action: none;
         }
-        .game-container {
-            position: relative;
-            background: #1a1f2e;
-            padding: 8px;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        .game-wrapper {
+            background: #1e212a;
+            padding: 10px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
         }
         canvas {
             display: block;
             margin: 0 auto;
-            box-shadow: 0 0 0 2px #4a4e6b;
-            border-radius: 8px;
+            box-shadow: 0 0 0 3px #ffd966, 0 0 0 6px #2a2e3f;
+            border-radius: 12px;
             cursor: pointer;
         }
-        .ui-panel {
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #0f1219cc;
-            backdrop-filter: blur(8px);
-            padding: 8px 16px;
-            border-radius: 40px;
-            color: #ffd966;
-            text-shadow: 0 0 2px black;
-            font-weight: bold;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .stats {
-            display: flex;
-            gap: 20px;
-            font-size: 13px;
-        }
-        .class-badge {
-            background: #2a2e4a;
-            padding: 4px 14px;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        button {
-            background: #2c2f3f;
-            border: none;
-            color: white;
-            font-weight: bold;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-family: monospace;
-            font-size: 13px;
-            box-shadow: 0 3px 0 #0a0c14;
-            transition: 0.05s linear;
-            touch-action: manipulation;
-            cursor: pointer;
-        }
-        button:active {
-            transform: translateY(2px);
-            box-shadow: 0 1px 0 #0a0c14;
-        }
-        .joystick-area {
-            position: fixed;
-            bottom: 25px;
-            left: 25px;
-            width: 130px;
-            height: 130px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 65px;
-            backdrop-filter: blur(8px);
-            border: 2px solid #ffaa55aa;
-            touch-action: none;
-            z-index: 10;
-        }
-        .action-btns {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            display: flex;
-            gap: 12px;
-            z-index: 10;
-        }
-        .action-btn {
-            width: 65px;
-            height: 65px;
-            background: #2c2f3fdd;
-            backdrop-filter: blur(8px);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: #ffaa44;
-            border: 2px solid #ffcc77;
-            box-shadow: 0 4px 0 #1a1c2a;
-            touch-action: manipulation;
-            transition: 0.03s linear;
-        }
-        .action-btn:active {
-            transform: translateY(2px);
-        }
-        .potion-btn {
-            background: #4a2e5edd;
-            border-color: #cc88ff;
-        }
-        @media (max-width: 700px) {
-            .stats { font-size: 9px; gap: 8px; }
-            .action-btn { width: 55px; height: 55px; font-size: 24px; }
-            .joystick-area { width: 110px; height: 110px; }
+        @media (max-width: 900px) {
+            .game-wrapper { padding: 5px; }
         }
     </style>
 </head>
 <body>
-<div>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="1000" height="620"></canvas>
-        <div class="ui-panel">
-            <div class="stats">
-                <span>❤️ <span id="hpVal">150</span>/<span id="maxHp">150</span></span>
-                <span>💙 <span id="mpVal">60</span>/<span id="maxMp">60</span></span>
-                <span>⚔️ DMG: <span id="dmgVal">22-35</span></span>
-                <span>⭐ Lv.<span id="lvlVal">1</span></span>
-            </div>
-            <div class="class-badge">
-                <span id="classIcon">⚔️</span>
-                <span id="className">Рыцарь</span>
-            </div>
-            <div>
-                <button id="resetBtn">⟳ ВОСКРЕСИТЬ</button>
-                <button id="classBtn">🔄 СМЕНА КЛАССА</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="joystickBase" class="joystick-area"></div>
-    <div class="action-btns">
-        <div id="attackBtn" class="action-btn">⚔️</div>
-        <div id="skillBtn" class="action-btn">✨</div>
-        <div id="hpPotionBtn" class="action-btn potion-btn">❤️💊</div>
-        <div id="mpPotionBtn" class="action-btn potion-btn">💙💊</div>
-    </div>
+<div class="game-wrapper">
+    <canvas id="gameCanvas" width="900" height="600"></canvas>
 </div>
 
 <script>
@@ -170,130 +50,81 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // ==================== РАЗМЕР МИРА ====================
-        const WORLD_WIDTH = 5000;
-        const WORLD_HEIGHT = 5000;
+        // ========== НАСТРОЙКИ КАРТЫ (КЛЕТКИ) ==========
+        const TILE_SIZE = 48;
+        const MAP_WIDTH = 19;   // 19x13 клеток
+        const MAP_HEIGHT = 13;
         
-        // ==================== ПРЕПЯТСТВИЯ (деревья, горы, реки) ====================
-        const obstacles = [];
-        
-        function generateWorld(){
-            // ДЕРЕВЬЯ
-            for(let i=0; i<280; i++){
-                let x = 150 + Math.random() * (WORLD_WIDTH - 300);
-                let y = 150 + Math.random() * (WORLD_HEIGHT - 300);
-                // группируем в леса
-                obstacles.push({
-                    x: x, y: y, type: 'tree', radius: 28,
-                    color: '#3c9e3c', trunk: '#8b5a2b'
-                });
-            }
-            // ГОРЫ
-            for(let i=0; i<45; i++){
-                let x = 200 + Math.random() * (WORLD_WIDTH - 400);
-                let y = 200 + Math.random() * (WORLD_HEIGHT - 400);
-                obstacles.push({
-                    x: x, y: y, type: 'mountain', radius: 42,
-                    color: '#6b6e6e', peak: '#e0e0e0'
-                });
-            }
-            // РЕКИ (линейные препятствия)
-            for(let r=0; r<12; r++){
-                let startX = 300 + Math.random() * (WORLD_WIDTH - 600);
-                let startY = 200 + Math.random() * (WORLD_HEIGHT - 400);
-                let angle = Math.random() * Math.PI * 2;
-                let length = 300 + Math.random() * 400;
-                for(let seg=0; seg<15; seg++){
-                    let t = seg / 14;
-                    let x = startX + Math.cos(angle) * length * t + (Math.random() - 0.5)*40;
-                    let y = startY + Math.sin(angle) * length * t + (Math.random() - 0.5)*40;
-                    obstacles.push({
-                        x: x, y: y, type: 'river', radius: 22,
-                        color: '#3a8cbb'
-                    });
-                }
-            }
-            // дополнительные камни
-            for(let i=0; i<120; i++){
-                obstacles.push({
-                    x: 100 + Math.random() * (WORLD_WIDTH - 200),
-                    y: 100 + Math.random() * (WORLD_HEIGHT - 200),
-                    type: 'rock', radius: 14,
-                    color: '#7a6a5a'
-                });
+        // Карта (0=трава, 1=камень, 2=вода, 3=грязь)
+        const tileMap = Array(MAP_HEIGHT).fill().map(() => Array(MAP_WIDTH).fill(0));
+        // Заполнение карты разнообразием
+        for(let y=0; y<MAP_HEIGHT; y++){
+            for(let x=0; x<MAP_WIDTH; x++){
+                if((x>3 && x<7 && y>2 && y<5) || (x>12 && x<15 && y>7 && y<10)) tileMap[y][x] = 2; // вода
+                else if((x>8 && x<12 && y>9 && y<12)) tileMap[y][x] = 1; // камни
+                else if((x>2 && x<5 && y>8 && y<11)) tileMap[y][x] = 3; // грязь
+                else tileMap[y][x] = 0;
             }
         }
         
-        function checkCollision(x, y, radius=22){
-            for(let obs of obstacles){
-                let dx = x - obs.x;
-                let dy = y - obs.y;
-                let dist = Math.hypot(dx, dy);
-                if(dist < radius + obs.radius){
-                    return true;
-                }
+        // ========== ПРЕПЯТСТВИЯ (непроходимые клетки) ==========
+        const blockedTiles = [
+            // вода и камни непроходимы
+            {type: 2, walkable: false},
+            {type: 1, walkable: false}
+        ];
+        function isWalkable(tileX, tileY){
+            if(tileX < 0 || tileX >= MAP_WIDTH || tileY < 0 || tileY >= MAP_HEIGHT) return false;
+            let tileType = tileMap[tileY][tileX];
+            if(tileType === 2 || tileType === 1) return false;
+            // проверка на мобов (нельзя встать на клетку с мобом)
+            for(let mob of mobs){
+                if(mob.tileX === tileX && mob.tileY === tileY && mob.hp > 0) return false;
             }
-            return false;
+            return true;
         }
         
-        // ==================== КЛАССЫ И СКИНЫ ====================
+        // ========== КЛАССЫ ПЕРСОНАЖЕЙ ==========
         const CLASSES = {
-            knight: {
-                name: "Рыцарь",
+            warrior: {
+                name: "Воин",
                 icon: "⚔️",
-                skinColor: "#6c8c9e",
-                armorColor: "#5a7a8a",
+                color: "#6c8cae",
+                armorColor: "#5a6e8a",
                 baseHp: 180,
                 baseMp: 40,
-                baseDmgMin: 24,
-                baseDmgMax: 42,
-                armorBonus: 12,
-                skill: { name: "Смертельный удар", cost: 20, dmgMulti: 1.9, desc: "Мощный удар" }
+                baseDmgMin: 22,
+                baseDmgMax: 38,
+                skill: "Яростный удар"
             },
             archer: {
                 name: "Лучник",
                 icon: "🏹",
-                skinColor: "#7c8a6e",
-                armorColor: "#6a7a5a",
+                color: "#7c9a6e",
+                armorColor: "#6a825a",
                 baseHp: 140,
                 baseMp: 65,
-                baseDmgMin: 22,
-                baseDmgMax: 38,
-                armorBonus: 5,
-                skill: { name: "Град стрел", cost: 25, dmgMulti: 1.6, desc: "Множественные стрелы" }
+                baseDmgMin: 20,
+                baseDmgMax: 36,
+                skill: "Точный выстрел"
             },
             mage: {
                 name: "Маг",
                 icon: "🔮",
-                skinColor: "#9a7ab5",
-                armorColor: "#7a5a9e",
-                baseHp: 100,
-                baseMp: 120,
-                baseDmgMin: 28,
-                baseDmgMax: 52,
-                armorBonus: 0,
-                skill: { name: "Огненная буря", cost: 35, dmgMulti: 2.2, desc: "Мощное заклинание" }
+                color: "#b58ad6",
+                armorColor: "#8a5ab5",
+                baseHp: 110,
+                baseMp: 110,
+                baseDmgMin: 26,
+                baseDmgMax: 48,
+                skill: "Огненный шар"
             }
         };
         
-        // ==================== ЭКИПИРОВКА ====================
-        const ARMOR_SET = {
-            cloth: { name: "Ткань", def: 5, lvl: 1 },
-            leather: { name: "Кожа", def: 12, lvl: 5 },
-            iron: { name: "Сталь", def: 22, lvl: 12 },
-            dragon: { name: "Драконья", def: 40, lvl: 25 }
-        };
-        const WEAPONS = {
-            dagger: { name: "Кинжал", dmgMin: 8, dmgMax: 14, lvl: 1 },
-            sword: { name: "Меч", dmgMin: 15, dmgMax: 24, lvl: 5 },
-            claymore: { name: "Клеймор", dmgMin: 24, dmgMax: 38, lvl: 12 },
-            dragonfang: { name: "Драконий Клык", dmgMin: 42, dmgMax: 64, lvl: 25 }
-        };
-        
-        // ==================== ИГРОК ====================
+        // ========== ИГРОК ==========
         let player = {
-            x: WORLD_WIDTH/2,
-            y: WORLD_HEIGHT/2,
+            tileX: 9,
+            tileY: 6,
             hp: 180,
             maxHp: 180,
             mp: 40,
@@ -301,485 +132,477 @@
             level: 1,
             exp: 0,
             expToNext: 60,
-            armorId: "cloth",
-            weaponId: "dagger",
-            classType: "knight",
-            potionHp: 3,
-            potionMp: 3
+            classType: "warrior",
+            potionHp: 5,
+            potionMp: 5,
+            gold: 0
         };
         
-        let currentMob = null;
-        let attackCooldown = 0;
-        let skillCooldown = 0;
-        let invincibleFrames = 0;
-        let moveVector = { x: 0, y: 0 };
-        let cameraX = 0, cameraY = 0;
-        const MOVE_SPEED = 3.6;
+        // ========== МОБЫ (МНОЖЕСТВО) ==========
+        let mobs = [];
+        let spawnCooldown = 0;
+        const MAX_MOBS = 12;
         
-        let damageNumbers = [];
-        let skillEffects = [];
-        let floatingTexts = [];
+        const MOB_TYPES = [
+            { name: "Гоблин", baseHp: 45, baseDmg: 8, exp: 22, color: "#6b8c5a", icon: "👺", levelRange: [1,5] },
+            { name: "Скелет", baseHp: 70, baseDmg: 14, exp: 38, color: "#b8b8c8", icon: "💀", levelRange: [3,8] },
+            { name: "Орк", baseHp: 110, baseDmg: 20, exp: 58, color: "#7a6a4a", icon: "👹", levelRange: [6,12] },
+            { name: "Дракончик", baseHp: 160, baseDmg: 28, exp: 90, color: "#c97a3a", icon: "🐉", levelRange: [10,20] }
+        ];
         
-        // ==================== МИРЫ И МОБЫ ====================
-        const WORLDS = {
-            forest: { name: "🌲 Лес", bg: "#2b5e3b", floor: "#3c8c40", mobBase: { name: "Гоблин", baseHp: 50, baseDmg: 9, exp: 22, color: "#6b4c3b" } },
-            desert: { name: "🏜️ Пустыня", bg: "#c9ae74", floor: "#e0b87a", mobBase: { name: "Скорпион", baseHp: 80, baseDmg: 14, exp: 38, color: "#b87c4f" } },
-            castle: { name: "🏰 Замок", bg: "#4a5b6e", floor: "#6c7f8f", mobBase: { name: "Скелет-рыцарь", baseHp: 130, baseDmg: 22, exp: 65, color: "#b0b7c6" } }
-        };
-        let currentWorldKey = "forest";
-        
-        function spawnMob(){
-            const world = WORLDS[currentWorldKey];
-            const mobLevel = Math.max(1, player.level + Math.floor(Math.random() * 3) - 1);
-            const levelMulti = 1 + (mobLevel - 1) * 0.13;
-            let baseHp = Math.floor(world.mobBase.baseHp * levelMulti);
-            let baseDmg = Math.floor(world.mobBase.baseDmg * (1 + (mobLevel-1)*0.12));
-            let expReward = Math.floor(world.mobBase.exp * (0.85 + mobLevel * 0.18));
-            
-            let spawnX, spawnY;
-            do {
-                spawnX = player.x + (Math.random() - 0.5) * 380;
-                spawnY = player.y + (Math.random() - 0.5) * 280;
-            } while(checkCollision(spawnX, spawnY, 25) && Math.hypot(spawnX - player.x, spawnY - player.y) > 60);
-            
-            currentMob = {
-                name: `${world.mobBase.name} Lv.${mobLevel}`,
+        function getMobByLevel(playerLvl){
+            let available = MOB_TYPES.filter(m => playerLvl >= m.levelRange[0]);
+            if(available.length === 0) available = MOB_TYPES;
+            let selected = available[Math.floor(Math.random() * available.length)];
+            let mobLevel = Math.max(1, playerLvl + Math.floor(Math.random() * 3) - 1);
+            let hpMult = 1 + (mobLevel-1) * 0.12;
+            let dmgMult = 1 + (mobLevel-1) * 0.1;
+            return {
+                name: `${selected.name} Lv.${mobLevel}`,
                 level: mobLevel,
-                hp: baseHp,
-                maxHp: baseHp,
-                dmg: baseDmg,
-                exp: expReward,
-                x: Math.min(Math.max(spawnX, 80), WORLD_WIDTH - 80),
-                y: Math.min(Math.max(spawnY, 80), WORLD_HEIGHT - 80),
-                color: world.mobBase.color
+                hp: Math.floor(selected.baseHp * hpMult),
+                maxHp: Math.floor(selected.baseHp * hpMult),
+                dmg: Math.floor(selected.baseDmg * dmgMult),
+                exp: Math.floor(selected.exp * (0.8 + mobLevel*0.12)),
+                color: selected.color,
+                icon: selected.icon,
+                tileX: 0,
+                tileY: 0
             };
         }
         
-        function updateStats(){
-            const cls = CLASSES[player.classType];
-            const weapon = WEAPONS[player.weaponId];
-            const armor = ARMOR_SET[player.armorId];
-            
-            player.maxHp = cls.baseHp + player.level * 9;
-            player.maxMp = cls.baseMp + player.level * 5;
-            if(player.hp > player.maxHp) player.hp = player.maxHp;
-            if(player.mp > player.maxMp) player.mp = player.maxMp;
-            
-            let dmgMin = weapon.dmgMin + cls.baseDmgMin + Math.floor(player.level * 1.6);
-            let dmgMax = weapon.dmgMax + cls.baseDmgMax + Math.floor(player.level * 2.2);
-            let totalDef = armor.def + cls.armorBonus + Math.floor(player.level * 0.9);
-            
-            document.getElementById('hpVal').innerText = Math.floor(player.hp);
-            document.getElementById('maxHp').innerText = player.maxHp;
-            document.getElementById('mpVal').innerText = Math.floor(player.mp);
-            document.getElementById('maxMp').innerText = player.maxMp;
-            document.getElementById('dmgVal').innerText = `${dmgMin}-${dmgMax}`;
-            document.getElementById('lvlVal').innerText = player.level;
-            document.getElementById('classIcon').innerText = cls.icon;
-            document.getElementById('className').innerText = cls.name;
-            
-            return { dmgMin, dmgMax, totalDef, cls };
+        function spawnMob(){
+            if(mobs.length >= MAX_MOBS) return;
+            let attempts = 0;
+            while(attempts < 30){
+                let tx = Math.floor(Math.random() * MAP_WIDTH);
+                let ty = Math.floor(Math.random() * MAP_HEIGHT);
+                if(isWalkable(tx, ty) && !(tx === player.tileX && ty === player.tileY)){
+                    let newMob = getMobByLevel(player.level);
+                    newMob.tileX = tx;
+                    newMob.tileY = ty;
+                    mobs.push(newMob);
+                    return;
+                }
+                attempts++;
+            }
         }
         
-        // ==================== ЗЕЛЬЯ ====================
-        function useHpPotion(){
-            if(player.potionHp <= 0){
-                floatingTexts.push({ x: player.x, y: player.y-40, text: "❌ Нет зелий HP!", life: 40 });
+        function respawnMobs(){
+            spawnCooldown--;
+            if(spawnCooldown <= 0 && mobs.length < MAX_MOBS){
+                spawnMob();
+                spawnCooldown = 15 + Math.floor(Math.random() * 20);
+            }
+        }
+        
+        // ========== БОЕВАЯ СИСТЕМА ==========
+        let currentTargetMob = null;
+        let attackCooldown = 0;
+        let skillCooldown = 0;
+        let messageLog = [];
+        
+        function addMessage(text, isError=false){
+            messageLog.unshift({text, isError, life: 180});
+            if(messageLog.length > 8) messageLog.pop();
+        }
+        
+        function getDamageRange(){
+            const cls = CLASSES[player.classType];
+            let dmgMin = cls.baseDmgMin + Math.floor(player.level * 1.4);
+            let dmgMax = cls.baseDmgMax + Math.floor(player.level * 1.9);
+            return { dmgMin, dmgMax };
+        }
+        
+        function attackMob(mob){
+            if(attackCooldown > 0){
+                addMessage(`⏳ Атака перезаряжается! (${attackCooldown})`, true);
+                return false;
+            }
+            if(!mob || mob.hp <= 0){
+                addMessage(`👻 Нет цели для атаки!`, true);
+                return false;
+            }
+            const { dmgMin, dmgMax } = getDamageRange();
+            let damage = Math.floor(Math.random() * (dmgMax - dmgMin + 1) + dmgMin);
+            mob.hp -= damage;
+            attackCooldown = 14;
+            addMessage(`⚔️ Вы нанесли ${damage} урона ${mob.name}!`);
+            
+            if(mob.hp <= 0){
+                let gainedExp = mob.exp;
+                player.exp += gainedExp;
+                let goldDrop = Math.floor(10 + Math.random() * (player.level * 5));
+                player.gold += goldDrop;
+                addMessage(`✨ +${gainedExp} опыта, +${goldDrop} золота с ${mob.name}`);
+                
+                // Шанс выпадения зелий
+                if(Math.random() < 0.35){
+                    if(Math.random() < 0.6){
+                        player.potionHp++;
+                        addMessage(`🧪 Выпало зелье HP! +1`);
+                    } else {
+                        player.potionMp++;
+                        addMessage(`🔮 Выпало зелье MP! +1`);
+                    }
+                }
+                
+                // Уровень ап
+                while(player.exp >= player.expToNext){
+                    player.exp -= player.expToNext;
+                    player.level++;
+                    player.maxHp = CLASSES[player.classType].baseHp + player.level * 9;
+                    player.maxMp = CLASSES[player.classType].baseMp + player.level * 5;
+                    player.hp = player.maxHp;
+                    player.mp = player.maxMp;
+                    player.expToNext = 55 + player.level * 22;
+                    addMessage(`⭐ LEVEL UP! Теперь вы ${player.level} уровень! ⭐`);
+                }
+                // Удаляем моба из массива
+                let index = mobs.indexOf(mob);
+                if(index !== -1) mobs.splice(index, 1);
+                return true;
+            }
+            return true;
+        }
+        
+        function useSkillOnMob(mob){
+            if(skillCooldown > 0){
+                addMessage(`✨ Способность перезаряжается! (${skillCooldown})`, true);
                 return;
             }
-            let healAmount = Math.floor(player.maxHp * 0.65);
-            player.hp = Math.min(player.maxHp, player.hp + healAmount);
+            if(!mob || mob.hp <= 0){
+                addMessage(`👻 Нет цели!`, true);
+                return;
+            }
+            const cls = CLASSES[player.classType];
+            let manaCost = 25 + Math.floor(player.level/3);
+            if(player.mp < manaCost){
+                addMessage(`💙 Недостаточно маны! Нужно ${manaCost} MP`, true);
+                return;
+            }
+            player.mp -= manaCost;
+            const { dmgMin, dmgMax } = getDamageRange();
+            let avgDmg = (dmgMin + dmgMax)/2;
+            let skillDamage = Math.floor(avgDmg * 1.9);
+            mob.hp -= skillDamage;
+            skillCooldown = 28;
+            addMessage(`✨ ${cls.skill}! ${skillDamage} урона по ${mob.name}!`);
+            
+            if(mob.hp <= 0){
+                let gainedExp = mob.exp;
+                player.exp += gainedExp;
+                let goldDrop = Math.floor(12 + Math.random() * (player.level * 6));
+                player.gold += goldDrop;
+                addMessage(`✨ +${gainedExp} опыта, +${goldDrop} золота`);
+                if(Math.random() < 0.35){
+                    if(Math.random() < 0.6) player.potionHp++;
+                    else player.potionMp++;
+                    addMessage(`🧪 Выпало зелье!`);
+                }
+                while(player.exp >= player.expToNext){
+                    player.exp -= player.expToNext;
+                    player.level++;
+                    player.maxHp = CLASSES[player.classType].baseHp + player.level * 9;
+                    player.maxMp = CLASSES[player.classType].baseMp + player.level * 5;
+                    player.hp = player.maxHp;
+                    player.mp = player.maxMp;
+                    player.expToNext = 55 + player.level * 22;
+                    addMessage(`⭐ LEVEL UP! ${player.level} ⭐`);
+                }
+                let idx = mobs.indexOf(mob);
+                if(idx !== -1) mobs.splice(idx,1);
+            }
+        }
+        
+        function useHpPotion(){
+            if(player.potionHp <= 0){
+                addMessage(`❌ Нет зелий HP!`, true);
+                return;
+            }
+            let heal = Math.floor(player.maxHp * 0.55);
+            player.hp = Math.min(player.maxHp, player.hp + heal);
             player.potionHp--;
-            floatingTexts.push({ x: player.x, y: player.y-35, text: `❤️ +${healAmount} HP`, life: 35 });
-            updateStats();
+            addMessage(`❤️ +${heal} HP (осталось ${player.potionHp} зелий)`);
         }
         
         function useMpPotion(){
             if(player.potionMp <= 0){
-                floatingTexts.push({ x: player.x, y: player.y-40, text: "❌ Нет зелий MP!", life: 40 });
+                addMessage(`❌ Нет зелий MP!`, true);
                 return;
             }
-            let manaAmount = Math.floor(player.maxMp * 0.7);
-            player.mp = Math.min(player.maxMp, player.mp + manaAmount);
+            let mana = Math.floor(player.maxMp * 0.6);
+            player.mp = Math.min(player.maxMp, player.mp + mana);
             player.potionMp--;
-            floatingTexts.push({ x: player.x, y: player.y-35, text: `💙 +${manaAmount} MP`, life: 35 });
-            updateStats();
+            addMessage(`💙 +${mana} MP (осталось ${player.potionMp} зелий)`);
         }
         
-        function addPotionDrop(){
-            if(Math.random() < 0.25){
-                let type = Math.random() < 0.6 ? "hp" : "mp";
-                if(type === "hp") player.potionHp++;
-                else player.potionMp++;
-                floatingTexts.push({ x: currentMob?.x || player.x, y: (currentMob?.y || player.y)-30, text: `📦 Зелье ${type === "hp" ? "HP" : "MP"} +1`, life: 50 });
-            }
-        }
-        
-        function playerAttack(){
-            if(attackCooldown > 0) return;
-            if(!currentMob || currentMob.hp <= 0) spawnMob();
-            if(!currentMob) return;
-            const { dmgMin, dmgMax } = updateStats();
-            let damage = Math.floor(Math.random() * (dmgMax - dmgMin + 1) + dmgMin);
-            currentMob.hp -= damage;
-            attackCooldown = 12;
-            damageNumbers.push({ x: currentMob.x, y: currentMob.y-20, value: damage, life: 22 });
-            
-            if(currentMob.hp <= 0){
-                let gainedExp = currentMob.exp;
-                player.exp += gainedExp;
-                addPotionDrop();
-                while(player.exp >= player.expToNext){
-                    player.exp -= player.expToNext;
-                    player.level++;
-                    player.expToNext = 55 + player.level * 20;
-                    if(player.level >= 25 && player.weaponId !== "dragonfang") player.weaponId = "dragonfang";
-                    else if(player.level >= 12 && player.weaponId !== "claymore") player.weaponId = "claymore";
-                    else if(player.level >= 5 && player.weaponId !== "sword") player.weaponId = "sword";
-                    if(player.level >= 25 && player.armorId !== "dragon") player.armorId = "dragon";
-                    else if(player.level >= 12 && player.armorId !== "iron") player.armorId = "iron";
-                    else if(player.level >= 5 && player.armorId !== "leather") player.armorId = "leather";
-                    player.hp = player.maxHp;
-                    player.mp = player.maxMp;
-                    floatingTexts.push({ x: player.x, y: player.y-50, text: `⭐ LEVEL UP! ${player.level}`, life: 60 });
+        // ========== ПЕРЕМЕЩЕНИЕ ПО КЛЕТКАМ ==========
+        function tryMove(dx, dy){
+            let newX = player.tileX + dx;
+            let newY = player.tileY + dy;
+            if(isWalkable(newX, newY)){
+                player.tileX = newX;
+                player.tileY = newY;
+                // атака моба если есть на новой клетке
+                for(let mob of mobs){
+                    if(mob.tileX === player.tileX && mob.tileY === player.tileY && mob.hp > 0){
+                        attackMob(mob);
+                        break;
+                    }
                 }
-                updateStats();
-                spawnMob();
+                return true;
+            } else {
+                addMessage(`🚫 Путь прегражден!`, true);
+                return false;
             }
         }
         
-        function useSkill(){
-            if(skillCooldown > 0) return;
-            const cls = CLASSES[player.classType];
-            if(player.mp < cls.skill.cost) return;
-            if(!currentMob || currentMob.hp <= 0) spawnMob();
-            if(!currentMob) return;
-            player.mp -= cls.skill.cost;
-            const { dmgMin, dmgMax } = updateStats();
-            let avgDmg = (dmgMin + dmgMax) / 2;
-            let skillDamage = Math.floor(avgDmg * cls.skill.dmgMulti);
-            currentMob.hp -= skillDamage;
-            skillCooldown = 38;
-            skillEffects.push({ x: currentMob.x, y: currentMob.y, type: player.classType, life: 22 });
-            damageNumbers.push({ x: currentMob.x, y: currentMob.y-38, value: `✨${skillDamage}`, life: 28 });
-            if(currentMob.hp <= 0){
-                player.exp += currentMob.exp;
-                addPotionDrop();
-                while(player.exp >= player.expToNext){
-                    player.exp -= player.expToNext;
-                    player.level++;
-                    player.expToNext = 55 + player.level * 20;
-                    if(player.level >= 25 && player.weaponId !== "dragonfang") player.weaponId = "dragonfang";
-                    else if(player.level >= 12 && player.weaponId !== "claymore") player.weaponId = "claymore";
-                    else if(player.level >= 5 && player.weaponId !== "sword") player.weaponId = "sword";
-                    if(player.level >= 25 && player.armorId !== "dragon") player.armorId = "dragon";
-                    else if(player.level >= 12 && player.armorId !== "iron") player.armorId = "iron";
-                    else if(player.level >= 5 && player.armorId !== "leather") player.armorId = "leather";
-                    floatingTexts.push({ x: player.x, y: player.y-50, text: `⭐ LEVEL UP! ${player.level}`, life: 60 });
+        // ========== АТАКА ПО КАСАНИЮ/КЛИКУ НА МОБА ==========
+        function handleTileClick(tileX, tileY){
+            for(let mob of mobs){
+                if(mob.tileX === tileX && mob.tileY === tileY && mob.hp > 0){
+                    if(currentTargetMob === mob){
+                        attackMob(mob);
+                    } else {
+                        currentTargetMob = mob;
+                        addMessage(`🎯 Цель: ${mob.name} Lv.${mob.level}`);
+                    }
+                    return;
                 }
-                updateStats();
-                spawnMob();
             }
-            updateStats();
-        }
-        
-        function damagePlayer(amount){
-            if(invincibleFrames > 0) return;
-            const { totalDef } = updateStats();
-            let reduced = Math.max(2, amount - Math.floor(totalDef / 2.8));
-            player.hp -= reduced;
-            invincibleFrames = 22;
-            damageNumbers.push({ x: player.x, y: player.y-15, value: `-${reduced}`, life: 18, isPlayer: true });
-            if(player.hp <= 0){
-                player.hp = player.maxHp;
-                player.mp = player.maxMp;
-                player.exp = Math.floor(player.exp * 0.85);
-                player.x = WORLD_WIDTH/2;
-                player.y = WORLD_HEIGHT/2;
-                spawnMob();
-                updateStats();
-                floatingTexts.push({ x: player.x, y: player.y-40, text: "💀 ВОСКРЕШЕНИЕ 💀", life: 70 });
+            // если кликнули по пустой клетке - идем туда
+            let dx = tileX - player.tileX;
+            let dy = tileY - player.tileY;
+            if(Math.abs(dx) + Math.abs(dy) === 1){
+                tryMove(dx, dy);
+            } else if(Math.abs(dx) + Math.abs(dy) > 1){
+                addMessage(`📌 Можно ходить только на соседние клетки`, true);
             }
         }
         
+        // ========== СМЕНА КЛАССА ==========
         function switchClass(){
             const classes = Object.keys(CLASSES);
             let idx = classes.indexOf(player.classType);
             let next = (idx + 1) % classes.length;
             player.classType = classes[next];
-            updateStats();
-            spawnMob();
+            player.maxHp = CLASSES[player.classType].baseHp + player.level * 9;
+            player.maxMp = CLASSES[player.classType].baseMp + player.level * 5;
+            player.hp = Math.min(player.hp, player.maxHp);
+            player.mp = Math.min(player.mp, player.maxMp);
+            addMessage(`🔄 Класс сменен на ${CLASSES[player.classType].name}`);
         }
         
-        // ==================== ДВИЖЕНИЕ И КАМЕРА ====================
-        function updateMovement(){
-            let newX = player.x + moveVector.x * MOVE_SPEED;
-            let newY = player.y + moveVector.y * MOVE_SPEED;
-            if(!checkCollision(newX, player.y, 22)) player.x = newX;
-            if(!checkCollision(player.x, newY, 22)) player.y = newY;
-            player.x = Math.min(Math.max(player.x, 45), WORLD_WIDTH - 45);
-            player.y = Math.min(Math.max(player.y, 45), WORLD_HEIGHT - 45);
+        // ========== ОТРИСОВКА (ПИКСЕЛЬНАЯ ГРАФИКА) ==========
+        function drawTile(x, y, type){
+            let screenX = x * TILE_SIZE;
+            let screenY = y * TILE_SIZE;
+            if(type === 0){ // трава
+                ctx.fillStyle = "#4a7a3a";
+                ctx.fillRect(screenX, screenY, TILE_SIZE-1, TILE_SIZE-1);
+                ctx.fillStyle = "#5c9c4a";
+                for(let i=0;i<4;i++) ctx.fillRect(screenX+5+Math.random()*30, screenY+10+Math.random()*30, 2, 2);
+            } else if(type === 1){ // камень
+                ctx.fillStyle = "#6a6e7a";
+                ctx.fillRect(screenX, screenY, TILE_SIZE-1, TILE_SIZE-1);
+                ctx.fillStyle = "#4a4e5a";
+                for(let i=0;i<6;i++) ctx.fillRect(screenX+8+Math.random()*30, screenY+8+Math.random()*30, 4, 4);
+            } else if(type === 2){ // вода
+                ctx.fillStyle = "#3a7a9e";
+                ctx.fillRect(screenX, screenY, TILE_SIZE-1, TILE_SIZE-1);
+                ctx.fillStyle = "#5aaece";
+                for(let i=0;i<8;i++) ctx.fillRect(screenX+5+Math.random()*35, screenY+5+Math.random()*35, 3, 3);
+            } else if(type === 3){ // грязь
+                ctx.fillStyle = "#8a6a4a";
+                ctx.fillRect(screenX, screenY, TILE_SIZE-1, TILE_SIZE-1);
+                ctx.fillStyle = "#6a4a2a";
+                ctx.fillRect(screenX+12, screenY+12, 8, 8);
+            }
+            ctx.strokeStyle = "#2a2e2a";
+            ctx.strokeRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+        }
+        
+        function drawPlayer(){
+            let x = player.tileX * TILE_SIZE;
+            let y = player.tileY * TILE_SIZE;
+            const cls = CLASSES[player.classType];
+            ctx.fillStyle = cls.color;
+            ctx.fillRect(x+8, y+8, 32, 34);
+            ctx.fillStyle = cls.armorColor;
+            ctx.fillRect(x+12, y+18, 24, 20);
+            ctx.fillStyle = "#f5c88a";
+            ctx.fillRect(x+18, y+14, 6, 6);
+            ctx.fillRect(x+26, y+14, 6, 6);
+            ctx.fillStyle = "#221c14";
+            ctx.fillRect(x+19, y+15, 4, 4);
+            ctx.fillRect(x+27, y+15, 4, 4);
+            ctx.fillStyle = "#c9a56e";
+            ctx.fillRect(x+20, y+24, 12, 5);
+            ctx.font = "bold 22px monospace";
+            ctx.fillStyle = "#fff2c0";
+            ctx.fillText(cls.icon, x+10, y+20);
+        }
+        
+        function drawMobOnTile(mob){
+            let x = mob.tileX * TILE_SIZE;
+            let y = mob.tileY * TILE_SIZE;
+            ctx.fillStyle = mob.color;
+            ctx.fillRect(x+6, y+8, 36, 34);
+            ctx.fillStyle = "#aa6666";
+            ctx.fillRect(x+16, y+16, 6, 6);
+            ctx.fillRect(x+26, y+16, 6, 6);
+            ctx.font = "24px monospace";
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(mob.icon, x+14, y+34);
+            // полоска HP
+            let hpPercent = mob.hp / mob.maxHp;
+            ctx.fillStyle = "#aa3333";
+            ctx.fillRect(x+8, y+4, 40, 6);
+            ctx.fillStyle = "#44ff66";
+            ctx.fillRect(x+8, y+4, 40 * hpPercent, 6);
+            ctx.font = "bold 9px monospace";
+            ctx.fillStyle = "#ffffaa";
+            ctx.fillText(`${mob.hp}/${mob.maxHp}`, x+12, y+12);
+        }
+        
+        function drawUI(){
+            const cls = CLASSES[player.classType];
+            // Левая верхняя панель (HP/MP)
+            ctx.fillStyle = "#000000aa";
+            ctx.fillRect(12, 12, 220, 70);
+            ctx.fillStyle = "#aa4444";
+            ctx.fillRect(18, 20, 200, 18);
+            ctx.fillStyle = "#ff6644";
+            ctx.fillRect(18, 20, 200 * (player.hp/player.maxHp), 18);
+            ctx.fillStyle = "#4488ff";
+            ctx.fillRect(18, 42, 200 * (player.mp/player.maxMp), 16);
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "bold 12px monospace";
+            ctx.fillText(`❤️ ${Math.floor(player.hp)}/${player.maxHp}`, 22, 36);
+            ctx.fillText(`💙 ${Math.floor(player.mp)}/${player.maxMp}`, 22, 56);
+            ctx.fillStyle = "#ffdd99";
+            ctx.fillText(`${cls.name} ${cls.icon}  Lv.${player.level}`, 22, 78);
             
-            let targetCamX = player.x - canvas.width/2;
-            let targetCamY = player.y - canvas.height/2;
-            targetCamX = Math.min(Math.max(targetCamX, 0), WORLD_WIDTH - canvas.width);
-            targetCamY = Math.min(Math.max(targetCamY, 0), WORLD_HEIGHT - canvas.height);
-            cameraX += (targetCamX - cameraX) * 0.12;
-            cameraY += (targetCamY - cameraY) * 0.12;
+            // Правая верхняя панель (статы)
+            ctx.fillStyle = "#000000aa";
+            ctx.fillRect(canvas.width-180, 12, 168, 70);
+            ctx.fillStyle = "#ffcc88";
+            ctx.font = "11px monospace";
+            ctx.fillText(`⚔️ Урон: ${Math.floor(cls.baseDmgMin + player.level*1.4)}-${Math.floor(cls.baseDmgMax + player.level*1.9)}`, canvas.width-172, 28);
+            ctx.fillText(`⭐ EXP: ${player.exp}/${player.expToNext}`, canvas.width-172, 44);
+            ctx.fillText(`💰 ${player.gold} золота`, canvas.width-172, 60);
+            ctx.fillText(`✨ ${cls.skill}`, canvas.width-172, 76);
+            
+            // Левая нижняя панель (зелья)
+            ctx.fillStyle = "#000000aa";
+            ctx.fillRect(12, canvas.height-70, 160, 58);
+            ctx.fillStyle = "#ffaa88";
+            ctx.font = "bold 14px monospace";
+            ctx.fillText(`🧪 HP: ${player.potionHp}`, 20, canvas.height-44);
+            ctx.fillText(`🔮 MP: ${player.potionMp}`, 20, canvas.height-24);
+            
+            // Лог сообщений справа снизу
+            ctx.fillStyle = "#000000aa";
+            ctx.fillRect(canvas.width-220, canvas.height-130, 208, 120);
+            ctx.fillStyle = "#ddcc99";
+            ctx.font = "9px monospace";
+            for(let i=0; i<Math.min(7, messageLog.length); i++){
+                let msg = messageLog[i];
+                ctx.fillStyle = msg.isError ? "#ff8866" : "#eeddbb";
+                ctx.fillText(msg.text.substring(0, 28), canvas.width-212, canvas.height-115 + i*14);
+            }
         }
         
+        function drawTarget(){
+            if(currentTargetMob && currentTargetMob.hp > 0){
+                let x = currentTargetMob.tileX * TILE_SIZE;
+                let y = currentTargetMob.tileY * TILE_SIZE;
+                ctx.strokeStyle = "#ffaa44";
+                ctx.lineWidth = 3;
+                ctx.strokeRect(x+2, y+2, 44, 44);
+            }
+        }
+        
+        // ========== ОБНОВЛЕНИЕ ==========
         function updateGame(){
             if(attackCooldown > 0) attackCooldown--;
             if(skillCooldown > 0) skillCooldown--;
-            if(invincibleFrames > 0) invincibleFrames--;
-            updateMovement();
-            
-            if(currentMob && currentMob.hp > 0){
-                let dx = player.x - currentMob.x;
-                let dy = player.y - currentMob.y;
-                let len = Math.hypot(dx,dy);
-                if(len > 10){
-                    let step = Math.min(1.3, len/22);
-                    currentMob.x += (dx/len)*step;
-                    currentMob.y += (dy/len)*step;
-                }
-                if(len < 55 && attackCooldown <= 3){
-                    damagePlayer(currentMob.dmg);
-                }
-            } else if(!currentMob || currentMob.hp <= 0){
-                spawnMob();
+            respawnMobs();
+            for(let msg of messageLog){
+                if(msg.life) msg.life--;
             }
-            
-            for(let i=0;i<damageNumbers.length;i++){
-                damageNumbers[i].life--;
-                if(damageNumbers[i].life<=0) damageNumbers.splice(i,1), i--;
-            }
-            for(let i=0;i<skillEffects.length;i++){
-                skillEffects[i].life--;
-                if(skillEffects[i].life<=0) skillEffects.splice(i,1), i--;
-            }
-            for(let i=0;i<floatingTexts.length;i++){
-                floatingTexts[i].life--;
-                if(floatingTexts[i].life<=0) floatingTexts.splice(i,1), i--;
-            }
+            messageLog = messageLog.filter(m => !m.life || m.life > 0);
         }
         
-        // ==================== ОТРИСОВКА СКИНОВ И ОКРУЖЕНИЯ ====================
-        function drawObstacle(obs, camX, camY){
-            let sx = obs.x - camX;
-            let sy = obs.y - camY;
-            if(sx < -80 || sx > canvas.width+80 || sy < -80 || sy > canvas.height+80) return;
-            
-            if(obs.type === 'tree'){
-                ctx.fillStyle = obs.color;
-                ctx.beginPath();
-                ctx.rect(sx-12, sy-30, 24, 45);
-                ctx.fill();
-                ctx.fillStyle = obs.trunk;
-                ctx.fillRect(sx-6, sy-10, 12, 28);
-                ctx.fillStyle = "#5aac3a";
-                ctx.beginPath();
-                ctx.ellipse(sx, sy-35, 18, 22, 0, 0, Math.PI*2);
-                ctx.fill();
-            } else if(obs.type === 'mountain'){
-                ctx.fillStyle = obs.color;
-                ctx.beginPath();
-                ctx.moveTo(sx, sy-48);
-                ctx.lineTo(sx-38, sy+10);
-                ctx.lineTo(sx+38, sy+10);
-                ctx.fill();
-                ctx.fillStyle = "#e0e0e0";
-                ctx.beginPath();
-                ctx.moveTo(sx-12, sy-20);
-                ctx.lineTo(sx, sy-42);
-                ctx.lineTo(sx+12, sy-20);
-                ctx.fill();
-            } else if(obs.type === 'river'){
-                ctx.fillStyle = obs.color;
-                ctx.beginPath();
-                ctx.ellipse(sx, sy, 28, 18, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#5ac8ff";
-                ctx.beginPath();
-                ctx.ellipse(sx-5, sy-2, 10, 8, 0, 0, Math.PI*2);
-                ctx.fill();
-            } else if(obs.type === 'rock'){
-                ctx.fillStyle = obs.color;
-                ctx.beginPath();
-                ctx.ellipse(sx, sy, 14, 12, 0, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#5a4a3a";
-                ctx.fillRect(sx-4, sy-4, 8, 8);
+        // ========== УПРАВЛЕНИЕ ==========
+        function getTileFromClick(clientX, clientY){
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let canvasX = (clientX - rect.left) * scaleX;
+            let canvasY = (clientY - rect.top) * scaleY;
+            let tileX = Math.floor(canvasX / TILE_SIZE);
+            let tileY = Math.floor(canvasY / TILE_SIZE);
+            if(tileX >= 0 && tileX < MAP_WIDTH && tileY >= 0 && tileY < MAP_HEIGHT){
+                return {tileX, tileY};
             }
+            return null;
         }
         
-        function drawPlayer(screenX, screenY){
-            const cls = CLASSES[player.classType];
-            ctx.save();
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = cls.skinColor;
-            ctx.fillRect(screenX-18, screenY-24, 36, 42);
-            ctx.fillStyle = cls.armorColor;
-            ctx.fillRect(screenX-16, screenY-18, 32, 28);
-            ctx.fillStyle = "#f5d742";
-            ctx.fillRect(screenX-10, screenY-16, 6, 6);
-            ctx.fillRect(screenX+4, screenY-16, 6, 6);
-            ctx.fillStyle = "#221c0f";
-            ctx.fillRect(screenX-9, screenY-15, 4, 4);
-            ctx.fillRect(screenX+5, screenY-15, 4, 4);
-            ctx.fillStyle = "#c99e6f";
-            ctx.fillRect(screenX-6, screenY-8, 12, 5);
-            if(cls.icon === "🏹") ctx.fillStyle = "#c4b27a";
-            else if(cls.icon === "🔮") ctx.fillStyle = "#b87cff";
-            else ctx.fillStyle = "#b0b8c0";
-            ctx.fillRect(screenX+14, screenY-14, 8, 20);
-            ctx.restore();
-        }
+        canvas.addEventListener('click', (e) => {
+            let tile = getTileFromClick(e.clientX, e.clientY);
+            if(tile) handleTileClick(tile.tileX, tile.tileY);
+        });
         
-        function drawMob(screenX, screenY, mob){
-            ctx.fillStyle = mob.color;
-            ctx.fillRect(screenX-18, screenY-24, 36, 40);
-            ctx.fillStyle = "#aa5555";
-            ctx.fillRect(screenX-10, screenY-16, 6, 6);
-            ctx.fillRect(screenX+4, screenY-16, 6, 6);
-            ctx.fillStyle = "#aa4444";
-            ctx.fillRect(screenX-8, screenY-8, 16, 4);
-            ctx.fillStyle = "#ffcc88";
-            ctx.font = "bold 10px monospace";
-            ctx.fillText(`Lv.${mob.level}`, screenX-18, screenY-32);
-        }
-        
-        function render(){
-            const world = WORLDS[currentWorldKey];
-            ctx.fillStyle = world.bg;
-            ctx.fillRect(0,0,canvas.width,canvas.height);
-            for(let i=0; i<200; i++){
-                ctx.fillStyle = world.floor;
-                let xOff = (i*53 + cameraX*0.2) % canvas.width;
-                let yOff = (i*31 + cameraY*0.2) % canvas.height;
-                ctx.fillRect(xOff, yOff, 48, 48);
-            }
-            
-            for(let obs of obstacles) drawObstacle(obs, cameraX, cameraY);
-            
-            if(currentMob && currentMob.hp > 0){
-                let mobX = currentMob.x - cameraX;
-                let mobY = currentMob.y - cameraY;
-                drawMob(mobX, mobY, currentMob);
-                ctx.fillStyle = "#aa3333";
-                ctx.fillRect(mobX-28, mobY-42, 56, 7);
-                ctx.fillStyle = "#44ff66";
-                ctx.fillRect(mobX-28, mobY-42, 56*(currentMob.hp/currentMob.maxHp), 7);
-                ctx.fillStyle = "#ffdd99";
-                ctx.font = "bold 11px monospace";
-                ctx.fillText(currentMob.name, mobX-35, mobY-46);
-            }
-            
-            let pX = player.x - cameraX;
-            let pY = player.y - cameraY;
-            drawPlayer(pX, pY);
-            ctx.fillStyle = "#cc5533";
-            ctx.fillRect(pX-32, pY-50, 64, 8);
-            ctx.fillStyle = "#ff6644";
-            ctx.fillRect(pX-32, pY-50, 64*(player.hp/player.maxHp), 8);
-            ctx.fillStyle = "#4488ff";
-            ctx.fillRect(pX-32, pY-58, 64*(player.mp/player.maxMp), 5);
-            
-            ctx.fillStyle = "#ffffaa";
-            ctx.font = "bold 12px monospace";
-            ctx.fillText(`🧪 HP:${player.potionHp} MP:${player.potionMp}`, pX-25, pY-70);
-            
-            for(let fx of skillEffects){
-                let sx = fx.x - cameraX;
-                let sy = fx.y - cameraY;
-                ctx.font = "bold 32px monospace";
-                if(fx.type === "mage") ctx.fillStyle = "#ff8844";
-                else if(fx.type === "archer") ctx.fillStyle = "#aaff88";
-                else ctx.fillStyle = "#ffaa66";
-                ctx.fillText(fx.type === "mage" ? "🔥" : (fx.type === "archer" ? "🏹✨" : "⚔️🌀"), sx-22, sy-40);
-            }
-            
-            for(let dmg of damageNumbers){
-                let sx = dmg.x - cameraX;
-                let sy = dmg.y - cameraY;
-                ctx.font = `bold ${dmg.isPlayer ? 14 : 18}px monospace`;
-                ctx.fillStyle = dmg.isPlayer ? "#ffaa66" : "#ff6644";
-                ctx.fillText(dmg.value, sx-15, sy - dmg.life/2);
-            }
-            
-            for(let txt of floatingTexts){
-                let sx = txt.x - cameraX;
-                let sy = txt.y - cameraY;
-                ctx.font = "bold 14px monospace";
-                ctx.fillStyle = "#ffeebb";
-                ctx.fillText(txt.text, sx-40, sy - txt.life/3);
-            }
-            
-            ctx.font = "bold 13px monospace";
-            ctx.fillStyle = "#fff2c0";
-            ctx.fillText(`EXP: ${player.exp}/${player.expToNext}  |  🌍 ${world.name}`, 12, 30);
-            ctx.fillStyle = "#ddcc88";
-            ctx.fillText(`✨ ${CLASSES[player.classType].skill.name} (${CLASSES[player.classType].skill.cost} MP)`, 12, 55);
-        }
-        
-        // ==================== УПРАВЛЕНИЕ ====================
-        let joystickActive = false;
-        const joystickBase = document.getElementById('joystickBase');
-        function handleTouchStart(e){ e.preventDefault(); joystickActive = true; }
-        function handleTouchMove(e){
-            if(!joystickActive) return;
+        canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const rect = joystickBase.getBoundingClientRect();
-            const centerX = rect.left + rect.width/2;
-            const centerY = rect.top + rect.height/2;
+            let rect = canvas.getBoundingClientRect();
             let touch = e.touches[0];
-            let dx = touch.clientX - centerX;
-            let dy = touch.clientY - centerY;
-            let len = Math.hypot(dx,dy);
-            let maxRad = rect.width/2;
-            if(len > maxRad) { dx = dx/len * maxRad; dy = dy/len * maxRad; }
-            moveVector.x = dx / (maxRad/1.5);
-            moveVector.y = dy / (maxRad/1.5);
-            if(Math.abs(moveVector.x) < 0.2) moveVector.x = 0;
-            if(Math.abs(moveVector.y) < 0.2) moveVector.y = 0;
-        }
-        function handleTouchEnd(e){ joystickActive = false; moveVector.x = 0; moveVector.y = 0; }
-        joystickBase.addEventListener('touchstart', handleTouchStart);
-        joystickBase.addEventListener('touchmove', handleTouchMove);
-        joystickBase.addEventListener('touchend', handleTouchEnd);
+            let tile = getTileFromClick(touch.clientX, touch.clientY);
+            if(tile) handleTileClick(tile.tileX, tile.tileY);
+        });
         
-        document.getElementById('attackBtn').addEventListener('touchstart', (e) => { e.preventDefault(); playerAttack(); });
-        document.getElementById('skillBtn').addEventListener('touchstart', (e) => { e.preventDefault(); useSkill(); });
-        document.getElementById('hpPotionBtn').addEventListener('touchstart', (e) => { e.preventDefault(); useHpPotion(); });
-        document.getElementById('mpPotionBtn').addEventListener('touchstart', (e) => { e.preventDefault(); useMpPotion(); });
-        document.getElementById('resetBtn').addEventListener('click', () => { player.hp = player.maxHp; player.mp = player.maxMp; spawnMob(); });
-        document.getElementById('classBtn').addEventListener('click', () => switchClass());
-        
+        // Клавиатура (для ПК)
         window.addEventListener('keydown', (e) => {
-            if(e.key === 'ArrowUp') moveVector.y = -1;
-            if(e.key === 'ArrowDown') moveVector.y = 1;
-            if(e.key === 'ArrowLeft') moveVector.x = -1;
-            if(e.key === 'ArrowRight') moveVector.x = 1;
-            if(e.key === ' ') playerAttack();
-            if(e.key === 'e') useSkill();
+            if(e.key === 'ArrowUp') tryMove(0, -1);
+            if(e.key === 'ArrowDown') tryMove(0, 1);
+            if(e.key === 'ArrowLeft') tryMove(-1, 0);
+            if(e.key === 'ArrowRight') tryMove(1, 0);
+            if(e.key === ' ' || e.key === 'a') { if(currentTargetMob) attackMob(currentTargetMob); }
+            if(e.key === 's') { if(currentTargetMob) useSkillOnMob(currentTargetMob); }
             if(e.key === 'q') useHpPotion();
             if(e.key === 'w') useMpPotion();
             if(e.key === 'c') switchClass();
-        });
-        window.addEventListener('keyup', (e) => {
-            if(e.key === 'ArrowUp' && moveVector.y === -1) moveVector.y = 0;
-            if(e.key === 'ArrowDown' && moveVector.y === 1) moveVector.y = 0;
-            if(e.key === 'ArrowLeft' && moveVector.x === -1) moveVector.x = 0;
-            if(e.key === 'ArrowRight' && moveVector.x === 1) moveVector.x = 0;
+            if(e.key === 'r') { player.hp = player.maxHp; player.mp = player.maxMp; addMessage("💚 Полное восстановление"); }
         });
         
-        generateWorld();
-        player.x = WORLD_WIDTH/2;
-        player.y = WORLD_HEIGHT/2;
-        player.potionHp = 5;
-        player.potionMp = 5;
-        updateStats();
-        spawnMob();
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        function init(){
+            player.tileX = 9;
+            player.tileY = 6;
+            player.hp = player.maxHp;
+            player.mp = player.maxMp;
+            mobs = [];
+            for(let i=0; i<6; i++) spawnMob();
+            addMessage("✨ Добро пожаловать! Нажмите на моба для атаки, на клетку - для ходьбы");
+        }
+        
+        init();
+        
+        function render(){
+            // Отрисовка карты
+            for(let y=0; y<MAP_HEIGHT; y++){
+                for(let x=0; x<MAP_WIDTH; x++){
+                    drawTile(x, y, tileMap[y][x]);
+                }
+            }
+            // Мобы
+            for(let mob of mobs) drawMobOnTile(mob);
+            drawPlayer();
+            drawTarget();
+            drawUI();
+        }
         
         function gameLoop(){
             updateGame();
