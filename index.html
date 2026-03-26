@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Rucoy Online 2D - NetErrror Build</title>
+    <title>Rucoy Online 2D - Classes & Camera | NetErrror</title>
     <style>
         * {
             margin: 0;
@@ -19,9 +19,11 @@
             align-items: center;
             min-height: 100vh;
             font-family: 'Courier New', monospace;
-            touch-action: none; /* Для джойстика */
+            touch-action: none;
+            overflow: hidden;
         }
-        .game-container {
+        .game-wrapper {
+            position: relative;
             background: #1a1f2e;
             padding: 10px;
             border-radius: 24px;
@@ -46,25 +48,31 @@
             color: #ffd966;
             text-shadow: 0 0 2px black;
             font-weight: bold;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         .stats {
             display: flex;
-            gap: 20px;
-            font-size: 14px;
+            gap: 15px;
+            font-size: 12px;
         }
-        .controls {
+        .class-indicator {
+            background: #2a2e4a;
+            padding: 4px 12px;
+            border-radius: 20px;
             display: flex;
-            gap: 12px;
+            align-items: center;
+            gap: 8px;
         }
         button {
             background: #2c2f3f;
             border: none;
             color: white;
             font-weight: bold;
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 40px;
             font-family: monospace;
-            font-size: 18px;
+            font-size: 14px;
             box-shadow: 0 3px 0 #0a0c14;
             transition: 0.05s linear;
             touch-action: manipulation;
@@ -77,10 +85,12 @@
             position: fixed;
             bottom: 30px;
             left: 30px;
-            width: 120px;
-            height: 120px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 60px;
+            width: 130px;
+            height: 130px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 65px;
+            backdrop-filter: blur(8px);
+            border: 2px solid #ffaa55aa;
             touch-action: none;
             z-index: 10;
         }
@@ -93,8 +103,8 @@
             z-index: 10;
         }
         .action-btn {
-            width: 65px;
-            height: 65px;
+            width: 70px;
+            height: 70px;
             background: #2c2f3fdd;
             backdrop-filter: blur(8px);
             border-radius: 50%;
@@ -107,189 +117,277 @@
             border: 2px solid #ffcc77;
             box-shadow: 0 5px 0 #1a1c2a;
             touch-action: manipulation;
+            transition: 0.03s linear;
         }
         .action-btn:active {
             transform: translateY(2px);
         }
+        .skill-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 120px;
+            background: #6a4e9edd;
+            border-color: #c88eff;
+        }
         @media (max-width: 700px) {
-            .stats { font-size: 10px; gap: 8px; }
-            button { padding: 4px 12px; font-size: 14px; }
+            .stats { font-size: 9px; gap: 6px; }
+            .action-btn { width: 55px; height: 55px; font-size: 22px; }
+            .skill-btn { right: 100px; }
         }
     </style>
 </head>
 <body>
 <div>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="800" height="480"></canvas>
+    <div class="game-wrapper">
+        <canvas id="gameCanvas" width="900" height="560"></canvas>
         <div class="ui-panel">
             <div class="stats">
-                <span>❤️ HP: <span id="hpVal">100</span>/<span id="maxHp">100</span></span>
-                <span>⚔️ DMG: <span id="dmgVal">15-25</span></span>
-                <span>🛡️ ARMOR: <span id="armorVal">10</span></span>
-                <span>🌍 WORLD: <span id="worldName">Forest</span></span>
+                <span>❤️ <span id="hpVal">120</span>/<span id="maxHp">120</span></span>
+                <span>⚔️ DMG: <span id="dmgVal">18-28</span></span>
+                <span>🛡️ ARMOR: <span id="armorVal">12</span></span>
+                <span>⭐ LVL: <span id="lvlVal">1</span></span>
             </div>
-            <div class="controls">
+            <div class="class-indicator">
+                <span id="classIcon">⚔️</span>
+                <span id="className">Melee</span>
+                <span>🔮 MP: <span id="mpVal">50</span>/<span id="maxMp">50</span></span>
+            </div>
+            <div>
                 <button id="resetBtn">⟳ RESPAWN</button>
+                <button id="classBtn">🔄 SWITCH CLASS</button>
             </div>
         </div>
     </div>
 
-    <!-- Мобильные элементы управления -->
     <div id="joystickBase" class="joystick-area"></div>
     <div class="action-btns">
         <div id="attackBtn" class="action-btn">⚔️</div>
+        <div id="skillBtn" class="action-btn skill-btn">✨</div>
         <div id="healBtn" class="action-btn">💊</div>
     </div>
 </div>
 
 <script>
     (function(){
-        // ---------- ПИКСЕЛЬНАЯ ГРАФИКА (стилизация спрайтов) ----------
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // ----- ИГРОВЫЕ МИРЫ (полная структура) -----
+        // ==================== МИРЫ ====================
         const WORLDS = {
-            forest: { name: "🌲 Forest", bg: "#2b5e3b", floor: "#3c8c40", mob: { name: "Goblin", hp: 45, dmg: 8, exp: 20, color: "#6b4c3b" } },
-            desert: { name: "🏜️ Desert", bg: "#c9ae74", floor: "#e0b87a", mob: { name: "Scorpion", hp: 70, dmg: 12, exp: 35, color: "#b87c4f" } },
-            castle: { name: "🏰 Castle", bg: "#4a5b6e", floor: "#6c7f8f", mob: { name: "Skeleton Knight", hp: 120, dmg: 18, exp: 60, color: "#b0b7c6" } }
+            forest: { name: "🌲 Forest", bg: "#2b5e3b", floor: "#3c8c40", mobBase: { name: "Goblin", baseHp: 45, baseDmg: 8, exp: 20, color: "#6b4c3b" } },
+            desert: { name: "🏜️ Desert", bg: "#c9ae74", floor: "#e0b87a", mobBase: { name: "Scorpion", baseHp: 70, baseDmg: 12, exp: 35, color: "#b87c4f" } },
+            castle: { name: "🏰 Castle", bg: "#4a5b6e", floor: "#6c7f8f", mobBase: { name: "Skeleton", baseHp: 110, baseDmg: 18, exp: 55, color: "#b0b7c6" } }
         };
         
-        // ----- ВСЯ БРОНЯ И ОРУЖИЕ (прогрессия) -----
+        // ==================== КЛАССЫ ====================
+        const CLASSES = {
+            melee: {
+                name: "Melee ⚔️",
+                icon: "⚔️",
+                baseHp: 140,
+                baseMp: 30,
+                baseDmgMin: 20,
+                baseDmgMax: 35,
+                armorBonus: 8,
+                skill: { name: "Whirlwind", cost: 15, dmgMulti: 1.8, desc: "Вихревая атака" }
+            },
+            archer: {
+                name: "Archer 🏹",
+                icon: "🏹",
+                baseHp: 110,
+                baseMp: 50,
+                baseDmgMin: 18,
+                baseDmgMax: 32,
+                armorBonus: 3,
+                skill: { name: "Arrow Rain", cost: 20, dmgMulti: 1.5, desc: "Дождь стрел" }
+            },
+            mage: {
+                name: "Mage 🔮",
+                icon: "🔮",
+                baseHp: 85,
+                baseMp: 100,
+                baseDmgMin: 22,
+                baseDmgMax: 42,
+                armorBonus: 0,
+                skill: { name: "Fireball", cost: 25, dmgMulti: 2.0, desc: "Огненный шар" }
+            }
+        };
+        
+        // ==================== ЭКИПИРОВКА ====================
         const ARMOR_SET = {
-            cloth: { name: "Cloth Armor", def: 5, lvl: 1 },
-            leather: { name: "Leather Armor", def: 12, lvl: 5 },
-            iron: { name: "Iron Armor", def: 22, lvl: 12 },
-            dragon: { name: "Dragon Scale", def: 38, lvl: 25 }
+            cloth: { name: "Cloth", def: 5, lvl: 1 },
+            leather: { name: "Leather", def: 12, lvl: 5 },
+            iron: { name: "Iron", def: 22, lvl: 12 },
+            dragon: { name: "Dragon", def: 38, lvl: 25 }
         };
         const WEAPONS = {
             dagger: { name: "Dagger", dmgMin: 8, dmgMax: 14, lvl: 1 },
-            sword: { name: "Iron Sword", dmgMin: 15, dmgMax: 24, lvl: 5 },
+            sword: { name: "Sword", dmgMin: 15, dmgMax: 24, lvl: 5 },
             claymore: { name: "Claymore", dmgMin: 24, dmgMax: 38, lvl: 12 },
             dragonfang: { name: "Dragonfang", dmgMin: 40, dmgMax: 60, lvl: 25 }
         };
         
-        // Состояние игрока
+        // ==================== ИГРОК ====================
         let player = {
-            x: 400, y: 240,
-            hp: 100,
-            maxHp: 100,
+            x: 500, y: 300,
+            hp: 120,
+            maxHp: 120,
+            mp: 50,
+            maxMp: 50,
             level: 1,
             exp: 0,
             expToNext: 50,
             armorId: "cloth",
             weaponId: "dagger",
-            worldKey: "forest"
+            worldKey: "forest",
+            classType: "melee"
         };
         
-        // Текущий моб (спавн)
+        // ==================== СИСТЕМА УРОВНЕЙ МОБОВ ====================
         let currentMob = null;
         let attackCooldown = 0;
+        let skillCooldown = 0;
         let invincibleFrames = 0;
-        let lastMove = { x: 0, y: 0 };
-        
-        // Перемещение (клавиатура + джойстик)
         let moveVector = { x: 0, y: 0 };
-        const MOVE_SPEED = 2.8;
+        let cameraX = 0, cameraY = 0;
         
-        // Пиксельные спрайты (рисуем вручную)
-        function drawPixelSprite(x, y, type, color, size=36) {
-            ctx.save();
-            ctx.imageSmoothingEnabled = false;
-            ctx.fillStyle = color;
-            ctx.shadowBlur = 0;
-            // Стилизация: квадратный "пиксельный" персонаж
-            ctx.fillRect(x-18, y-24, 36, 40);
-            // глаза
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(x-10, y-16, 6, 6);
-            ctx.fillRect(x+4, y-16, 6, 6);
-            ctx.fillStyle = "#000000";
-            ctx.fillRect(x-9, y-15, 4, 4);
-            ctx.fillRect(x+5, y-15, 4, 4);
-            if(type === "player"){
-                ctx.fillStyle = "#ffaa66";
-                ctx.fillRect(x-6, y-8, 12, 6); // улыбка
-            } else {
-                ctx.fillStyle = "#aa4444";
-                ctx.fillRect(x-8, y-8, 16, 4);
-            }
-            // оружие/экипировка стилизация
-            ctx.fillStyle = "#ccaaff";
-            if(type === "player") ctx.fillRect(x+14, y-12, 6, 18);
-            ctx.restore();
+        const MOVE_SPEED = 3.2;
+        const WORLD_WIDTH = 3000;
+        const WORLD_HEIGHT = 2000;
+        
+        // Эффекты
+        let damageNumbers = [];
+        let skillEffects = [];
+        
+        // Обновление статов от класса и экипировки
+        function updateStatsFromClassAndGear(){
+            const cls = CLASSES[player.classType];
+            const weapon = WEAPONS[player.weaponId];
+            const armor = ARMOR_SET[player.armorId];
+            
+            player.maxHp = cls.baseHp + player.level * 8;
+            player.maxMp = cls.baseMp + player.level * 4;
+            if(player.hp > player.maxHp) player.hp = player.maxHp;
+            if(player.mp > player.maxMp) player.mp = player.maxMp;
+            
+            let dmgMin = weapon.dmgMin + cls.baseDmgMin + Math.floor(player.level * 1.5);
+            let dmgMax = weapon.dmgMax + cls.baseDmgMax + Math.floor(player.level * 2.2);
+            let totalDef = armor.def + cls.armorBonus + Math.floor(player.level * 0.8);
+            
+            document.getElementById('armorVal').innerText = totalDef;
+            document.getElementById('dmgVal').innerText = `${dmgMin}-${dmgMax}`;
+            document.getElementById('hpVal').innerText = player.hp;
+            document.getElementById('maxHp').innerText = player.maxHp;
+            document.getElementById('mpVal').innerText = player.mp;
+            document.getElementById('maxMp').innerText = player.maxMp;
+            document.getElementById('lvlVal').innerText = player.level;
+            document.getElementById('classIcon').innerText = cls.icon;
+            document.getElementById('className').innerText = cls.name;
+            
+            return { dmgMin, dmgMax, totalDef, cls };
         }
         
-        // Генерация моба для текущего мира
+        // Спавн моба с уровнем (масштабирование)
         function spawnMob(){
             const world = WORLDS[player.worldKey];
             if(!world) return;
-            let baseHp = world.mob.hp + Math.floor(player.level * 1.5);
-            let baseDmg = world.mob.dmg + Math.floor(player.level * 0.8);
+            const mobLevel = Math.max(1, player.level + Math.floor(Math.random() * 3) - 1);
+            const levelMulti = 1 + (mobLevel - 1) * 0.12;
+            
+            let baseHp = Math.floor(world.mobBase.baseHp * levelMulti);
+            let baseDmg = Math.floor(world.mobBase.baseDmg * (1 + (mobLevel-1)*0.1));
+            let expReward = Math.floor(world.mobBase.exp * (0.8 + mobLevel * 0.15));
+            
             currentMob = {
-                name: world.mob.name,
+                name: `${world.mobBase.name} Lv.${mobLevel}`,
+                level: mobLevel,
                 hp: baseHp,
                 maxHp: baseHp,
                 dmg: baseDmg,
-                exp: world.mob.exp + player.level * 2,
-                x: 400 + (Math.random() - 0.5) * 200,
-                y: 240 + (Math.random() - 0.5) * 120,
-                color: world.mob.color
+                exp: expReward,
+                x: player.x + (Math.random() - 0.5) * 350,
+                y: player.y + (Math.random() - 0.5) * 250,
+                color: world.mobBase.color
             };
+            // Ограничение по миру
+            currentMob.x = Math.min(Math.max(currentMob.x, 80), WORLD_WIDTH - 80);
+            currentMob.y = Math.min(Math.max(currentMob.y, 80), WORLD_HEIGHT - 80);
         }
         
-        // Обновление статов от экипировки
-        function updateStatsFromGear(){
-            const armor = ARMOR_SET[player.armorId];
-            const weapon = WEAPONS[player.weaponId];
-            let totalDef = armor.def;
-            let dmgMin = weapon.dmgMin + Math.floor(player.level * 1.2);
-            let dmgMax = weapon.dmgMax + Math.floor(player.level * 1.8);
-            document.getElementById('armorVal').innerText = totalDef;
-            document.getElementById('dmgVal').innerText = `${dmgMin}-${dmgMax}`;
-            return { dmgMin, dmgMax, totalDef };
-        }
-        
-        // Атака
+        // Атака (обычная)
         function playerAttack(){
             if(attackCooldown > 0) return false;
             if(!currentMob || currentMob.hp <= 0){
                 spawnMob();
-                if(!currentMob) return false;
+                return false;
             }
-            const { dmgMin, dmgMax } = updateStatsFromGear();
+            const { dmgMin, dmgMax } = updateStatsFromClassAndGear();
             let damage = Math.floor(Math.random() * (dmgMax - dmgMin + 1) + dmgMin);
             currentMob.hp -= damage;
-            attackCooldown = 15; // фреймы кулдауна
+            attackCooldown = 12;
             
-            // эффект текста урона
-            ctx.font = "bold 20px monospace";
-            ctx.fillStyle = "#ffaa66";
-            ctx.shadowBlur = 0;
-            ctx.fillText(`-${damage}`, currentMob.x, currentMob.y-25);
+            damageNumbers.push({ x: currentMob.x, y: currentMob.y - 20, value: damage, life: 20 });
             
             if(currentMob.hp <= 0){
-                // получение опыта
                 let gainedExp = currentMob.exp;
                 player.exp += gainedExp;
-                // проверка уровня
                 while(player.exp >= player.expToNext){
                     player.exp -= player.expToNext;
                     player.level++;
-                    player.maxHp = 80 + player.level * 8;
-                    player.hp = player.maxHp;
-                    player.expToNext = 50 + player.level * 15;
-                    // улучшение брони/оружия по уровням
+                    player.expToNext = 50 + player.level * 18;
+                    // автоапгрейд экипировки
                     if(player.level >= 25 && player.weaponId !== "dragonfang") player.weaponId = "dragonfang";
                     else if(player.level >= 12 && player.weaponId !== "claymore") player.weaponId = "claymore";
                     else if(player.level >= 5 && player.weaponId !== "sword") player.weaponId = "sword";
-                    
                     if(player.level >= 25 && player.armorId !== "dragon") player.armorId = "dragon";
                     else if(player.level >= 12 && player.armorId !== "iron") player.armorId = "iron";
                     else if(player.level >= 5 && player.armorId !== "leather") player.armorId = "leather";
-                    
-                    updateStatsFromGear();
+                    player.hp = player.maxHp;
+                    player.mp = player.maxMp;
                 }
+                updateStatsFromClassAndGear();
+                spawnMob();
+            }
+            return true;
+        }
+        
+        // Способность класса
+        function useSkill(){
+            if(skillCooldown > 0) return false;
+            const cls = CLASSES[player.classType];
+            if(player.mp < cls.skill.cost) return false;
+            if(!currentMob || currentMob.hp <= 0) spawnMob();
+            if(!currentMob) return false;
+            
+            player.mp -= cls.skill.cost;
+            const { dmgMin, dmgMax } = updateStatsFromClassAndGear();
+            let avgDmg = (dmgMin + dmgMax) / 2;
+            let skillDamage = Math.floor(avgDmg * cls.skill.dmgMulti);
+            currentMob.hp -= skillDamage;
+            skillCooldown = 35;
+            
+            // Визуальный эффект способности
+            skillEffects.push({
+                x: currentMob.x, y: currentMob.y,
+                type: player.classType,
+                life: 25
+            });
+            damageNumbers.push({ x: currentMob.x, y: currentMob.y - 35, value: `✨${skillDamage}`, life: 25 });
+            
+            if(currentMob.hp <= 0){
+                player.exp += currentMob.exp;
+                while(player.exp >= player.expToNext){
+                    player.exp -= player.expToNext;
+                    player.level++;
+                    player.expToNext = 50 + player.level * 18;
+                    if(player.level >= 25 && player.weaponId !== "dragonfang") player.weaponId = "dragonfang";
+                    else if(player.level >= 12 && player.weaponId !== "claymore") player.weaponId = "claymore";
+                    else if(player.level >= 5 && player.weaponId !== "sword") player.weaponId = "sword";
+                    if(player.level >= 25 && player.armorId !== "dragon") player.armorId = "dragon";
+                    else if(player.level >= 12 && player.armorId !== "iron") player.armorId = "iron";
+                    else if(player.level >= 5 && player.armorId !== "leather") player.armorId = "leather";
+                }
+                updateStatsFromClassAndGear();
                 spawnMob();
             }
             return true;
@@ -297,112 +395,193 @@
         
         function healPlayer(){
             if(player.hp < player.maxHp){
-                player.hp = Math.min(player.maxHp, player.hp + 25);
+                player.hp = Math.min(player.maxHp, player.hp + 20);
+                updateStatsFromClassAndGear();
             }
         }
         
         function damagePlayer(amount){
             if(invincibleFrames > 0) return;
-            let armor = ARMOR_SET[player.armorId].def;
-            let reduced = Math.max(1, amount - Math.floor(armor/3));
+            const { totalDef } = updateStatsFromClassAndGear();
+            let reduced = Math.max(2, amount - Math.floor(totalDef / 2.5));
             player.hp -= reduced;
-            invincibleFrames = 20;
+            invincibleFrames = 22;
+            damageNumbers.push({ x: player.x, y: player.y - 15, value: `-${reduced}`, life: 18, isPlayer: true });
             if(player.hp <= 0){
                 player.hp = player.maxHp;
-                player.exp = Math.floor(player.exp * 0.9);
+                player.mp = player.maxMp;
+                player.exp = Math.floor(player.exp * 0.85);
+                player.x = WORLD_WIDTH/2;
+                player.y = WORLD_HEIGHT/2;
                 spawnMob();
-                player.x = 400; player.y = 240;
+                updateStatsFromClassAndGear();
             }
         }
         
-        // Обновление движения и боя моба
+        // Смена класса
+        function switchClass(){
+            const classes = Object.keys(CLASSES);
+            let idx = classes.indexOf(player.classType);
+            let next = (idx + 1) % classes.length;
+            player.classType = classes[next];
+            updateStatsFromClassAndGear();
+            spawnMob();
+        }
+        
+        // Обновление игры с плавной камерой
         function updateGame(){
             if(attackCooldown > 0) attackCooldown--;
+            if(skillCooldown > 0) skillCooldown--;
             if(invincibleFrames > 0) invincibleFrames--;
             
-            // движение игрока
+            // Движение
             let newX = player.x + moveVector.x * MOVE_SPEED;
             let newY = player.y + moveVector.y * MOVE_SPEED;
-            player.x = Math.min(Math.max(newX, 40), canvas.width-40);
-            player.y = Math.min(Math.max(newY, 40), canvas.height-40);
+            player.x = Math.min(Math.max(newX, 60), WORLD_WIDTH - 60);
+            player.y = Math.min(Math.max(newY, 60), WORLD_HEIGHT - 60);
             
+            // Плавная камера (интерполяция)
+            let targetCamX = player.x - canvas.width/2;
+            let targetCamY = player.y - canvas.height/2;
+            targetCamX = Math.min(Math.max(targetCamX, 0), WORLD_WIDTH - canvas.width);
+            targetCamY = Math.min(Math.max(targetCamY, 0), WORLD_HEIGHT - canvas.height);
+            cameraX += (targetCamX - cameraX) * 0.1;
+            cameraY += (targetCamY - cameraY) * 0.1;
+            
+            // Моб логика
             if(currentMob && currentMob.hp > 0){
-                // движение моба к игроку
                 let dx = player.x - currentMob.x;
                 let dy = player.y - currentMob.y;
                 let len = Math.hypot(dx,dy);
-                if(len > 5){
-                    let step = Math.min(1.2, len/15);
+                if(len > 8){
+                    let step = Math.min(1.4, len/20);
                     currentMob.x += (dx/len)*step;
                     currentMob.y += (dy/len)*step;
                 }
-                // атака моба
-                if(len < 45 && attackCooldown <= 5){
-                    let mobDmg = currentMob.dmg;
-                    damagePlayer(mobDmg);
+                if(len < 52 && attackCooldown <= 3){
+                    damagePlayer(currentMob.dmg);
                 }
             } else if(!currentMob || currentMob.hp <= 0){
                 spawnMob();
             }
+            
+            // Обновление эффектов
+            for(let i=0; i<damageNumbers.length; i++){
+                damageNumbers[i].life--;
+                if(damageNumbers[i].life <= 0) damageNumbers.splice(i,1), i--;
+            }
+            for(let i=0; i<skillEffects.length; i++){
+                skillEffects[i].life--;
+                if(skillEffects[i].life <= 0) skillEffects.splice(i,1), i--;
+            }
         }
         
-        // Смена миров через кнопки (+ для полноты интерфейса)
-        function cycleWorld(){
-            const worlds = Object.keys(WORLDS);
-            let idx = worlds.indexOf(player.worldKey);
-            let next = (idx+1) % worlds.length;
-            player.worldKey = worlds[next];
-            document.getElementById('worldName').innerText = WORLDS[player.worldKey].name;
-            spawnMob();
+        // ========== ОТРИСОВКА (с учетом камеры) ==========
+        function drawPixelSprite(worldX, worldY, type, color, extra={}){
+            let screenX = worldX - cameraX;
+            let screenY = worldY - cameraY;
+            if(screenX < -50 || screenX > canvas.width+50 || screenY < -50 || screenY > canvas.height+50) return;
+            
+            ctx.save();
+            ctx.imageSmoothingEnabled = false;
+            ctx.fillStyle = color;
+            ctx.fillRect(screenX-18, screenY-24, 36, 40);
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(screenX-10, screenY-16, 6, 6);
+            ctx.fillRect(screenX+4, screenY-16, 6, 6);
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(screenX-9, screenY-15, 4, 4);
+            ctx.fillRect(screenX+5, screenY-15, 4, 4);
+            
+            if(type === "player"){
+                ctx.fillStyle = "#ffaa66";
+                ctx.fillRect(screenX-6, screenY-8, 12, 6);
+                // Оружие по классу
+                const cls = CLASSES[player.classType];
+                ctx.fillStyle = cls.icon === "🏹" ? "#b8a67c" : (cls.icon === "🔮" ? "#aa88ff" : "#ccaa77");
+                ctx.fillRect(screenX+14, screenY-12, 6, 18);
+            } else {
+                ctx.fillStyle = "#aa4444";
+                ctx.fillRect(screenX-8, screenY-8, 16, 4);
+                // Уровень моба
+                ctx.font = "bold 10px monospace";
+                ctx.fillStyle = "#ffcc88";
+                ctx.fillText(`Lv.${currentMob?.level}`, screenX-15, screenY-32);
+            }
+            ctx.restore();
         }
         
-        // Отрисовка всего (пиксельный стиль)
         function render(){
             const world = WORLDS[player.worldKey];
             ctx.fillStyle = world.bg;
             ctx.fillRect(0,0,canvas.width,canvas.height);
-            // пол тайлы
-            for(let i=0;i<20;i++){
+            
+            // Пол
+            for(let i=0; i<50; i++){
                 ctx.fillStyle = world.floor;
-                ctx.fillRect((i*40)%canvas.width, Math.floor(i/6)*40, 38, 38);
+                let xOff = (i*47 + cameraX*0.3) % canvas.width;
+                ctx.fillRect(xOff, (i*37)%canvas.height, 42, 42);
             }
-            // рисуем моба
+            
+            // Моб
             if(currentMob && currentMob.hp > 0){
                 drawPixelSprite(currentMob.x, currentMob.y, "mob", currentMob.color);
-                ctx.fillStyle = "#ff0000";
-                ctx.fillRect(currentMob.x-25, currentMob.y-38, 50, 6);
-                ctx.fillStyle = "#00aa44";
+                let screenX = currentMob.x - cameraX;
+                let screenY = currentMob.y - cameraY;
+                ctx.fillStyle = "#aa3333";
+                ctx.fillRect(screenX-30, screenY-42, 60, 8);
+                ctx.fillStyle = "#44ff66";
                 let percent = currentMob.hp/currentMob.maxHp;
-                ctx.fillRect(currentMob.x-25, currentMob.y-38, 50*percent, 6);
-                ctx.fillStyle = "#ffffff";
+                ctx.fillRect(screenX-30, screenY-42, 60*percent, 8);
+                ctx.fillStyle = "#ffffaa";
                 ctx.font = "bold 12px monospace";
-                ctx.fillText(currentMob.name, currentMob.x-30, currentMob.y-42);
+                ctx.fillText(currentMob.name, screenX-35, screenY-46);
             }
-            // игрок
+            
+            // Игрок
             drawPixelSprite(player.x, player.y, "player", "#7c6e65");
-            // полоска хп игрока
-            ctx.fillStyle = "#660000";
-            ctx.fillRect(player.x-30, player.y-45, 60, 8);
-            ctx.fillStyle = "#ee6644";
-            ctx.fillRect(player.x-30, player.y-45, 60*(player.hp/player.maxHp), 8);
+            let pScreenX = player.x - cameraX;
+            let pScreenY = player.y - cameraY;
+            ctx.fillStyle = "#aa5555";
+            ctx.fillRect(pScreenX-32, pScreenY-48, 64, 8);
+            ctx.fillStyle = "#ff6644";
+            ctx.fillRect(pScreenX-32, pScreenY-48, 64*(player.hp/player.maxHp), 8);
+            ctx.fillStyle = "#88aaff";
+            ctx.fillRect(pScreenX-32, pScreenY-56, 64*(player.mp/player.maxMp), 5);
             
-            ctx.fillStyle = "#f9f3c1";
+            // Эффекты способностей
+            for(let fx of skillEffects){
+                let sx = fx.x - cameraX;
+                let sy = fx.y - cameraY;
+                ctx.font = "bold 26px monospace";
+                ctx.shadowBlur = 8;
+                if(fx.type === "mage") ctx.fillStyle = "#ff8844";
+                else if(fx.type === "archer") ctx.fillStyle = "#88ff88";
+                else ctx.fillStyle = "#ffaa88";
+                ctx.fillText(fx.type === "mage" ? "🔥" : (fx.type === "archer" ? "🏹✨" : "🌀"), sx-20, sy-30);
+                ctx.shadowBlur = 0;
+            }
+            
+            // Урон
+            for(let dmg of damageNumbers){
+                let sx = dmg.x - cameraX;
+                let sy = dmg.y - cameraY;
+                ctx.font = `bold ${dmg.isPlayer ? 14 : 18}px monospace`;
+                ctx.fillStyle = dmg.isPlayer ? "#ffaa66" : "#ff6644";
+                ctx.fillText(dmg.value, sx-15, sy - dmg.life/2);
+            }
+            
             ctx.font = "bold 14px monospace";
-            ctx.fillText(`Lv.${player.level}  Exp:${player.exp}/${player.expToNext}`, 12, 30);
-            ctx.fillStyle = "#eedd99";
-            ctx.fillText(`⚔️ ${WEAPONS[player.weaponId].name}  🛡️ ${ARMOR_SET[player.armorId].name}`, 12, 55);
-            
-            document.getElementById('hpVal').innerText = player.hp;
-            document.getElementById('maxHp').innerText = player.maxHp;
+            ctx.fillStyle = "#ffffcc";
+            ctx.fillText(`EXP: ${player.exp}/${player.expToNext}`, 12, 30);
+            ctx.fillStyle = "#ccccaa";
+            ctx.fillText(`Class Skill: ${CLASSES[player.classType].skill.name} (${CLASSES[player.classType].skill.cost} MP)`, 12, 55);
         }
         
-        // ----- УПРАВЛЕНИЕ (Mobile Joystick + кнопки) -----
+        // ========== УПРАВЛЕНИЕ ==========
         let joystickActive = false;
         const joystickBase = document.getElementById('joystickBase');
-        function handleTouchStart(e){
-            e.preventDefault();
-            joystickActive = true;
-        }
+        function handleTouchStart(e){ e.preventDefault(); joystickActive = true; }
         function handleTouchMove(e){
             if(!joystickActive) return;
             e.preventDefault();
@@ -415,48 +594,46 @@
             let len = Math.hypot(dx,dy);
             let maxRad = rect.width/2;
             if(len > maxRad) { dx = dx/len * maxRad; dy = dy/len * maxRad; }
-            moveVector.x = dx / (maxRad/2);
-            moveVector.y = dy / (maxRad/2);
-            if(Math.abs(moveVector.x) < 0.15) moveVector.x = 0;
-            if(Math.abs(moveVector.y) < 0.15) moveVector.y = 0;
+            moveVector.x = dx / (maxRad/1.5);
+            moveVector.y = dy / (maxRad/1.5);
+            if(Math.abs(moveVector.x) < 0.2) moveVector.x = 0;
+            if(Math.abs(moveVector.y) < 0.2) moveVector.y = 0;
         }
-        function handleTouchEnd(e){
-            joystickActive = false;
-            moveVector.x = 0; moveVector.y = 0;
-        }
+        function handleTouchEnd(e){ joystickActive = false; moveVector.x = 0; moveVector.y = 0; }
         joystickBase.addEventListener('touchstart', handleTouchStart);
         joystickBase.addEventListener('touchmove', handleTouchMove);
         joystickBase.addEventListener('touchend', handleTouchEnd);
         
         document.getElementById('attackBtn').addEventListener('touchstart', (e) => { e.preventDefault(); playerAttack(); });
+        document.getElementById('skillBtn').addEventListener('touchstart', (e) => { e.preventDefault(); useSkill(); });
         document.getElementById('healBtn').addEventListener('touchstart', (e) => { e.preventDefault(); healPlayer(); });
-        document.getElementById('resetBtn').addEventListener('click', () => { player.hp = player.maxHp; spawnMob(); });
-        // доп. смена мира долгим нажатием на heal (для удобства)
-        let worldTimer;
-        document.getElementById('healBtn').addEventListener('touchstart', () => { worldTimer = setTimeout(() => { cycleWorld(); }, 500); });
-        document.getElementById('healBtn').addEventListener('touchend', () => { clearTimeout(worldTimer); });
-        // клавиатура для ПК
+        document.getElementById('resetBtn').addEventListener('click', () => { player.hp = player.maxHp; player.mp = player.maxMp; spawnMob(); });
+        document.getElementById('classBtn').addEventListener('click', () => switchClass());
+        
+        // Клавиатура
         window.addEventListener('keydown', (e) => {
-            const key = e.key;
-            if(key === 'ArrowUp') moveVector.y = -1;
-            if(key === 'ArrowDown') moveVector.y = 1;
-            if(key === 'ArrowLeft') moveVector.x = -1;
-            if(key === 'ArrowRight') moveVector.x = 1;
-            if(key === ' ') playerAttack();
-            if(key === 'h') healPlayer();
-            if(key === 'w') cycleWorld();
+            if(e.key === 'ArrowUp') moveVector.y = -1;
+            if(e.key === 'ArrowDown') moveVector.y = 1;
+            if(e.key === 'ArrowLeft') moveVector.x = -1;
+            if(e.key === 'ArrowRight') moveVector.x = 1;
+            if(e.key === ' ') playerAttack();
+            if(e.key === 'e') useSkill();
+            if(e.key === 'h') healPlayer();
+            if(e.key === 'c') switchClass();
         });
         window.addEventListener('keyup', (e) => {
-            const key = e.key;
-            if(key === 'ArrowUp' && moveVector.y === -1) moveVector.y = 0;
-            if(key === 'ArrowDown' && moveVector.y === 1) moveVector.y = 0;
-            if(key === 'ArrowLeft' && moveVector.x === -1) moveVector.x = 0;
-            if(key === 'ArrowRight' && moveVector.x === 1) moveVector.x = 0;
+            if(e.key === 'ArrowUp' && moveVector.y === -1) moveVector.y = 0;
+            if(e.key === 'ArrowDown' && moveVector.y === 1) moveVector.y = 0;
+            if(e.key === 'ArrowLeft' && moveVector.x === -1) moveVector.x = 0;
+            if(e.key === 'ArrowRight' && moveVector.x === 1) moveVector.x = 0;
         });
         
         // Инициализация
+        player.x = WORLD_WIDTH/2;
+        player.y = WORLD_HEIGHT/2;
+        updateStatsFromClassAndGear();
         spawnMob();
-        updateStatsFromGear();
+        
         function gameLoop(){
             updateGame();
             render();
