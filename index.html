@@ -23,7 +23,7 @@
             cursor: crosshair;
         }
         
-        /* ПИКСЕЛЬНЫЕ КНОПКИ ПО УГЛАМ */
+        /* КНОПКИ КАК НА СКРИНЕ */
         .pixel-btn {
             position: fixed;
             background: #2c2f3f;
@@ -43,13 +43,21 @@
             box-shadow: 1px 1px 0 #000;
         }
         
-        /* УГЛЫ */
-        .top-left { top: 10px; left: 10px; }
-        .top-right { top: 10px; right: 10px; }
-        .bottom-left { bottom: 10px; left: 10px; }
-        .bottom-right { bottom: 10px; right: 10px; }
+        /* ЛЕВЫЙ ВЕРХНИЙ УГОЛ - КЛАССЫ */
+        .top-left-class { top: 10px; left: 10px; }
+        .top-left-class2 { top: 10px; left: 100px; }
+        .top-left-class3 { top: 10px; left: 190px; }
         
-        /* ПИКСЕЛЬНАЯ ПАНЕЛЬ ЗДОРОВЬЯ */
+        /* ПРАВЫЙ ВЕРХНИЙ УГОЛ - ИНВЕНТАРЬ/СТАТ */
+        .top-right-inv { top: 10px; right: 10px; }
+        .top-right-stat { top: 10px; right: 100px; }
+        
+        /* ЛЕВЫЙ НИЖНИЙ УГОЛ - ЗЕЛЬЯ И СУПЕР */
+        .bottom-left-heal { bottom: 10px; left: 10px; }
+        .bottom-left-mana { bottom: 10px; left: 100px; }
+        .bottom-left-super { bottom: 10px; left: 190px; }
+        
+        /* СТАТИСТИКА ВВЕРХУ ПО ЦЕНТРУ */
         .pixel-stats {
             position: fixed;
             top: 10px;
@@ -69,7 +77,7 @@
         .pixel-stats .hp { color: #ff6a6a; }
         .pixel-stats .mp { color: #6a9eff; }
         
-        /* ПОЛОСКИ */
+        /* ПОЛОСКИ ЗДОРОВЬЯ И ОПЫТА */
         .pixel-bars {
             position: fixed;
             bottom: 10px;
@@ -181,20 +189,21 @@
 <body>
     <canvas id="canvas"></canvas>
     
-    <!-- КНОПКИ ПО УГЛАМ -->
-    <button class="pixel-btn top-left" id="btnKnight">⚔️ РЫЦАРЬ</button>
-    <button class="pixel-btn top-left" id="btnArcher" style="left: 100px;">🏹 ЛУЧНИК</button>
-    <button class="pixel-btn top-left" id="btnMage" style="left: 190px;">🔮 МАГ</button>
+    <!-- КНОПКИ СЛЕВА СВЕРХУ - КЛАССЫ -->
+    <button class="pixel-btn top-left-class" id="btnKnight">⚔️ РЫЦАРЬ</button>
+    <button class="pixel-btn top-left-class2" id="btnArcher">🏹 ЛУЧНИК</button>
+    <button class="pixel-btn top-left-class3" id="btnMage">🔮 МАГ</button>
     
-    <button class="pixel-btn top-right" id="btnInv">🎒 ИНВ</button>
-    <button class="pixel-btn top-right" id="btnStats" style="right: 100px;">📊 СТАТ</button>
+    <!-- КНОПКИ СПРАВА СВЕРХУ - ИНВЕНТАРЬ И СТАТИСТИКА -->
+    <button class="pixel-btn top-right-inv" id="btnInv">🎒 ИНВЕНТАРЬ</button>
+    <button class="pixel-btn top-right-stat" id="btnStats">📊 СТАТИСТИКА</button>
     
-    <button class="pixel-btn bottom-left" id="btnHeal">💊 ЛЕЧЕНИЕ</button>
-    <button class="pixel-btn bottom-left" id="btnMana" style="left: 100px;">💙 МАНА</button>
+    <!-- КНОПКИ СЛЕВА СНИЗУ - ЛЕЧЕНИЕ, МАНА, СУПЕР -->
+    <button class="pixel-btn bottom-left-heal" id="btnHeal">💊 ЛЕЧЕНИЕ</button>
+    <button class="pixel-btn bottom-left-mana" id="btnMana">💙 МАНА</button>
+    <button class="pixel-btn bottom-left-super" id="btnSpell">✨ СУПЕРУДАР</button>
     
-    <button class="pixel-btn bottom-right" id="btnSpell">✨ УДАР</button>
-    
-    <!-- ПАНЕЛЬ ЗДОРОВЬЯ -->
+    <!-- СТАТИСТИКА ПО ЦЕНТРУ ВВЕРХУ -->
     <div class="pixel-stats">
         <span>Lv.<span id="lv">1</span></span>
         <span class="hp">❤️ <span id="hpText">120/120</span></span>
@@ -202,7 +211,7 @@
         <span>💰 <span id="gold">500</span></span>
     </div>
     
-    <!-- ПОЛОСКИ -->
+    <!-- ПОЛОСКИ ЗДОРОВЬЯ И ОПЫТА -->
     <div class="pixel-bars">
         <div class="hp-pixel" id="hpBar"></div>
         <div class="xp-pixel" id="xpBar"></div>
@@ -412,7 +421,7 @@
             }
         };
         
-        // ========== МОНСТРЫ (как на фото: Rat, Crab) ==========
+        // ========== МОНСТРЫ ==========
         let monsters = [];
         
         const MONSTER_DATA = {
@@ -687,7 +696,7 @@
             }
         }
         
-        // ========== ОТРИСОВКА (ТРАВА, ДЕРЕВЬЯ, МОБЫ) ==========
+        // ========== ОТРИСОВКА ==========
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
@@ -706,25 +715,20 @@
                     let cx = x * TILE - cam.x;
                     let cy = y * TILE - cam.y;
                     
-                    // ТРАВА
                     if (map[y][x] === 1) {
                         ctx.fillStyle = '#4a3e35';
                         ctx.fillRect(cx, cy, TILE - 1, TILE - 1);
                     } else {
-                        // ЗЕЛЁНАЯ ТРАВА
                         ctx.fillStyle = '#5cae4a';
                         ctx.fillRect(cx, cy, TILE - 1, TILE - 1);
                         ctx.fillStyle = '#6cbe5a';
                         ctx.fillRect(cx + 4, cy + 4, TILE - 9, TILE - 9);
-                        
-                        // ТРАВИНКИ
                         ctx.fillStyle = '#4c8e3a';
                         for (let i = 0; i < 6; i++) {
                             ctx.fillRect(cx + 6 + i * 6, cy + TILE - 8, 2, 6);
                         }
                     }
                     
-                    // ДЕРЕВЬЯ
                     let isTree = false;
                     for (let t of trees) {
                         if (t.x === x && t.y === y && map[y][x] === 1) {
@@ -739,14 +743,12 @@
                         }
                     }
                     
-                    // ТОРГОВЕЦ
                     if (x === safeX && y === safeY) {
                         ctx.fillStyle = '#ffaa66';
                         ctx.font = '24px monospace';
                         ctx.fillText('🏪', cx + 14, cy + 34);
                     }
                     
-                    // ЖЁЛТЫЙ КВАДРАТ ДВИЖЕНИЯ
                     if (targetTile && targetTile.x === x && targetTile.y === y) {
                         ctx.strokeStyle = '#ffdd88';
                         ctx.lineWidth = 2;
@@ -755,7 +757,6 @@
                 }
             }
             
-            // МОНСТРЫ
             for (let m of monsters) {
                 if (!m.alive) continue;
                 let cx = m.x - cam.x - m.size / 2;
@@ -776,7 +777,6 @@
                 ctx.font = 'bold 9px monospace';
                 ctx.fillText(m.name, cx + 4, cy - 2);
                 
-                // КРАСНЫЙ КВАДРАТ ВЫБОРА
                 if (selectedMonster === m) {
                     ctx.strokeStyle = 'red';
                     ctx.lineWidth = 2;
@@ -784,7 +784,6 @@
                 }
             }
             
-            // ИГРОК С ОРУЖИЕМ
             let px = player.x - cam.x - 18;
             let py = player.y - cam.y - 18;
             ctx.fillStyle = '#3a6ea5';
@@ -794,7 +793,6 @@
             ctx.arc(px + 18, py + 12, 8, 0, Math.PI * 2);
             ctx.fill();
             
-            // ОРУЖИЕ ПО УГЛАМ ПЕРСОНАЖА
             if (player.class === 'knight') {
                 ctx.fillStyle = '#ccccaa';
                 ctx.fillRect(px + 26, py + 18, 10, 5);
@@ -835,7 +833,6 @@
             }
         }
         
-        // АВТОАТАКА
         setInterval(() => {
             if (selectedMonster && selectedMonster.alive && player.hp > 0) {
                 let dist = Math.abs(player.tx - selectedMonster.tx) + Math.abs(player.ty - selectedMonster.ty);
@@ -844,7 +841,6 @@
             }
         }, 500);
         
-        // РЕГЕНЕРАЦИЯ
         setInterval(() => {
             if (player.hp > 0 && player.hp < player.maxHp) {
                 let regen = Math.floor(player.maxHp * 0.03);
@@ -858,7 +854,6 @@
             }
         }, 1000);
         
-        // ЛОГИ
         function addLog(msg) {
             let d = document.createElement('div');
             d.className = 'log';
@@ -908,7 +903,6 @@
             }
         });
         
-        // КНОПКИ
         document.getElementById('btnHeal').onclick = heal;
         document.getElementById('btnMana').onclick = mana;
         document.getElementById('btnSpell').onclick = spell;
