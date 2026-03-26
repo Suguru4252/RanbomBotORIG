@@ -134,7 +134,6 @@
         
         let safeZone = { x: 500, y: 420, width: 560, height: 440 };
         
-        // NPC Торговец
         let shopNPC = { x: safeZone.x + safeZone.width - 80, y: safeZone.y + safeZone.height - 60, radius: 28 };
         
         let gates = [
@@ -204,17 +203,17 @@
             return true;
         }
         
-        // КЛАССЫ С РАЗНОЙ ДАЛЬНОСТЬЮ
+        // КЛАССЫ: Мечник ближний бой, Лучник и Маг дальний бой (увеличенный радиус)
         const CLASSES = {
             warrior: { name: "Мечник", icon: "⚔️", color: "#6c8cae", armor: "#5a7a9a", 
                 hp: 320, mp: 75, dmgMin: 34, dmgMax: 60, skill: "Вихрь", 
-                range: 55, skillRange: 70, isMelee: true },
+                range: 60, skillRange: 75, isMelee: true },
             archer: { name: "Лучник", icon: "🏹", color: "#7cae6c", armor: "#6a8a5a", 
                 hp: 260, mp: 120, dmgMin: 32, dmgMax: 58, skill: "Тройной выстрел", 
-                range: 150, skillRange: 180, isMelee: false },
+                range: 180, skillRange: 210, isMelee: false },
             mage: { name: "Маг", icon: "🔮", color: "#b57ad6", armor: "#9a6aba", 
                 hp: 210, mp: 210, dmgMin: 40, dmgMax: 70, skill: "Огненный взрыв", 
-                range: 140, skillRange: 170, isMelee: false }
+                range: 170, skillRange: 200, isMelee: false }
         };
         
         // ПИКСЕЛЬНЫЕ МОДЕЛИ МОБОВ
@@ -322,7 +321,7 @@
                     }
                 }
             } else if(c.name === "Лучник") {
-                let targets = mobs.filter(m=>m.hp>0 && Math.hypot(player.x-m.x,player.y-m.y)<200);
+                let targets = mobs.filter(m=>m.hp>0 && Math.hypot(player.x-m.x,player.y-m.y)<220);
                 targets.sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y));
                 let hit=0;
                 for(let mob of targets.slice(0,3)) {
@@ -345,7 +344,7 @@
             explosionTarget = null;
             let {min,max}=getDamageRange(), avg=(min+max)/2, dmg=Math.floor(avg*2.5), hit=false;
             for(let mob of mobs) {
-                if(Math.hypot(wx-mob.x,wy-mob.y)<80 && mob.hp>0) {
+                if(Math.hypot(wx-mob.x,wy-mob.y)<90 && mob.hp>0) {
                     mob.hp-=dmg; stats.totalDamage+=dmg; showDamage(mob.x,mob.y,dmg);
                     addMsg(`🔥 Взрыв → ${dmg} урона ${mob.name}!`);
                     if(mob.hp<=0) killMob(mob); hit=true;
@@ -380,7 +379,7 @@
             }
         }
         
-        // АТАКА ИГРОКА (раз в 2 секунды)
+        // АТАКА ИГРОКА - РАЗ В 1 СЕКУНДУ (15 фреймов при 60fps)
         function playerAttack() {
             if(!selectedMob || selectedMob.hp<=0) { selectedMob=null; return false; }
             if(player.attackTimer > 0) return false;
@@ -394,7 +393,7 @@
             let dmg = Math.floor(Math.random()*(max-min+1)+min);
             selectedMob.hp -= dmg;
             stats.totalDamage += dmg;
-            player.attackTimer = 30;
+            player.attackTimer = 15;
             addMsg(`⚔️ ${c.name} → ${dmg} урона ${selectedMob.name}!`);
             showDamage(selectedMob.x, selectedMob.y, dmg);
             if(selectedMob.hp <= 0) killMob(selectedMob);
@@ -419,7 +418,7 @@
             if(selectedMob.hp<=0) killMob(selectedMob);
         }
         
-        // МОБЫ АТАКУЮТ (раз в 2 секунды)
+        // МОБЫ АТАКУЮТ - РАЗ В 2 СЕКУНДЫ (30 фреймов)
         function updateMobs() {
             for(let m of mobs) {
                 if(m.hp<=0) continue;
@@ -602,7 +601,6 @@
             let szX=safeZone.x-cameraX, szY=safeZone.y-cameraY;
             ctx.fillStyle="#88aa66aa"; ctx.fillRect(szX,szY,safeZone.width,safeZone.height);
             
-            // NPC Торговец
             let npcX = shopNPC.x - cameraX;
             let npcY = shopNPC.y - cameraY;
             ctx.fillStyle = "#c99e6f";
@@ -634,25 +632,20 @@
         function drawPlayer() {
             let x=player.x-cameraX, y=player.y-cameraY;
             let c=CLASSES[player.classType];
-            // Тело человека
             ctx.fillStyle = "#e0c8a0";
             ctx.fillRect(x-12, y-24, 24, 44);
-            // Одежда/броня
             ctx.fillStyle = c.color;
             ctx.fillRect(x-10, y-16, 20, 32);
             ctx.fillStyle = c.armor;
             ctx.fillRect(x-8, y-8, 16, 24);
-            // Голова
             ctx.fillStyle = "#e0c8a0";
             ctx.fillRect(x-8, y-28, 16, 16);
-            // Глаза
             ctx.fillStyle = "#fff";
             ctx.fillRect(x-5, y-24, 4, 4);
             ctx.fillRect(x+1, y-24, 4, 4);
             ctx.fillStyle = "#000";
             ctx.fillRect(x-4, y-23, 2, 2);
             ctx.fillRect(x+2, y-23, 2, 2);
-            // Оружие в зависимости от класса
             if(c.name === "Мечник") {
                 ctx.fillStyle = "#ccaaff";
                 ctx.fillRect(x+8, y-12, 8, 24);
@@ -666,16 +659,13 @@
                 ctx.fillStyle = "#ff8844";
                 ctx.fillRect(x+8, y-10, 6, 6);
             }
-            // Иконка класса
             ctx.font = "16px monospace";
             ctx.fillStyle = "#ffffaa";
             ctx.fillText(c.icon, x-6, y+2);
-            // Полоска HP
             ctx.fillStyle = "#a33";
             ctx.fillRect(x-20, y-36, 56, 7);
             ctx.fillStyle = "#4f6";
             ctx.fillRect(x-20, y-36, 56 * (player.hp/player.maxHp), 7);
-            // Эффект вихря
             if(whirlwindActive) {
                 ctx.fillStyle = "#ffaa44aa";
                 ctx.beginPath();
@@ -691,13 +681,11 @@
             let y = m.y - cameraY;
             if(x < -80 || x > canvasWidth+80) return;
             m.drawFunc(x, y);
-            // Полоска HP
             let percent = m.hp / m.maxHp;
             ctx.fillStyle = "#a33";
             ctx.fillRect(x-24, y-32, 48, 6);
             ctx.fillStyle = "#4f6";
             ctx.fillRect(x-24, y-32, 48 * percent, 6);
-            // Имя и уровень
             ctx.font = "9px monospace";
             ctx.fillStyle = "#ffffaa";
             ctx.fillText(m.name, x-20, y-38);
@@ -808,12 +796,12 @@
         canvas.addEventListener('click',(e)=>{ let w=getWorldClick(e.clientX,e.clientY); handleClick(w.x,w.y); });
         canvas.addEventListener('touchstart',(e)=>{ e.preventDefault(); let t=e.touches[0]; let w=getWorldClick(t.clientX,t.clientY); handleClick(w.x,w.y); });
         
-        // АВТОАТАКА РАЗ В 2 СЕКУНДЫ
+        // АВТОАТАКА РАЗ В 1 СЕКУНДУ (игрок)
         setInterval(()=>{
             if(selectedMob && selectedMob.hp>0 && Math.hypot(player.x-selectedMob.x, player.y-selectedMob.y) <= CLASSES[player.classType].range + 15) {
                 playerAttack();
             }
-        }, 2000);
+        }, 1000);
         
         document.getElementById('attackBtn').onclick=()=>{
             if(selectedMob&&selectedMob.hp>0) playerAttack();
@@ -847,6 +835,8 @@
             addMsg(`🗡️ ${CLASSES.warrior.name} - ближний бой (${CLASSES.warrior.range}px)`);
             addMsg(`🏹 ${CLASSES.archer.name} - дальний бой (${CLASSES.archer.range}px)`);
             addMsg(`🔮 ${CLASSES.mage.name} - дальний бой (${CLASSES.mage.range}px)`);
+            addMsg("⚔️ Атака игрока - 1 раз в секунду");
+            addMsg("💀 Атака мобов - 1 раз в 2 секунды");
             addMsg("🌟 1 - СУПЕРСИЛА | 2 - ЗЕЛЬЕ HP | 3 - ЗЕЛЬЕ MP");
             addMsg("🏪 Торговец в безопасной зоне (иконка 🏪)");
         }
