@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
-    <title>Rucoy Online - Полная версия с сохранением</title>
+    <title>Rucoy Online - Полная версия</title>
     <style>
         * {
             margin: 0;
@@ -66,57 +66,6 @@
         .skill-mini { background: rgba(106, 78, 158, 0.85); border-color: #c88eff; }
         .class-mini { background: rgba(60, 100, 80, 0.85); border-color: #88ffaa; }
         
-        /* Модальное окно для ввода ника */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: monospace;
-        }
-        .modal-content {
-            background: #2a2e3f;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            border: 2px solid #ffaa55;
-            max-width: 90%;
-            width: 320px;
-        }
-        .modal-content h2 {
-            color: #ffcc88;
-            margin-bottom: 20px;
-            font-size: 24px;
-        }
-        .modal-content input {
-            width: 100%;
-            padding: 12px;
-            font-size: 18px;
-            background: #1a1e2a;
-            border: 1px solid #ffaa55;
-            color: #ffcc88;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-family: monospace;
-            text-align: center;
-        }
-        .modal-content button {
-            background: #ffaa55;
-            color: #1a1e2a;
-            border: none;
-            padding: 10px 20px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: monospace;
-        }
         .nickname-display {
             position: fixed;
             top: 12px;
@@ -131,9 +80,25 @@
             pointer-events: none;
             font-family: monospace;
         }
+        .portal-progress {
+            position: fixed;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.7);
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #88ffaa;
+            font-size: 11px;
+            z-index: 100;
+            pointer-events: none;
+            font-family: monospace;
+            white-space: nowrap;
+        }
         @media (max-width: 700px) {
             .mini-btn { font-size: 10px; padding: 4px 8px; min-width: 45px; }
             .nickname-display { font-size: 10px; top: 8px; }
+            .portal-progress { font-size: 9px; bottom: 8px; }
         }
     </style>
 </head>
@@ -165,12 +130,45 @@
     </div>
     
     <div class="nickname-display" id="nicknameDisplay"></div>
+    <div class="portal-progress" id="portalProgress"></div>
 
 <script>
     (function(){
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // ========== МИРЫ ==========
+        let currentWorld = "forest"; // forest, desert, castle
+        let mobsKilledInWorld = 0;
+        const MOBS_NEEDED_FOR_PORTAL = 300;
+        let portalActive = false;
+        let portalX = 0, portalY = 0;
+        
+        const WORLDS = {
+            forest: {
+                name: "🌲 Лес",
+                bgColor1: "#4a8c3a",
+                bgColor2: "#3a6c2a",
+                mobMultiplier: 1.0,
+                mobColors: ["#6f8c5a", "#8a7a6a", "#8b5a3a", "#b8b8cc", "#8a6a4a", "#c97a3a"]
+            },
+            desert: {
+                name: "🏜️ Пустыня",
+                bgColor1: "#c9ae74",
+                bgColor2: "#e0b87a",
+                mobMultiplier: 1.5,
+                mobColors: ["#c9a87a", "#b87c4a", "#a86a3a", "#d8b87a", "#c89a6a", "#e8c88a"]
+            },
+            castle: {
+                name: "🏰 Замок",
+                bgColor1: "#4a5b6e",
+                bgColor2: "#6c7f8f",
+                mobMultiplier: 2.0,
+                mobColors: ["#6a7a8a", "#8a9aaa", "#5a6a7a", "#7a8a9a", "#9aabbb", "#4a5a6a"]
+            }
+        };
+        
+        // ========== РАЗМЕР МИРА ==========
         const WORLD_WIDTH = 5800;
         const WORLD_HEIGHT = 4600;
         
@@ -207,6 +205,8 @@
                 gold: player.gold,
                 potionHp: player.potionHp,
                 potionMp: player.potionMp,
+                currentWorld: currentWorld,
+                mobsKilledInWorld: mobsKilledInWorld,
                 stats: {
                     mobsKilled: stats.mobsKilled,
                     totalGold: stats.totalGold,
@@ -217,7 +217,6 @@
             };
             localStorage.setItem('rucoy_save_' + playerNickname, JSON.stringify(saveData));
             localStorage.setItem('rucoy_last_nickname', playerNickname);
-            console.log('Игра сохранена для', playerNickname);
         }
         
         function loadGame(nickname) {
@@ -234,6 +233,8 @@
                 player.gold = data.gold;
                 player.potionHp = data.potionHp;
                 player.potionMp = data.potionMp;
+                if(data.currentWorld) currentWorld = data.currentWorld;
+                if(data.mobsKilledInWorld) mobsKilledInWorld = data.mobsKilledInWorld;
                 if(data.stats) {
                     stats.mobsKilled = data.stats.mobsKilled;
                     stats.totalGold = data.stats.totalGold;
@@ -243,6 +244,7 @@
                 }
                 updateStatsFromLevel();
                 addMsg(`✨ Добро пожаловать обратно, ${nickname}! Уровень ${player.level}`);
+                updatePortalStatus();
                 return true;
             }
             return false;
@@ -258,60 +260,74 @@
             player.defense = 15 + Math.floor(player.level * 1.2);
         }
         
-        // Модальное окно для ввода ника
+        function updatePortalStatus() {
+            portalActive = (mobsKilledInWorld >= MOBS_NEEDED_FOR_PORTAL);
+            if(portalActive && currentWorld === "forest") {
+                portalX = safeZone.x + safeZone.width - 80;
+                portalY = safeZone.y + 60;
+            } else {
+                portalActive = false;
+            }
+            const progressPercent = Math.min(100, Math.floor(mobsKilledInWorld / MOBS_NEEDED_FOR_PORTAL * 100));
+            document.getElementById('portalProgress').innerText = `🚪 Прогресс портала: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL} (${progressPercent}%)`;
+            if(portalActive) {
+                document.getElementById('portalProgress').innerHTML = `✨ ПОРТАЛ ОТКРЫТ! ✨ (Нажмите на него)`;
+                document.getElementById('portalProgress').style.color = "#ffaa66";
+            } else {
+                document.getElementById('portalProgress').style.color = "#88ffaa";
+            }
+        }
+        
+        function activatePortal() {
+            if(!portalActive) return;
+            if(currentWorld === "forest") {
+                currentWorld = "desert";
+                addMsg(`🌍 ПЕРСОНАЖ ПЕРЕШЁЛ В МИР: ${WORLDS.desert.name}! Сложность увеличена!`);
+                mobsKilledInWorld = 0;
+                portalActive = false;
+                // Очищаем мобов и спавним новых
+                mobs = [];
+                for(let i=0;i<15;i++) spawnMob();
+                saveGame();
+                updatePortalStatus();
+            } else if(currentWorld === "desert") {
+                currentWorld = "castle";
+                addMsg(`🌍 ПЕРСОНАЖ ПЕРЕШЁЛ В МИР: ${WORLDS.castle.name}! Максимальная сложность!`);
+                mobsKilledInWorld = 0;
+                portalActive = false;
+                mobs = [];
+                for(let i=0;i<18;i++) spawnMob();
+                saveGame();
+                updatePortalStatus();
+            }
+        }
+        
+        // Модальное окно
         function showNicknameModal() {
             return new Promise((resolve) => {
                 const modal = document.createElement('div');
                 modal.className = 'modal';
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:200;display:flex;align-items:center;justify-content:center;';
                 modal.innerHTML = `
-                    <div class="modal-content">
-                        <h2>⚔️ Введите имя ⚔️</h2>
-                        <input type="text" id="nicknameInput" placeholder="Ваш никнейм" maxlength="20">
-                        <button id="startBtn">Начать игру</button>
+                    <div style="background:#2a2e3f;padding:30px;border-radius:20px;text-align:center;border:2px solid #ffaa55;max-width:90%;width:320px;">
+                        <h2 style="color:#ffcc88;margin-bottom:20px;">⚔️ Введите имя ⚔️</h2>
+                        <input type="text" id="nicknameInput" placeholder="Ваш никнейм" maxlength="20" style="width:100%;padding:12px;font-size:18px;background:#1a1e2a;border:1px solid #ffaa55;color:#ffcc88;border-radius:10px;margin-bottom:20px;font-family:monospace;text-align:center;">
+                        <button id="startBtn" style="background:#ffaa55;color:#1a1e2a;border:none;padding:10px 20px;font-size:18px;font-weight:bold;border-radius:10px;cursor:pointer;">Начать игру</button>
                     </div>
                 `;
                 document.body.appendChild(modal);
-                
                 const input = modal.querySelector('#nicknameInput');
                 const btn = modal.querySelector('#startBtn');
-                
                 const start = () => {
                     let nick = input.value.trim();
-                    if(nick === "") {
-                        nick = "Герой_" + Math.floor(Math.random() * 1000);
-                    }
+                    if(nick === "") nick = "Герой_" + Math.floor(Math.random() * 1000);
                     modal.remove();
                     resolve(nick);
                 };
-                
                 btn.onclick = start;
                 input.onkeypress = (e) => { if(e.key === 'Enter') start(); };
                 input.focus();
             });
-        }
-        
-        // ========== ИНИЦИАЛИЗАЦИЯ С СОХРАНЕНИЕМ ==========
-        async function initSaveSystem() {
-            const lastNick = localStorage.getItem('rucoy_last_nickname');
-            if(lastNick) {
-                // Проверяем, есть ли сохранение для этого ника
-                const saveExists = localStorage.getItem('rucoy_save_' + lastNick);
-                if(saveExists) {
-                    playerNickname = lastNick;
-                    loadGame(lastNick);
-                    document.getElementById('nicknameDisplay').innerText = `👤 ${lastNick}`;
-                    return true;
-                }
-            }
-            // Если нет сохранения или последний ник не найден — запрашиваем новый
-            playerNickname = await showNicknameModal();
-            document.getElementById('nicknameDisplay').innerText = `👤 ${playerNickname}`;
-            // Проверяем, есть ли сохранение для введённого ника
-            if(!loadGame(playerNickname)) {
-                // Новый игрок — стартовые значения
-                addMsg(`✨ Добро пожаловать, ${playerNickname}! Новая игра начинается!`);
-            }
-            return true;
         }
         
         // ========== СТАТИСТИКА ==========
@@ -420,18 +436,21 @@
         ];
         
         let mobs = [], spawnTimer = 0;
-        const MAX_MOBS = 30;
+        const MAX_MOBS = 40;
         
         function createMob() {
             let t = MOB_TYPES[Math.floor(Math.random() * MOB_TYPES.length)];
             let lvl = Math.max(1, player.level + Math.floor(Math.random() * 4) - 2);
-            let hpMult = 1 + (lvl-1)*0.15, dmgMult = 1 + (lvl-1)*0.13;
+            let worldMult = WORLDS[currentWorld].mobMultiplier;
+            let hpMult = 1 + (lvl-1)*0.15;
+            let dmgMult = 1 + (lvl-1)*0.13;
             let mob = {
                 name: t.name + " Lv." + lvl, level: lvl,
-                hp: Math.floor(t.hp * hpMult), maxHp: Math.floor(t.hp * hpMult),
-                dmg: Math.floor(t.dmg * dmgMult),
-                exp: Math.floor(t.exp * (0.85 + lvl*0.12)),
-                color: t.color, skin: t.skin, icon: t.icon,
+                hp: Math.floor(t.hp * hpMult * worldMult), maxHp: Math.floor(t.hp * hpMult * worldMult),
+                dmg: Math.floor(t.dmg * dmgMult * (1 + (worldMult-1)*0.3)),
+                exp: Math.floor(t.exp * (0.85 + lvl*0.12) * worldMult),
+                color: WORLDS[currentWorld].mobColors[Math.floor(Math.random() * WORLDS[currentWorld].mobColors.length)],
+                skin: t.skin, icon: t.icon,
                 speed: t.speed, attackRange: t.range,
                 drawFunc: t.draw,
                 x: 0, y: 0, attackTimer: 0
@@ -558,7 +577,9 @@
             let expGain=mob.exp, goldGain=Math.floor(25+Math.random()*(player.level*13));
             player.exp+=expGain; player.gold+=goldGain;
             stats.mobsKilled++; stats.totalGold+=goldGain;
-            addMsg(`✨ +${expGain} опыта, +${goldGain}💰`);
+            mobsKilledInWorld++;
+            updatePortalStatus();
+            addMsg(`✨ +${expGain} опыта, +${goldGain}💰 | Убито в мире: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL}`);
             if(Math.random()<0.5) { if(Math.random()<0.6) player.potionHp++; else player.potionMp++; addMsg(`🧪 Выпало зелье!`); }
             let idx=mobs.indexOf(mob); if(idx!==-1) mobs.splice(idx,1);
             if(selectedMob===mob) selectedMob=null;
@@ -574,6 +595,7 @@
             saveGame();
         }
         
+        // АТАКА ИГРОКА - 1.2 секунды (20 фреймов при 60fps)
         function playerAttack() {
             if(!selectedMob || selectedMob.hp<=0) { selectedMob=null; return false; }
             if(player.attackTimer > 0) return false;
@@ -587,7 +609,7 @@
             let dmg = Math.floor(Math.random()*(max-min+1)+min);
             selectedMob.hp -= dmg;
             stats.totalDamage += dmg;
-            player.attackTimer = 15;
+            player.attackTimer = 20;
             addMsg(`⚔️ ${c.name} → ${dmg} урона ${selectedMob.name}!`);
             showDamage(selectedMob.x, selectedMob.y, dmg);
             if(selectedMob.hp <= 0) killMob(selectedMob);
@@ -730,6 +752,16 @@
             return false;
         }
         
+        function isClickOnPortal(wx, wy) {
+            if(!portalActive) return false;
+            let distToPortal = Math.hypot(wx - portalX, wy - portalY);
+            if(distToPortal < 35) {
+                activatePortal();
+                return true;
+            }
+            return false;
+        }
+        
         function selectMobAt(wx,wy) {
             for(let m of mobs) {
                 if(Math.hypot(m.x-wx,m.y-wy)<55 && m.hp>0) {
@@ -756,6 +788,7 @@
                 return;
             }
             if(explosionTarget?.active) { castExplosion(wx,wy); return; }
+            if(isClickOnPortal(wx,wy)) return;
             if(isClickOnNPC(wx,wy)) return;
             if(selectMobAt(wx,wy)) return;
             moveTo(wx,wy);
@@ -769,13 +802,13 @@
             cameraY+=(ty-cameraY)*0.1;
         }
         
-        // ОТРИСОВКА (сокращена для экономии места, но полная функциональность сохранена)
         function drawWorld() {
+            let w = WORLDS[currentWorld];
             for(let i=0;i<WORLD_WIDTH/52+10;i++) {
                 for(let j=0;j<WORLD_HEIGHT/52+10;j++) {
                     let x=i*52-cameraX, y=j*52-cameraY;
                     if(x>-60 && x<canvasWidth+60 && y>-60 && y<canvasHeight+60) {
-                        ctx.fillStyle=((i+j)%2===0)?"#4a8c3a":"#3a6c2a";
+                        ctx.fillStyle=((i+j)%2===0)?w.bgColor1:w.bgColor2;
                         ctx.fillRect(x,y,51,51);
                     }
                 }
@@ -800,6 +833,26 @@
             }
             let szX=safeZone.x-cameraX, szY=safeZone.y-cameraY;
             ctx.fillStyle="#88aa66aa"; ctx.fillRect(szX,szY,safeZone.width,safeZone.height);
+            
+            // Портал
+            if(portalActive && currentWorld === "forest") {
+                let px = portalX - cameraX;
+                let py = portalY - cameraY;
+                ctx.fillStyle = "#aa44ffaa";
+                ctx.beginPath();
+                ctx.arc(px, py, 28, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#ff88ff";
+                ctx.beginPath();
+                ctx.arc(px, py, 20, 0, Math.PI*2);
+                ctx.fill();
+                ctx.font = "20px monospace";
+                ctx.fillStyle = "#ffffff";
+                ctx.fillText("🌀", px-12, py+8);
+                ctx.font = "9px monospace";
+                ctx.fillStyle = "#ffffaa";
+                ctx.fillText("ПОРТАЛ", px-18, py-20);
+            }
             
             let npcX = shopNPC.x - cameraX;
             let npcY = shopNPC.y - cameraY;
@@ -962,6 +1015,8 @@
                 ctx.fillText(`🛡️ Получено: ${stats.totalDamageTaken}`,canvasWidth/2-150,canvasHeight/2+50);
                 ctx.fillText(`⏱️ Время: ${t.h}h ${t.m}m ${t.s}s`,canvasWidth/2-150,canvasHeight/2+85);
                 ctx.fillText(`⭐ Уровень: ${player.level}`,canvasWidth/2-150,canvasHeight/2+120);
+                ctx.fillText(`🌍 Мир: ${WORLDS[currentWorld].name}`,canvasWidth/2-150,canvasHeight/2+155);
+                ctx.fillText(`🚪 Убито для портала: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL}`,canvasWidth/2-150,canvasHeight/2+190);
             }
             if(player.superCooldown>0) {
                 let p=player.superCooldown/180;
@@ -978,9 +1033,11 @@
             updateCamera();
             if(player.attackTimer > 0) player.attackTimer--;
             if(player.superCooldown > 0) player.superCooldown--;
-            if(spawnTimer<=0) {
-                if(mobs.length<MAX_MOBS) for(let i=0;i<2;i++) spawnMob();
-                spawnTimer=18;
+            if(spawnTimer <= 0) {
+                if(mobs.length < MAX_MOBS) {
+                    for(let i=0;i<3;i++) spawnMob();
+                }
+                spawnTimer = 12;
             } else {
                 spawnTimer--;
             }
@@ -1000,22 +1057,12 @@
             if(selectedMob && selectedMob.hp>0 && Math.hypot(player.x-selectedMob.x, player.y-selectedMob.y) <= CLASSES[player.classType].range + 15) {
                 playerAttack();
             }
-        }, 1000);
+        }, 1200);
         
-        // Сохранение каждые 30 секунд на всякий случай
-        setInterval(() => {
-            if(playerNickname) saveGame();
-        }, 30000);
+        setInterval(() => { if(playerNickname) saveGame(); }, 30000);
+        window.addEventListener('beforeunload', () => { if(playerNickname) saveGame(); });
         
-        // Сохранение перед закрытием страницы
-        window.addEventListener('beforeunload', () => {
-            if(playerNickname) saveGame();
-        });
-        
-        document.getElementById('attackBtn').onclick=()=>{
-            if(selectedMob&&selectedMob.hp>0) playerAttack();
-            else addMsg("🎯 Выберите цель",true);
-        };
+        document.getElementById('attackBtn').onclick=()=>{ if(selectedMob&&selectedMob.hp>0) playerAttack(); else addMsg("🎯 Выберите цель",true); };
         document.getElementById('skillBtn').onclick=()=>useSkill();
         document.getElementById('hpBtn').onclick=()=>useHp();
         document.getElementById('mpBtn').onclick=()=>useMp();
@@ -1034,33 +1081,40 @@
         });
         
         async function startGame() {
-            await initSaveSystem();
+            await (async () => {
+                const lastNick = localStorage.getItem('rucoy_last_nickname');
+                if(lastNick && localStorage.getItem('rucoy_save_' + lastNick)) {
+                    playerNickname = lastNick;
+                    loadGame(lastNick);
+                    document.getElementById('nicknameDisplay').innerText = `👤 ${lastNick}`;
+                    return;
+                }
+                playerNickname = await showNicknameModal();
+                document.getElementById('nicknameDisplay').innerText = `👤 ${playerNickname}`;
+                if(!loadGame(playerNickname)) {
+                    addMsg(`✨ Добро пожаловать, ${playerNickname}! Новая игра начинается!`);
+                }
+            })();
             generateWorld();
             updateStatsFromLevel();
-            if(player.hp <= 0) {
-                player.hp = player.maxHp;
-                player.mp = player.maxMp;
-            }
-            for(let i=0;i<12;i++) spawnMob();
+            if(player.hp <= 0) { player.hp = player.maxHp; player.mp = player.maxMp; }
+            for(let i=0;i<15;i++) spawnMob();
+            updatePortalStatus();
             addMsg("✨ Добро пожаловать!");
             addMsg(`🗡️ ${CLASSES.warrior.name} - ближний бой (${CLASSES.warrior.range}px)`);
             addMsg(`🏹 ${CLASSES.archer.name} - дальний бой (${CLASSES.archer.range}px)`);
             addMsg(`🔮 ${CLASSES.mage.name} - дальний бой (${CLASSES.mage.range}px)`);
-            addMsg("⚔️ Атака игрока - 1 раз в секунду");
-            addMsg("💀 Атака мобов - 1 раз в 2 секунды");
+            addMsg("⚔️ Атака игрока - 1.2 секунды");
+            addMsg("💀 Атака мобов - 2 секунды");
             addMsg("🌟 1 - СУПЕРСИЛА | 2 - ЗЕЛЬЕ HP | 3 - ЗЕЛЬЕ MP");
             addMsg("🏪 Торговец в безопасной зоне (иконка 🏪)");
+            addMsg("🌀 Убейте 300 мобов для открытия портала!");
             addMsg("💾 Игра автоматически сохраняется!");
         }
         
         startGame();
         
-        function render() {
-            drawWorld();
-            for(let m of mobs) drawMob(m);
-            drawPlayer();
-            drawUI();
-        }
+        function render() { drawWorld(); for(let m of mobs) drawMob(m); drawPlayer(); drawUI(); }
         function loop() { update(); render(); requestAnimationFrame(loop); }
         loop();
     })();
