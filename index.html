@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
-    <title>Rucoy Online - Полная версия</title>
+    <title>Rucoy Online - Реалистичный игрок</title>
     <style>
         * {
             margin: 0;
@@ -148,6 +148,8 @@
         let cameraX = 0, cameraY = 0;
         let canvasWidth = window.innerWidth;
         let canvasHeight = window.innerHeight;
+        let walkAnimation = 0;
+        let lastMoveTime = 0;
         
         function resizeCanvas() {
             canvasWidth = window.innerWidth;
@@ -473,18 +475,170 @@
         
         // ========== КЛАССЫ ==========
         const CLASSES = {
-            warrior: { name: "Мечник", icon: "⚔️", color: "#6c8cae", armor: "#5a7a9a", 
+            warrior: { name: "Мечник", icon: "⚔️", color: "#5a7a9a", armorColor: "#4a6a8a", 
                 hp: 320, mp: 75, dmgMin: 34, dmgMax: 60, skill: "Вихрь", 
-                range: 60, skillRange: 75, isMelee: true },
-            archer: { name: "Лучник", icon: "🏹", color: "#7cae6c", armor: "#6a8a5a", 
+                range: 60, skillRange: 75, isMelee: true, skinColor: "#e0c8a0", hairColor: "#8b5a2b" },
+            archer: { name: "Лучник", icon: "🏹", color: "#6a8a5a", armorColor: "#5a7a4a", 
                 hp: 260, mp: 120, dmgMin: 32, dmgMax: 58, skill: "Тройной выстрел", 
-                range: 180, skillRange: 210, isMelee: false },
-            mage: { name: "Маг", icon: "🔮", color: "#b57ad6", armor: "#9a6aba", 
+                range: 180, skillRange: 210, isMelee: false, skinColor: "#e0c8a0", hairColor: "#6b4a2a" },
+            mage: { name: "Маг", icon: "🔮", color: "#9a6aba", armorColor: "#8a5aaa", 
                 hp: 210, mp: 210, dmgMin: 40, dmgMax: 70, skill: "Огненный взрыв", 
-                range: 170, skillRange: 200, isMelee: false }
+                range: 170, skillRange: 200, isMelee: false, skinColor: "#e0c8a0", hairColor: "#4a2a6a" }
         };
         
-        // МОБЫ
+        // ========== РЕАЛИСТИЧНАЯ МОДЕЛЬ ИГРОКА ==========
+        let walkCycle = 0;
+        
+        function drawRealisticPlayer(x, y, isMoving) {
+            const c = CLASSES[player.classType];
+            
+            // Анимация ходьбы
+            if(isMoving) {
+                walkCycle = (walkCycle + 0.15) % (Math.PI * 2);
+            } else {
+                walkCycle = walkCycle * 0.95;
+            }
+            const legOffset = Math.sin(walkCycle) * 6;
+            const armOffset = Math.sin(walkCycle + Math.PI) * 8;
+            
+            // === НОГИ ===
+            ctx.fillStyle = "#2a2a2a";
+            // Левая нога
+            ctx.beginPath();
+            ctx.moveTo(x-12, y+15);
+            ctx.lineTo(x-16 + (legOffset * 0.5), y+28);
+            ctx.lineTo(x-10, y+28);
+            ctx.fill();
+            // Правая нога
+            ctx.beginPath();
+            ctx.moveTo(x+12, y+15);
+            ctx.lineTo(x+16 - (legOffset * 0.5), y+28);
+            ctx.lineTo(x+10, y+28);
+            ctx.fill();
+            
+            // Ботинки
+            ctx.fillStyle = "#4a3a2a";
+            ctx.fillRect(x-18 + (legOffset * 0.3), y+27, 12, 6);
+            ctx.fillRect(x+6 - (legOffset * 0.3), y+27, 12, 6);
+            
+            // === ТУЛОВИЩЕ ===
+            ctx.fillStyle = c.color;
+            ctx.beginPath();
+            ctx.moveTo(x-14, y+4);
+            ctx.quadraticCurveTo(x, y+14, x+14, y+4);
+            ctx.lineTo(x+12, y-2);
+            ctx.quadraticCurveTo(x, y+2, x-12, y-2);
+            ctx.fill();
+            
+            // Броня/одежда
+            ctx.fillStyle = c.armorColor;
+            ctx.fillRect(x-10, y+2, 20, 12);
+            
+            // === РУКИ ===
+            ctx.fillStyle = c.skinColor;
+            // Левая рука с анимацией
+            ctx.beginPath();
+            ctx.moveTo(x-12, y+2);
+            ctx.quadraticCurveTo(x-18 + armOffset, y+6, x-14 + armOffset*0.7, y+12);
+            ctx.lineTo(x-10, y+4);
+            ctx.fill();
+            // Правая рука
+            ctx.beginPath();
+            ctx.moveTo(x+12, y+2);
+            ctx.quadraticCurveTo(x+18 - armOffset, y+6, x+14 - armOffset*0.7, y+12);
+            ctx.lineTo(x+10, y+4);
+            ctx.fill();
+            
+            // Кисти рук
+            ctx.fillStyle = c.skinColor;
+            ctx.fillRect(x-16 + armOffset*0.6, y+10, 6, 5);
+            ctx.fillRect(x+10 - armOffset*0.6, y+10, 6, 5);
+            
+            // === ГОЛОВА ===
+            ctx.fillStyle = c.skinColor;
+            ctx.beginPath();
+            ctx.ellipse(x, y-8, 10, 12, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Волосы
+            ctx.fillStyle = c.hairColor;
+            ctx.beginPath();
+            ctx.ellipse(x-2, y-15, 8, 6, 0, 0, Math.PI*2);
+            ctx.ellipse(x+2, y-15, 8, 6, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Глаза
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(x-5, y-11, 2.5, 0, Math.PI*2);
+            ctx.arc(x+5, y-11, 2.5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#1a2a3a";
+            ctx.beginPath();
+            ctx.arc(x-5, y-11, 1.5, 0, Math.PI*2);
+            ctx.arc(x+5, y-11, 1.5, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(x-5.8, y-12, 0.8, 0, Math.PI*2);
+            ctx.arc(x+4.2, y-12, 0.8, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Рот (в зависимости от настроения)
+            ctx.beginPath();
+            ctx.strokeStyle = "#8b5a3a";
+            ctx.lineWidth = 2;
+            ctx.arc(x, y-5, 5, 0.1, Math.PI - 0.1);
+            ctx.stroke();
+            
+            // Нос
+            ctx.fillStyle = "#c99e6f";
+            ctx.beginPath();
+            ctx.moveTo(x-2, y-8);
+            ctx.lineTo(x, y-6);
+            ctx.lineTo(x+2, y-8);
+            ctx.fill();
+            
+            // === ОРУЖИЕ ===
+            if(c.name === "Мечник") {
+                ctx.fillStyle = "#ccaa88";
+                ctx.fillRect(x+12 - armOffset*0.3, y-2, 16, 6);
+                ctx.fillStyle = "#aa8866";
+                ctx.fillRect(x+24 - armOffset*0.5, y-4, 6, 12);
+            } else if(c.name === "Лучник") {
+                ctx.fillStyle = "#c4b27a";
+                ctx.beginPath();
+                ctx.moveTo(x+14 - armOffset*0.3, y-4);
+                ctx.lineTo(x+28 - armOffset*0.5, y);
+                ctx.lineTo(x+14 - armOffset*0.3, y+4);
+                ctx.fill();
+                ctx.fillStyle = "#aa8866";
+                ctx.fillRect(x+24 - armOffset*0.5, y-2, 4, 8);
+            } else if(c.name === "Маг") {
+                ctx.fillStyle = "#ffaa66";
+                ctx.beginPath();
+                ctx.ellipse(x+14 - armOffset*0.3, y, 8, 6, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#ff8844";
+                ctx.beginPath();
+                ctx.ellipse(x+16 - armOffset*0.4, y, 4, 3, 0, 0, Math.PI*2);
+                ctx.fill();
+                // Свечение
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "#ffaa44";
+                ctx.fillStyle = "#ffaa44";
+                ctx.beginPath();
+                ctx.ellipse(x+14 - armOffset*0.3, y, 3, 2, 0, 0, Math.PI*2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            }
+            
+            // Пояс/ремень
+            ctx.fillStyle = "#8b5a2b";
+            ctx.fillRect(x-8, y+8, 16, 3);
+        }
+        
+        // ========== МОБЫ ==========
         const MOB_TYPES = [
             { name: "Гоблин", hp: 70, dmg: 16, exp: 38, color: "#6f8c5a", skin: "#8cae6a", icon: "👺", speed: 1.0, range: 55, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-12,y-18,24,32); ctx.fillStyle=this.color; ctx.fillRect(x-10,y-10,20,24); ctx.fillStyle="#000"; ctx.fillRect(x-6,y-12,4,4); ctx.fillRect(x+2,y-12,4,4); ctx.fillStyle="#8b5a2b"; ctx.fillRect(x-8,y+4,16,8); } },
             { name: "Волк", hp: 95, dmg: 24, exp: 55, color: "#8a7a6a", skin: "#c0a890", icon: "🐺", speed: 1.3, range: 50, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-14,y-16,28,28); ctx.fillStyle=this.color; ctx.fillRect(x-12,y-12,24,22); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-10,4,4); ctx.fillRect(x+4,y-10,4,4); ctx.fillStyle="#4a3a2a"; ctx.fillRect(x-4,y+2,8,6); } },
@@ -536,25 +690,31 @@
             potionHp: 5, potionMp: 5,
             potionBigHp: 1, potionBigMp: 1,
             gold: 450, speed: 4.5, defense: 15,
-            attackTimer: 0, superCooldown: 0
+            attackTimer: 0, superCooldown: 0,
+            isMoving: false
         };
         
-        // ========== ПРОСТОЕ ДВИЖЕНИЕ (БЕЗ A*) ==========
+        // ========== ПРОСТОЕ ДВИЖЕНИЕ ==========
         function moveTo(x, y) {
             player.targetX = x;
             player.targetY = y;
         }
         
         function updateMove() {
-            if(player.targetX === null || player.targetY === null) return;
+            if(player.targetX === null || player.targetY === null) {
+                player.isMoving = false;
+                return;
+            }
             let dx = player.targetX - player.x;
             let dy = player.targetY - player.y;
             let dist = Math.hypot(dx, dy);
             if(dist < 8) {
                 player.targetX = null;
                 player.targetY = null;
+                player.isMoving = false;
                 return;
             }
+            player.isMoving = true;
             let step = Math.min(player.speed, dist);
             let ang = Math.atan2(dy, dx);
             let nx = player.x + Math.cos(ang) * step;
@@ -565,10 +725,11 @@
             } else {
                 player.targetX = null;
                 player.targetY = null;
+                player.isMoving = false;
             }
         }
         
-        // СУПЕРСПОСОБНОСТИ
+        // СУПЕРСПОСОБНОСТИ (сокращены для размера)
         let explosionTarget = null;
         let whirlwindActive = false;
         let whirlwindTimer = 0;
@@ -740,7 +901,6 @@
             }
         }
         
-        // ========== ЗЕЛЬЯ - В ЛЮБОЙ ТОЧКЕ ==========
         function useHp() {
             if(player.potionHp <= 0 && player.potionBigHp <= 0) {
                 addMsg(`❌ Нет зелий HP! Купите у торговца`, true);
@@ -856,21 +1016,11 @@
         }
         
         function handleClick(wx,wy) {
-            if(showStats) {
-                showStats = false;
-                return;
-            }
+            if(showStats) { showStats=false; return; }
             if(shopOpen) {
                 let cx=canvasWidth/2, cy=canvasHeight/2-40;
-                for(let i=0;i<SHOP.length;i++) {
-                    let y=cy-20+i*62;
-                    if(wy>cameraY+y-25 && wy<cameraY+y+35) {
-                        buyItem(SHOP[i]);
-                        return;
-                    }
-                }
-                shopOpen=false;
-                return;
+                for(let i=0;i<SHOP.length;i++) { let y=cy-20+i*62; if(wy>cameraY+y-25 && wy<cameraY+y+35) { buyItem(SHOP[i]); return; } }
+                shopOpen=false; return;
             }
             if(explosionTarget?.active) { castExplosion(wx,wy); return; }
             if(isClickOnPortal(wx,wy)) return;
@@ -887,141 +1037,7 @@
             cameraY+=(ty-cameraY)*0.1;
         }
         
-        function drawMinimap() {
-            let mapSize = 180;
-            let mapX = canvasWidth - mapSize - 10;
-            let mapY = 80;
-            let cellSize = mapSize / MAP_W;
-            
-            ctx.fillStyle = "#000000aa";
-            ctx.fillRect(mapX-5, mapY-5, mapSize+10, mapSize+10);
-            ctx.fillStyle = "#1a1e2a";
-            ctx.fillRect(mapX, mapY, mapSize, mapSize);
-            
-            for(let y=0; y<MAP_H; y++) {
-                for(let x=0; x<MAP_W; x++) {
-                    let tile = worldMap[y][x];
-                    let color = getMapColor(tile);
-                    ctx.fillStyle = color;
-                    ctx.fillRect(mapX + x*cellSize, mapY + y*cellSize, cellSize+0.5, cellSize+0.5);
-                }
-            }
-            
-            let playerTileX = player.x / TILE_SIZE;
-            let playerTileY = player.y / TILE_SIZE;
-            ctx.fillStyle = "#ff4444";
-            ctx.beginPath();
-            ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.8, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.4, 0, Math.PI*2);
-            ctx.fill();
-            
-            if(portalActive && currentWorld === "forest") {
-                let portalTileX = portalX / TILE_SIZE;
-                let portalTileY = portalY / TILE_SIZE;
-                ctx.fillStyle = "#ffaa44";
-                ctx.beginPath();
-                ctx.arc(mapX + portalTileX*cellSize, mapY + portalTileY*cellSize, cellSize*0.7, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#ffff88";
-                ctx.beginPath();
-                ctx.arc(mapX + portalTileX*cellSize, mapY + portalTileY*cellSize, cellSize*0.4, 0, Math.PI*2);
-                ctx.fill();
-            }
-            
-            ctx.fillStyle = "#ffcc88";
-            ctx.font = "10px monospace";
-            ctx.fillText("🗺️ КАРТА", mapX+5, mapY-8);
-        }
-        
-        function drawFullMap() {
-            let mapWidth = Math.min(canvasWidth - 100, 800);
-            let mapHeight = mapWidth * (MAP_H / MAP_W);
-            let mapX = (canvasWidth - mapWidth) / 2;
-            let mapY = (canvasHeight - mapHeight) / 2;
-            let cellW = mapWidth / MAP_W;
-            let cellH = mapHeight / MAP_H;
-            
-            ctx.fillStyle = "#000000dd";
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-            ctx.fillStyle = "#2a2e3f";
-            ctx.fillRect(mapX-10, mapY-10, mapWidth+20, mapHeight+20);
-            
-            for(let y=0; y<MAP_H; y++) {
-                for(let x=0; x<MAP_W; x++) {
-                    let tile = worldMap[y][x];
-                    let color = getMapColor(tile);
-                    ctx.fillStyle = color;
-                    ctx.fillRect(mapX + x*cellW, mapY + y*cellH, cellW+0.5, cellH+0.5);
-                    
-                    if(tile === 3) {
-                        ctx.fillStyle = "#5aac3a";
-                        ctx.font = `${cellH*0.7}px monospace`;
-                        ctx.fillText("🌲", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8);
-                    } else if(tile === 4) {
-                        ctx.fillStyle = "#8e8e9a";
-                        ctx.font = `${cellH*0.7}px monospace`;
-                        ctx.fillText("⛰️", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8);
-                    } else if(tile === 5) {
-                        ctx.fillStyle = "#5ac8ff";
-                        ctx.font = `${cellH*0.7}px monospace`;
-                        ctx.fillText("💧", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8);
-                    }
-                }
-            }
-            
-            let playerTileX = player.x / TILE_SIZE;
-            let playerTileY = player.y / TILE_SIZE;
-            ctx.fillStyle = "#ff4444";
-            ctx.beginPath();
-            ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.6, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = "#ffffff";
-            ctx.beginPath();
-            ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.3, 0, Math.PI*2);
-            ctx.fill();
-            
-            if(portalActive && currentWorld === "forest") {
-                let portalTileX = portalX / TILE_SIZE;
-                let portalTileY = portalY / TILE_SIZE;
-                ctx.fillStyle = "#ffaa44";
-                ctx.beginPath();
-                ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.55, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#ffff88";
-                ctx.beginPath();
-                ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.3, 0, Math.PI*2);
-                ctx.fill();
-            }
-            
-            if(mapClickTarget) {
-                let targetTileX = mapClickTarget.x / TILE_SIZE;
-                let targetTileY = mapClickTarget.y / TILE_SIZE;
-                ctx.fillStyle = "#ffdd44";
-                ctx.beginPath();
-                ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.7, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#ffaa00";
-                ctx.beginPath();
-                ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.35, 0, Math.PI*2);
-                ctx.fill();
-            }
-            
-            ctx.fillStyle = "#ffcc88";
-            ctx.font = `bold ${Math.min(20, canvasWidth/30)}px monospace`;
-            ctx.fillText("🗺️ КАРТА МИРА", canvasWidth/2-80, mapY-20);
-            ctx.fillStyle = "#88aaff";
-            ctx.font = "12px monospace";
-            ctx.fillText("⬜ трава 🟫 безопасная 🚪 ворота 🌲 дерево ⛰️ гора 💧 вода 🪨 камень", canvasWidth/2-200, mapY+mapHeight+25);
-            ctx.fillStyle = "#ffaa88";
-            ctx.fillText("🔴 вы 🔶 портал 🟡 метка", canvasWidth/2+150, mapY+mapHeight+25);
-            ctx.fillStyle = "#ccaa88";
-            ctx.font = "10px monospace";
-            ctx.fillText("Нажмите на карту - персонаж пойдёт туда | ESC или клик для закрытия", canvasWidth/2-200, mapY+mapHeight+50);
-        }
-        
+        // ОТРИСОВКА (сокращена для размера, но модель игрока новая)
         function drawWorld() {
             let w = WORLDS[currentWorld];
             for(let i=0;i<WORLD_WIDTH/52+10;i++) {
@@ -1057,94 +1073,26 @@
             if(portalActive && currentWorld === "forest") {
                 let px = portalX - cameraX;
                 let py = portalY - cameraY;
-                ctx.fillStyle = "#aa44ffaa";
-                ctx.beginPath();
-                ctx.arc(px, py, 28, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = "#ff88ff";
-                ctx.beginPath();
-                ctx.arc(px, py, 20, 0, Math.PI*2);
-                ctx.fill();
-                ctx.font = "20px monospace";
-                ctx.fillStyle = "#ffffff";
-                ctx.fillText("🌀", px-12, py+8);
-                ctx.font = "9px monospace";
-                ctx.fillStyle = "#ffffaa";
-                ctx.fillText("ПОРТАЛ", px-18, py-20);
+                ctx.fillStyle = "#aa44ffaa"; ctx.beginPath(); ctx.arc(px, py, 28, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#ff88ff"; ctx.beginPath(); ctx.arc(px, py, 20, 0, Math.PI*2); ctx.fill();
+                ctx.font = "20px monospace"; ctx.fillStyle = "#ffffff"; ctx.fillText("🌀", px-12, py+8);
+                ctx.font = "9px monospace"; ctx.fillStyle = "#ffffaa"; ctx.fillText("ПОРТАЛ", px-18, py-20);
             }
             
             let npcX = shopNPC.x - cameraX;
             let npcY = shopNPC.y - cameraY;
-            ctx.fillStyle = "#c99e6f";
-            ctx.fillRect(npcX-18, npcY-25, 36, 45);
-            ctx.fillStyle = "#e8c28a";
-            ctx.fillRect(npcX-12, npcY-15, 24, 30);
-            ctx.fillStyle = "#000";
-            ctx.fillRect(npcX-8, npcY-10, 5, 5);
-            ctx.fillRect(npcX+3, npcY-10, 5, 5);
-            ctx.font = "24px monospace";
-            ctx.fillStyle = "#ffdd99";
-            ctx.fillText("🏪", npcX-12, npcY+5);
-            ctx.font = "10px monospace";
-            ctx.fillStyle = "#ffffaa";
-            ctx.fillText("Торговец", npcX-20, npcY-28);
+            ctx.fillStyle = "#c99e6f"; ctx.fillRect(npcX-18, npcY-25, 36, 45);
+            ctx.fillStyle = "#e8c28a"; ctx.fillRect(npcX-12, npcY-15, 24, 30);
+            ctx.fillStyle = "#000"; ctx.fillRect(npcX-8, npcY-10, 5, 5); ctx.fillRect(npcX+3, npcY-10, 5, 5);
+            ctx.font = "24px monospace"; ctx.fillStyle = "#ffdd99"; ctx.fillText("🏪", npcX-12, npcY+5);
+            ctx.font = "10px monospace"; ctx.fillStyle = "#ffffaa"; ctx.fillText("Торговец", npcX-20, npcY-28);
             
             for(let g of gates) {
                 let gx=g.x-cameraX, gy=g.y-cameraY;
                 ctx.fillStyle="#c9a87a"; ctx.fillRect(gx,gy,g.width,g.height);
                 ctx.fillStyle="#e8c28a";
-                if(g.width>g.height) {
-                    for(let i=0;i<3;i++) ctx.fillRect(gx+15+i*25,gy+12,12,18);
-                } else {
-                    for(let i=0;i<3;i++) ctx.fillRect(gx+12,gy+15+i*25,18,12);
-                }
-            }
-        }
-        
-        function drawPlayer() {
-            let x=player.x-cameraX, y=player.y-cameraY;
-            let c=CLASSES[player.classType];
-            ctx.fillStyle = "#e0c8a0";
-            ctx.fillRect(x-12, y-24, 24, 44);
-            ctx.fillStyle = c.color;
-            ctx.fillRect(x-10, y-16, 20, 32);
-            ctx.fillStyle = c.armor;
-            ctx.fillRect(x-8, y-8, 16, 24);
-            ctx.fillStyle = "#e0c8a0";
-            ctx.fillRect(x-8, y-28, 16, 16);
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(x-5, y-24, 4, 4);
-            ctx.fillRect(x+1, y-24, 4, 4);
-            ctx.fillStyle = "#000";
-            ctx.fillRect(x-4, y-23, 2, 2);
-            ctx.fillRect(x+2, y-23, 2, 2);
-            if(c.name === "Мечник") {
-                ctx.fillStyle = "#ccaaff";
-                ctx.fillRect(x+8, y-12, 8, 24);
-            } else if(c.name === "Лучник") {
-                ctx.fillStyle = "#c4b27a";
-                ctx.fillRect(x+8, y-14, 12, 6);
-                ctx.fillRect(x+12, y-8, 4, 12);
-            } else if(c.name === "Маг") {
-                ctx.fillStyle = "#ffaa66";
-                ctx.fillRect(x+6, y-14, 10, 10);
-                ctx.fillStyle = "#ff8844";
-                ctx.fillRect(x+8, y-10, 6, 6);
-            }
-            ctx.font = "16px monospace";
-            ctx.fillStyle = "#ffffaa";
-            ctx.fillText(c.icon, x-6, y+2);
-            ctx.fillStyle = "#a33";
-            ctx.fillRect(x-20, y-36, 56, 7);
-            ctx.fillStyle = "#4f6";
-            ctx.fillRect(x-20, y-36, 56 * (player.hp/player.maxHp), 7);
-            if(whirlwindActive) {
-                ctx.fillStyle = "#ffaa44aa";
-                ctx.beginPath();
-                ctx.arc(x, y, 45, 0, Math.PI*2);
-                ctx.fill();
-                whirlwindTimer--;
-                if(whirlwindTimer <= 0) whirlwindActive = false;
+                if(g.width>g.height) { for(let i=0;i<3;i++) ctx.fillRect(gx+15+i*25,gy+12,12,18); }
+                else { for(let i=0;i<3;i++) ctx.fillRect(gx+12,gy+15+i*25,18,12); }
             }
         }
         
@@ -1154,13 +1102,77 @@
             if(x < -80 || x > canvasWidth+80) return;
             m.drawFunc(x, y);
             let percent = m.hp / m.maxHp;
-            ctx.fillStyle = "#a33";
-            ctx.fillRect(x-24, y-32, 48, 6);
-            ctx.fillStyle = "#4f6";
-            ctx.fillRect(x-24, y-32, 48 * percent, 6);
-            ctx.font = "9px monospace";
-            ctx.fillStyle = "#ffffaa";
-            ctx.fillText(m.name, x-20, y-38);
+            ctx.fillStyle = "#a33"; ctx.fillRect(x-24, y-32, 48, 6);
+            ctx.fillStyle = "#4f6"; ctx.fillRect(x-24, y-32, 48 * percent, 6);
+            ctx.font = "9px monospace"; ctx.fillStyle = "#ffffaa"; ctx.fillText(m.name, x-20, y-38);
+        }
+        
+        function drawMinimap() {
+            let mapSize = 180;
+            let mapX = canvasWidth - mapSize - 10;
+            let mapY = 80;
+            let cellSize = mapSize / MAP_W;
+            ctx.fillStyle = "#000000aa"; ctx.fillRect(mapX-5, mapY-5, mapSize+10, mapSize+10);
+            ctx.fillStyle = "#1a1e2a"; ctx.fillRect(mapX, mapY, mapSize, mapSize);
+            for(let y=0; y<MAP_H; y++) {
+                for(let x=0; x<MAP_W; x++) {
+                    let tile = worldMap[y][x];
+                    ctx.fillStyle = getMapColor(tile);
+                    ctx.fillRect(mapX + x*cellSize, mapY + y*cellSize, cellSize+0.5, cellSize+0.5);
+                }
+            }
+            let playerTileX = player.x / TILE_SIZE;
+            let playerTileY = player.y / TILE_SIZE;
+            ctx.fillStyle = "#ff4444"; ctx.beginPath(); ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.8, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.4, 0, Math.PI*2); ctx.fill();
+            if(portalActive && currentWorld === "forest") {
+                let portalTileX = portalX / TILE_SIZE;
+                let portalTileY = portalY / TILE_SIZE;
+                ctx.fillStyle = "#ffaa44"; ctx.beginPath(); ctx.arc(mapX + portalTileX*cellSize, mapY + portalTileY*cellSize, cellSize*0.7, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#ffff88"; ctx.beginPath(); ctx.arc(mapX + portalTileX*cellSize, mapY + portalTileY*cellSize, cellSize*0.4, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.fillStyle = "#ffcc88"; ctx.font = "10px monospace"; ctx.fillText("🗺️ КАРТА", mapX+5, mapY-8);
+        }
+        
+        function drawFullMap() {
+            let mapWidth = Math.min(canvasWidth - 100, 800);
+            let mapHeight = mapWidth * (MAP_H / MAP_W);
+            let mapX = (canvasWidth - mapWidth) / 2;
+            let mapY = (canvasHeight - mapHeight) / 2;
+            let cellW = mapWidth / MAP_W;
+            let cellH = mapHeight / MAP_H;
+            ctx.fillStyle = "#000000dd"; ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillStyle = "#2a2e3f"; ctx.fillRect(mapX-10, mapY-10, mapWidth+20, mapHeight+20);
+            for(let y=0; y<MAP_H; y++) {
+                for(let x=0; x<MAP_W; x++) {
+                    let tile = worldMap[y][x];
+                    ctx.fillStyle = getMapColor(tile);
+                    ctx.fillRect(mapX + x*cellW, mapY + y*cellH, cellW+0.5, cellH+0.5);
+                    if(tile === 3) { ctx.fillStyle = "#5aac3a"; ctx.font = `${cellH*0.7}px monospace`; ctx.fillText("🌲", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8); }
+                    else if(tile === 4) { ctx.fillStyle = "#8e8e9a"; ctx.font = `${cellH*0.7}px monospace`; ctx.fillText("⛰️", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8); }
+                    else if(tile === 5) { ctx.fillStyle = "#5ac8ff"; ctx.font = `${cellH*0.7}px monospace`; ctx.fillText("💧", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8); }
+                }
+            }
+            let playerTileX = player.x / TILE_SIZE;
+            let playerTileY = player.y / TILE_SIZE;
+            ctx.fillStyle = "#ff4444"; ctx.beginPath(); ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.6, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.3, 0, Math.PI*2); ctx.fill();
+            if(portalActive && currentWorld === "forest") {
+                let portalTileX = portalX / TILE_SIZE;
+                let portalTileY = portalY / TILE_SIZE;
+                ctx.fillStyle = "#ffaa44"; ctx.beginPath(); ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.55, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#ffff88"; ctx.beginPath(); ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.3, 0, Math.PI*2); ctx.fill();
+            }
+            if(mapClickTarget) {
+                let targetTileX = mapClickTarget.x / TILE_SIZE;
+                let targetTileY = mapClickTarget.y / TILE_SIZE;
+                ctx.fillStyle = "#ffdd44"; ctx.beginPath(); ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.7, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = "#ffaa00"; ctx.beginPath(); ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.35, 0, Math.PI*2); ctx.fill();
+            }
+            ctx.fillStyle = "#ffcc88"; ctx.font = `bold ${Math.min(20, canvasWidth/30)}px monospace`; ctx.fillText("🗺️ КАРТА МИРА", canvasWidth/2-80, mapY-20);
+            ctx.fillStyle = "#88aaff"; ctx.font = "12px monospace"; ctx.fillText("⬜ трава 🟫 безопасная 🚪 ворота 🌲 дерево ⛰️ гора 💧 вода 🪨 камень", canvasWidth/2-200, mapY+mapHeight+25);
+            ctx.fillStyle = "#ffaa88"; ctx.fillText("🔴 вы 🔶 портал 🟡 метка", canvasWidth/2+150, mapY+mapHeight+25);
+            ctx.fillStyle = "#ccaa88"; ctx.font = "10px monospace"; ctx.fillText("Нажмите на карту - персонаж пойдёт туда | ESC или клик для закрытия", canvasWidth/2-200, mapY+mapHeight+50);
         }
         
         function drawUI() {
@@ -1170,63 +1182,27 @@
             ctx.fillStyle="#c55"; ctx.fillRect(18,18,190,18);
             ctx.fillStyle="#f75"; ctx.fillRect(18,18,190*(player.hp/player.maxHp),18);
             ctx.fillStyle="#58f"; ctx.fillRect(18,42,190*(player.mp/player.maxMp),16);
-            ctx.fillStyle="#fff"; ctx.font=`bold ${fs}px monospace`;
-            ctx.fillText(`❤️ ${Math.floor(player.hp)}/${player.maxHp}`,22,34);
+            ctx.fillStyle="#fff"; ctx.font=`bold ${fs}px monospace`; ctx.fillText(`❤️ ${Math.floor(player.hp)}/${player.maxHp}`,22,34);
             ctx.fillText(`💙 ${Math.floor(player.mp)}/${player.maxMp}`,22,56);
-            ctx.fillStyle="#fd9"; ctx.font=`bold ${fs+2}px monospace`;
-            ctx.fillText(`${c.name} Lv.${player.level}`,22,88);
-            ctx.fillStyle="#000000aa"; ctx.fillRect(12,96,210,14);
-            ctx.fillStyle="#8af"; ctx.fillRect(12,96,210*(player.exp/player.expToNext),14);
-            ctx.fillStyle="#fff"; ctx.font=`${fs-2}px monospace`;
-            ctx.fillText(`EXP: ${player.exp}/${player.expToNext}`,18,108);
+            ctx.fillStyle="#fd9"; ctx.font=`bold ${fs+2}px monospace`; ctx.fillText(`${c.name} Lv.${player.level}`,22,88);
+            ctx.fillStyle="#000000aa"; ctx.fillRect(12,96,210,14); ctx.fillStyle="#8af"; ctx.fillRect(12,96,210*(player.exp/player.expToNext),14);
+            ctx.fillStyle="#fff"; ctx.font=`${fs-2}px monospace`; ctx.fillText(`EXP: ${player.exp}/${player.expToNext}`,18,108);
             ctx.fillStyle="#000000aa"; ctx.fillRect(canvasWidth-145,12,133,60);
-            ctx.fillStyle="#fc8"; ctx.font=`bold ${fs}px monospace`;
-            ctx.fillText(`💰 ${player.gold}`,canvasWidth-135,35);
+            ctx.fillStyle="#fc8"; ctx.font=`bold ${fs}px monospace`; ctx.fillText(`💰 ${player.gold}`,canvasWidth-135,35);
             ctx.fillText(`🧪${player.potionHp}  🔮${player.potionMp}`,canvasWidth-135,60);
-            for(let i=0;i<Math.min(4,messages.length);i++) {
-                let m=messages[i];
-                ctx.fillStyle=m.isErr?"#f86c":"#edbc";
-                ctx.font=`${fs-2}px monospace`;
-                ctx.fillText(m.text.substring(0,32),15,canvasHeight-45-i*18);
-            }
-            if(selectedMob&&selectedMob.hp>0) {
-                let x=selectedMob.x-cameraX, y=selectedMob.y-cameraY;
-                ctx.strokeStyle="#fa4"; ctx.lineWidth=4;
-                ctx.strokeRect(x-20,y-30,56,56);
-            }
-            if(player.targetX!==null && player.targetY!==null) {
-                let tx=player.targetX-cameraX, ty=player.targetY-cameraY;
-                ctx.fillStyle="#fc4a"; ctx.beginPath(); ctx.arc(tx,ty,16,0,Math.PI*2); ctx.fill();
-                ctx.fillStyle="#fa0"; ctx.beginPath(); ctx.arc(tx,ty,8,0,Math.PI*2); ctx.fill();
-            }
-            for(let i=0;i<damageFloats.length;i++) {
-                let d=damageFloats[i], x=d.x-cameraX, y=d.y-cameraY;
-                if(d.isExplosion) {
-                    ctx.font="bold 32px monospace"; ctx.fillStyle="#ff8844";
-                    ctx.fillText("💥",x-15,y-20);
-                } else {
-                    ctx.font=`bold ${d.isPlayer?18:22}px monospace`;
-                    ctx.fillStyle=d.isPlayer?"#fa6":"#f84";
-                    ctx.fillText(`-${d.dmg}`,x-12,y-28);
-                }
-                d.life--; if(d.life<=0) damageFloats.splice(i,1), i--;
-            }
+            for(let i=0;i<Math.min(4,messages.length);i++) { let m=messages[i]; ctx.fillStyle=m.isErr?"#f86c":"#edbc"; ctx.font=`${fs-2}px monospace`; ctx.fillText(m.text.substring(0,32),15,canvasHeight-45-i*18); }
+            if(selectedMob&&selectedMob.hp>0) { let x=selectedMob.x-cameraX, y=selectedMob.y-cameraY; ctx.strokeStyle="#fa4"; ctx.lineWidth=4; ctx.strokeRect(x-20,y-30,56,56); }
+            if(player.targetX!==null && player.targetY!==null) { let tx=player.targetX-cameraX, ty=player.targetY-cameraY; ctx.fillStyle="#fc4a"; ctx.beginPath(); ctx.arc(tx,ty,16,0,Math.PI*2); ctx.fill(); ctx.fillStyle="#fa0"; ctx.beginPath(); ctx.arc(tx,ty,8,0,Math.PI*2); ctx.fill(); }
+            for(let i=0;i<damageFloats.length;i++) { let d=damageFloats[i], x=d.x-cameraX, y=d.y-cameraY; if(d.isExplosion) { ctx.font="bold 32px monospace"; ctx.fillStyle="#ff8844"; ctx.fillText("💥",x-15,y-20); } else { ctx.font=`bold ${d.isPlayer?18:22}px monospace`; ctx.fillStyle=d.isPlayer?"#fa6":"#f84"; ctx.fillText(`-${d.dmg}`,x-12,y-28); } d.life--; if(d.life<=0) damageFloats.splice(i,1), i--; }
             if(shopOpen&&isInSafeZone(player.x,player.y)) {
                 ctx.fillStyle="#000000dd"; ctx.fillRect(canvasWidth/2-210,canvasHeight/2-150,420,280);
-                ctx.fillStyle="#fd9"; ctx.font=`bold ${Math.min(24,canvasWidth/30)}px monospace`;
-                ctx.fillText("🏪 МАГАЗИН",canvasWidth/2-80,canvasHeight/2-90);
-                for(let i=0;i<SHOP.length;i++) {
-                    let it=SHOP[i], y=canvasHeight/2-35+i*62;
-                    ctx.fillStyle="#a86"; ctx.fillRect(canvasWidth/2-180,y-12,360,48);
-                    ctx.fillStyle="#fc8"; ctx.font=`${Math.min(18,canvasWidth/45)}px monospace`;
-                    ctx.fillText(`${it.icon} ${it.name} - ${it.price}💰`,canvasWidth/2-150,y+12);
-                }
+                ctx.fillStyle="#fd9"; ctx.font=`bold ${Math.min(24,canvasWidth/30)}px monospace`; ctx.fillText("🏪 МАГАЗИН",canvasWidth/2-80,canvasHeight/2-90);
+                for(let i=0;i<SHOP.length;i++) { let it=SHOP[i], y=canvasHeight/2-35+i*62; ctx.fillStyle="#a86"; ctx.fillRect(canvasWidth/2-180,y-12,360,48); ctx.fillStyle="#fc8"; ctx.font=`${Math.min(18,canvasWidth/45)}px monospace`; ctx.fillText(`${it.icon} ${it.name} - ${it.price}💰`,canvasWidth/2-150,y+12); }
             }
             if(showStats) {
                 let t=getPlayTime();
                 ctx.fillStyle="#000000dd"; ctx.fillRect(canvasWidth/2-190,canvasHeight/2-170,380,340);
-                ctx.fillStyle="#fd9"; ctx.font=`bold ${Math.min(24,canvasWidth/30)}px monospace`;
-                ctx.fillText("⚙️ СТАТИСТИКА",canvasWidth/2-95,canvasHeight/2-120);
+                ctx.fillStyle="#fd9"; ctx.font=`bold ${Math.min(24,canvasWidth/30)}px monospace`; ctx.fillText("⚙️ СТАТИСТИКА",canvasWidth/2-95,canvasHeight/2-120);
                 ctx.font=`${Math.min(14,canvasWidth/50)}px monospace`; ctx.fillStyle="#edb";
                 ctx.fillText(`👾 Убито: ${stats.mobsKilled}`,canvasWidth/2-150,canvasHeight/2-55);
                 ctx.fillText(`💰 Золота: ${stats.totalGold}`,canvasWidth/2-150,canvasHeight/2-20);
@@ -1237,13 +1213,7 @@
                 ctx.fillText(`🌍 Мир: ${WORLDS[currentWorld].name}`,canvasWidth/2-150,canvasHeight/2+155);
                 ctx.fillText(`🚪 Убито для портала: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL}`,canvasWidth/2-150,canvasHeight/2+190);
             }
-            if(player.superCooldown>0) {
-                let p=player.superCooldown/180;
-                ctx.fillStyle="#000000aa"; ctx.fillRect(15,canvasHeight-70,70,12);
-                ctx.fillStyle="#ffaa44"; ctx.fillRect(15,canvasHeight-70,70*(1-p),12);
-                ctx.fillStyle="#ffaa88"; ctx.font="10px monospace";
-                ctx.fillText(`🌟 ${Math.ceil(player.superCooldown/10)}с`,20,canvasHeight-55);
-            }
+            if(player.superCooldown>0) { let p=player.superCooldown/180; ctx.fillStyle="#000000aa"; ctx.fillRect(15,canvasHeight-70,70,12); ctx.fillStyle="#ffaa44"; ctx.fillRect(15,canvasHeight-70,70*(1-p),12); ctx.fillStyle="#ffaa88"; ctx.font="10px monospace"; ctx.fillText(`🌟 ${Math.ceil(player.superCooldown/10)}с`,20,canvasHeight-55); }
             drawMinimap();
             if(showMap) drawFullMap();
         }
@@ -1255,13 +1225,9 @@
             if(player.attackTimer > 0) player.attackTimer--;
             if(player.superCooldown > 0) player.superCooldown--;
             if(spawnTimer <= 0) {
-                if(mobs.length < MAX_MOBS) {
-                    for(let i=0;i<3;i++) spawnMob();
-                }
+                if(mobs.length < MAX_MOBS) { for(let i=0;i<3;i++) spawnMob(); }
                 spawnTimer = 12;
-            } else {
-                spawnTimer--;
-            }
+            } else { spawnTimer--; }
             for(let i=0;i<messages.length;i++) if(messages[i].life) messages[i].life--;
             messages=messages.filter(m=>!m.life||m.life>0);
         }
@@ -1279,7 +1245,6 @@
             let mapY = (canvasHeight - mapHeight) / 2;
             let cellW = mapWidth / MAP_W;
             let cellH = mapHeight / MAP_H;
-            
             if(clientX > mapX && clientX < mapX + mapWidth && clientY > mapY && clientY < mapY + mapHeight) {
                 let tileX = Math.floor((clientX - mapX) / cellW);
                 let tileY = Math.floor((clientY - mapY) / cellH);
@@ -1291,32 +1256,19 @@
                         moveTo(worldX, worldY);
                         addMsg(`📍 Перемещение к отмеченной точке на карте`);
                         showMap = false;
-                    } else {
-                        addMsg(`🚫 В эту точку нельзя пройти (препятствие)`, true);
-                    }
+                    } else { addMsg(`🚫 В эту точку нельзя пройти (препятствие)`, true); }
                 }
             }
         }
         
         canvas.addEventListener('click', (e) => { 
-            if(showMap) {
-                handleMapClick(e.clientX, e.clientY);
-                return;
-            }
-            let w = getWorldClick(e.clientX, e.clientY); 
-            handleClick(w.x, w.y); 
+            if(showMap) { handleMapClick(e.clientX, e.clientY); return; }
+            let w = getWorldClick(e.clientX, e.clientY); handleClick(w.x, w.y); 
         });
-        
         canvas.addEventListener('touchstart', (e) => { 
             e.preventDefault(); 
-            if(showMap) {
-                let touch = e.touches[0];
-                handleMapClick(touch.clientX, touch.clientY);
-                return;
-            }
-            let t = e.touches[0]; 
-            let w = getWorldClick(t.clientX, t.clientY); 
-            handleClick(w.x, w.y); 
+            if(showMap) { let touch = e.touches[0]; handleMapClick(touch.clientX, touch.clientY); return; }
+            let t = e.touches[0]; let w = getWorldClick(t.clientX, t.clientY); handleClick(w.x, w.y); 
         });
         
         setInterval(()=>{
@@ -1360,9 +1312,7 @@
                 }
                 playerNickname = await showNicknameModal();
                 document.getElementById('nicknameDisplay').innerText = `👤 ${playerNickname}`;
-                if(!loadGame(playerNickname)) {
-                    addMsg(`✨ Добро пожаловать, ${playerNickname}! Новая игра начинается!`);
-                }
+                if(!loadGame(playerNickname)) { addMsg(`✨ Добро пожаловать, ${playerNickname}! Новая игра начинается!`); }
             })();
             generateWorld();
             updateStatsFromLevel();
@@ -1385,7 +1335,15 @@
         
         startGame();
         
-        function render() { drawWorld(); for(let m of mobs) drawMob(m); drawPlayer(); drawUI(); }
+        function render() { 
+            drawWorld(); 
+            for(let m of mobs) drawMob(m); 
+            // Отрисовка игрока с новой моделью
+            let px = player.x - cameraX;
+            let py = player.y - cameraY;
+            drawRealisticPlayer(px, py, player.isMoving);
+            drawUI(); 
+        }
         function loop() { update(); render(); requestAnimationFrame(loop); }
         loop();
     })();
