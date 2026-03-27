@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
-    <title>Rucoy Online - Полная версия с картой</title>
+    <title>Rucoy Online - Полная версия с картой и кликами</title>
     <style>
         * {
             margin: 0;
@@ -163,8 +163,8 @@
         
         // ========== КАРТА МИРА ==========
         let showMap = false;
+        let mapClickTarget = null;
         let worldMap = Array(MAP_H).fill().map(() => Array(MAP_W).fill(0));
-        // 0=трава, 1=безопасная зона, 2=ворота, 3=дерево, 4=гора, 5=вода, 6=камень
         
         function getMapColor(tile) {
             if(tile === 0) return "#3a6c2a";
@@ -175,17 +175,6 @@
             if(tile === 5) return "#3a8cbb";
             if(tile === 6) return "#7a6a5a";
             return "#3a6c2a";
-        }
-        
-        function getMapSymbol(tile) {
-            if(tile === 0) return "⬜";
-            if(tile === 1) return "🟫";
-            if(tile === 2) return "🚪";
-            if(tile === 3) return "🌲";
-            if(tile === 4) return "⛰️";
-            if(tile === 5) return "💧";
-            if(tile === 6) return "🪨";
-            return "⬜";
         }
         
         // ========== МИРЫ ==========
@@ -218,8 +207,6 @@
                 mobColors: ["#6a7a8a", "#8a9aaa", "#5a6a7a", "#7a8a9a", "#9aabbb", "#4a5a6a"]
             }
         };
-        
-        let cameraXmap = 0, cameraYmap = 0;
         
         // ========== СИСТЕМА СОХРАНЕНИЯ ==========
         let playerNickname = null;
@@ -409,13 +396,11 @@
                     worldMap[i][j] = 0;
                 }
             }
-            // Безопасная зона
             for(let y=12;y<24;y++) {
                 for(let x=14;x<30;x++) {
                     worldMap[y][x] = 1;
                 }
             }
-            // Ворота
             for(let x=19;x<25;x++) { worldMap[11][x] = 2; worldMap[24][x] = 2; }
             for(let y=16;y<22;y++) { worldMap[y][13] = 2; worldMap[y][30] = 2; }
             
@@ -483,7 +468,92 @@
             return true;
         }
         
-        // КЛАССЫ
+        // ========== A* ПОИСК ПУТИ ==========
+        function findPathAStar(sx, sy, tx, ty) {
+            let start = { x: sx, y: sy };
+            let target = { x: tx, y: ty };
+            let dist = Math.hypot(tx - sx, ty - sy);
+            if(dist < 30) return [{x: tx, y: ty}];
+            
+            let openSet = [start];
+            let cameFrom = new Map();
+            let gScore = new Map();
+            let fScore = new Map();
+            
+            gScore.set(`${start.x},${start.y}`, 0);
+            fScore.set(`${start.x},${start.y}`, Math.hypot(start.x - target.x, start.y - target.y));
+            
+            while(openSet.length > 0) {
+                let current = openSet.reduce((a,b) => {
+                    let af = fScore.get(`${a.x},${a.y}`) || Infinity;
+                    let bf = fScore.get(`${b.x},${b.y}`) || Infinity;
+                    return af < bf ? a : b;
+                });
+                
+                if(Math.hypot(current.x - target.x, current.y - target.y) < 35) {
+                    let path = [];
+                    let cur = current;
+                    while(cameFrom.has(`${cur.x},${cur.y}`)) {
+                        path.unshift({x: cur.x, y: cur.y});
+                        cur = cameFrom.get(`${cur.x},${cur.y}`);
+                    }
+                    path.push({x: tx, y: ty});
+                    return path;
+                }
+                
+                openSet = openSet.filter(p => !(p.x === current.x && p.y === current.y));
+                
+                let directions = [
+                    {x: current.x + 35, y: current.y}, {x: current.x - 35, y: current.y},
+                    {x: current.x, y: current.y + 35}, {x: current.x, y: current.y - 35},
+                    {x: current.x + 25, y: current.y + 25}, {x: current.x + 25, y: current.y - 25},
+                    {x: current.x - 25, y: current.y + 25}, {x: current.x - 25, y: current.y - 25}
+                ];
+                
+                for(let n of directions) {
+                    if(!canMoveTo(n.x, n.y, 24)) continue;
+                    let tentG = (gScore.get(`${current.x},${current.y}`) || 0) + Math.hypot(n.x - current.x, n.y - current.y);
+                    let key = `${n.x},${n.y}`;
+                    if(tentG < (gScore.get(key) || Infinity)) {
+                        cameFrom.set(key, {x: current.x, y: current.y});
+                        gScore.set(key, tentG);
+                        fScore.set(key, tentG + Math.hypot(n.x - target.x, n.y - target.y));
+                        if(!openSet.some(p => p.x === n.x && p.y === n.y)) openSet.push(n);
+                    }
+                }
+            }
+            return [{x: tx, y: ty}];
+        }
+        
+        function moveTo(x, y) {
+            player.targetX = x;
+            player.targetY = y;
+            player.path = findPathAStar(player.x, player.y, x, y);
+        }
+        
+        function updateMove() {
+            if(!player.path || player.path.length === 0) return;
+            let next = player.path[0];
+            let dx = next.x - player.x, dy = next.y - player.y;
+            let dist = Math.hypot(dx, dy);
+            if(dist < 12) {
+                player.path.shift();
+            } else {
+                let step = Math.min(player.speed, dist);
+                let ang = Math.atan2(dy, dx);
+                let nx = player.x + Math.cos(ang) * step;
+                let ny = player.y + Math.sin(ang) * step;
+                if(canMoveTo(nx, ny, 24)) {
+                    player.x = nx;
+                    player.y = ny;
+                } else {
+                    player.path = [];
+                    player.targetX = null;
+                }
+            }
+        }
+        
+        // ========== КЛАССЫ ==========
         const CLASSES = {
             warrior: { name: "Мечник", icon: "⚔️", color: "#6c8cae", armor: "#5a7a9a", 
                 hp: 320, mp: 75, dmgMin: 34, dmgMax: 60, skill: "Вихрь", 
@@ -541,7 +611,7 @@
         
         let player = {
             x: safeZone.x + safeZone.width/2, y: safeZone.y + safeZone.height/2,
-            targetX: null, targetY: null,
+            targetX: null, targetY: null, path: [],
             hp: 320, maxHp: 320, mp: 75, maxMp: 75,
             level: 1, exp: 0, expToNext: 90,
             classType: "warrior",
@@ -549,35 +619,6 @@
             gold: 450, speed: 4.5, defense: 15,
             attackTimer: 0, superCooldown: 0
         };
-        
-        // ДВИЖЕНИЕ
-        function moveTo(x, y) {
-            player.targetX = x;
-            player.targetY = y;
-        }
-        
-        function updateMove() {
-            if(player.targetX === null || player.targetY === null) return;
-            let dx = player.targetX - player.x;
-            let dy = player.targetY - player.y;
-            let dist = Math.hypot(dx, dy);
-            if(dist < 8) {
-                player.targetX = null;
-                player.targetY = null;
-                return;
-            }
-            let step = Math.min(player.speed, dist);
-            let ang = Math.atan2(dy, dx);
-            let nx = player.x + Math.cos(ang) * step;
-            let ny = player.y + Math.sin(ang) * step;
-            if(canMoveTo(nx, ny, 24)) {
-                player.x = nx;
-                player.y = ny;
-            } else {
-                player.targetX = null;
-                player.targetY = null;
-            }
-        }
         
         // СУПЕРСПОСОБНОСТИ
         let explosionTarget = null;
@@ -735,8 +776,8 @@
                                 player.mp = player.maxMp;
                                 player.x = safeZone.x + safeZone.width/2;
                                 player.y = safeZone.y + safeZone.height/2;
+                                player.path = [];
                                 player.targetX = null;
-                                player.targetY = null;
                                 addMsg(`💀 ВОСКРЕШЕНИЕ В БЕЗОПАСНОЙ ЗОНЕ 💀`, true);
                                 saveGame();
                             }
@@ -752,25 +793,54 @@
             }
         }
         
+        // ========== ЗЕЛЬЯ - ТЕПЕРЬ В ЛЮБОЙ ТОЧКЕ КАРТЫ ==========
         function useHp() {
-            if(!isInSafeZone(player.x,player.y)) { addMsg(`🏪 Зелья только в безопасной зоне!`, true); return; }
-            if(player.potionHp<=0) { addMsg(`❌ Нет зелий HP! Купите у торговца`, true); return; }
-            let heal=Math.floor(player.maxHp*0.75);
-            player.hp=Math.min(player.maxHp,player.hp+heal);
-            player.potionHp--;
-            addMsg(`❤️ +${heal} HP (осталось ${player.potionHp})`);
+            if(player.potionHp <= 0 && player.potionBigHp <= 0) {
+                addMsg(`❌ Нет зелий HP! Купите у торговца`, true);
+                return;
+            }
+            stats.potionsUsed = (stats.potionsUsed || 0) + 1;
+            if(player.potionBigHp > 0 && player.hp < player.maxHp * 0.5) {
+                let heal = Math.floor(player.maxHp * 0.9);
+                player.hp = Math.min(player.maxHp, player.hp + heal);
+                player.potionBigHp--;
+                addMsg(`❤️❤️ БОЛЬШОЕ ЗЕЛЬЕ! +${heal} HP`);
+            } else if(player.potionHp > 0) {
+                let heal = Math.floor(player.maxHp * 0.7);
+                player.hp = Math.min(player.maxHp, player.hp + heal);
+                player.potionHp--;
+                addMsg(`❤️ +${heal} HP (осталось ${player.potionHp})`);
+            } else {
+                addMsg(`❌ Нет малых зелий!`, true);
+            }
             saveGame();
         }
         
         function useMp() {
-            if(!isInSafeZone(player.x,player.y)) { addMsg(`🏪 Зелья только в безопасной зоне!`, true); return; }
-            if(player.potionMp<=0) { addMsg(`❌ Нет зелий MP! Купите у торговца`, true); return; }
-            let mana=Math.floor(player.maxMp*0.8);
-            player.mp=Math.min(player.maxMp,player.mp+mana);
-            player.potionMp--;
-            addMsg(`💙 +${mana} MP (осталось ${player.potionMp})`);
+            if(player.potionMp <= 0 && player.potionBigMp <= 0) {
+                addMsg(`❌ Нет зелий MP! Купите у торговца`, true);
+                return;
+            }
+            stats.potionsUsed = (stats.potionsUsed || 0) + 1;
+            if(player.potionBigMp > 0 && player.mp < player.maxMp * 0.5) {
+                let mana = Math.floor(player.maxMp);
+                player.mp = Math.min(player.maxMp, player.mp + mana);
+                player.potionBigMp--;
+                addMsg(`💙💙 БОЛЬШОЕ ЗЕЛЬЕ! +${mana} MP`);
+            } else if(player.potionMp > 0) {
+                let mana = Math.floor(player.maxMp * 0.75);
+                player.mp = Math.min(player.maxMp, player.mp + mana);
+                player.potionMp--;
+                addMsg(`💙 +${mana} MP (осталось ${player.potionMp})`);
+            } else {
+                addMsg(`❌ Нет малых зелий!`, true);
+            }
             saveGame();
         }
+        
+        // Добавляем большие зелья в инвентарь
+        player.potionBigHp = 1;
+        player.potionBigMp = 1;
         
         const SHOP = [
             { name: "Зелье HP", type: "hp", price: 60, icon: "❤️" },
@@ -793,8 +863,8 @@
                 player.gold-=item.price;
                 if(item.type==="hp") player.potionHp++;
                 else if(item.type==="mp") player.potionMp++;
-                else if(item.type==="hp_big") player.potionHp+=2;
-                else if(item.type==="mp_big") player.potionMp+=2;
+                else if(item.type==="hp_big") player.potionBigHp++;
+                else if(item.type==="mp_big") player.potionBigMp++;
                 addMsg(`✅ Куплен ${item.name}!`);
                 saveGame();
             } else addMsg(`💰 Не хватает золота!`, true);
@@ -845,9 +915,8 @@
         }
         
         function handleClick(wx,wy) {
-            if(showStats || showMap) {
+            if(showStats) {
                 showStats = false;
-                showMap = false;
                 return;
             }
             if(shopOpen) {
@@ -877,7 +946,7 @@
             cameraY+=(ty-cameraY)*0.1;
         }
         
-        // ========== ОТРИСОВКА КАРТЫ ==========
+        // ========== ОТРИСОВКА МИНИ-КАРТЫ ==========
         function drawMinimap() {
             let mapSize = 180;
             let mapX = canvasWidth - mapSize - 10;
@@ -898,7 +967,6 @@
                 }
             }
             
-            // Игрок на карте
             let playerTileX = player.x / TILE_SIZE;
             let playerTileY = player.y / TILE_SIZE;
             ctx.fillStyle = "#ff4444";
@@ -910,7 +978,6 @@
             ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.4, 0, Math.PI*2);
             ctx.fill();
             
-            // Портал на карте
             if(portalActive && currentWorld === "forest") {
                 let portalTileX = portalX / TILE_SIZE;
                 let portalTileY = portalY / TILE_SIZE;
@@ -929,7 +996,7 @@
             ctx.fillText("🗺️ КАРТА", mapX+5, mapY-8);
         }
         
-        // ========== ПОЛНОЭКРАННАЯ КАРТА ==========
+        // ========== ПОЛНОЭКРАННАЯ КАРТА С КЛИКАМИ ==========
         function drawFullMap() {
             let mapWidth = Math.min(canvasWidth - 100, 800);
             let mapHeight = mapWidth * (MAP_H / MAP_W);
@@ -950,7 +1017,6 @@
                     ctx.fillStyle = color;
                     ctx.fillRect(mapX + x*cellW, mapY + y*cellH, cellW+0.5, cellH+0.5);
                     
-                    // Символы для некоторых объектов
                     if(tile === 3) {
                         ctx.fillStyle = "#5aac3a";
                         ctx.font = `${cellH*0.7}px monospace`;
@@ -967,7 +1033,6 @@
                 }
             }
             
-            // Игрок
             let playerTileX = player.x / TILE_SIZE;
             let playerTileY = player.y / TILE_SIZE;
             ctx.fillStyle = "#ff4444";
@@ -979,7 +1044,6 @@
             ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.3, 0, Math.PI*2);
             ctx.fill();
             
-            // Портал
             if(portalActive && currentWorld === "forest") {
                 let portalTileX = portalX / TILE_SIZE;
                 let portalTileY = portalY / TILE_SIZE;
@@ -991,9 +1055,20 @@
                 ctx.beginPath();
                 ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.3, 0, Math.PI*2);
                 ctx.fill();
-                ctx.fillStyle = "#ffffff";
-                ctx.font = `${cellH*0.5}px monospace`;
-                ctx.fillText("🌀", mapX + portalTileX*cellW + cellW*0.2, mapY + portalTileY*cellH + cellH*0.7);
+            }
+            
+            // Жёлтая метка на карте (цель)
+            if(mapClickTarget) {
+                let targetTileX = mapClickTarget.x / TILE_SIZE;
+                let targetTileY = mapClickTarget.y / TILE_SIZE;
+                ctx.fillStyle = "#ffdd44";
+                ctx.beginPath();
+                ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.7, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#ffaa00";
+                ctx.beginPath();
+                ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.35, 0, Math.PI*2);
+                ctx.fill();
             }
             
             ctx.fillStyle = "#ffcc88";
@@ -1003,12 +1078,13 @@
             ctx.font = "12px monospace";
             ctx.fillText("⬜ трава 🟫 безопасная 🚪 ворота 🌲 дерево ⛰️ гора 💧 вода 🪨 камень", canvasWidth/2-200, mapY+mapHeight+25);
             ctx.fillStyle = "#ffaa88";
-            ctx.fillText("🔴 вы 🔶 портал", canvasWidth/2+120, mapY+mapHeight+25);
+            ctx.fillText("🔴 вы 🔶 портал 🟡 метка", canvasWidth/2+150, mapY+mapHeight+25);
             ctx.fillStyle = "#ccaa88";
             ctx.font = "10px monospace";
-            ctx.fillText("Нажмите ESC или кликните для закрытия", canvasWidth/2-120, mapY+mapHeight+50);
+            ctx.fillText("Нажмите на карту - персонаж пойдёт туда | ESC или клик для закрытия", canvasWidth/2-200, mapY+mapHeight+50);
         }
         
+        // ========== ОТРИСОВКА ОСНОВНОГО МИРА ==========
         function drawWorld() {
             let w = WORLDS[currentWorld];
             for(let i=0;i<WORLD_WIDTH/52+10;i++) {
@@ -1181,7 +1257,7 @@
                 ctx.strokeStyle="#fa4"; ctx.lineWidth=4;
                 ctx.strokeRect(x-20,y-30,56,56);
             }
-            if(player.targetX!==null && player.targetY!==null) {
+            if(player.targetX!==null && player.targetY!==null && player.path && player.path.length > 0) {
                 let tx=player.targetX-cameraX, ty=player.targetY-cameraY;
                 ctx.fillStyle="#fc4a"; ctx.beginPath(); ctx.arc(tx,ty,16,0,Math.PI*2); ctx.fill();
                 ctx.fillStyle="#fa0"; ctx.beginPath(); ctx.arc(tx,ty,8,0,Math.PI*2); ctx.fill();
@@ -1231,10 +1307,8 @@
                 ctx.fillStyle="#ffaa88"; ctx.font="10px monospace";
                 ctx.fillText(`🌟 ${Math.ceil(player.superCooldown/10)}с`,20,canvasHeight-55);
             }
-            // Мини-карта
             drawMinimap();
             
-            // Полноэкранная карта
             if(showMap) {
                 drawFullMap();
             }
@@ -1264,23 +1338,55 @@
             return { x:(cx-rect.left)*sx+cameraX, y:(cy-rect.top)*sy+cameraY };
         }
         
-        canvas.addEventListener('click',(e)=>{ 
+        // Обработка клика на полноэкранной карте
+        function handleMapClick(clientX, clientY) {
+            let mapWidth = Math.min(canvasWidth - 100, 800);
+            let mapHeight = mapWidth * (MAP_H / MAP_W);
+            let mapX = (canvasWidth - mapWidth) / 2;
+            let mapY = (canvasHeight - mapHeight) / 2;
+            let cellW = mapWidth / MAP_W;
+            let cellH = mapHeight / MAP_H;
+            
+            let clickX = clientX;
+            let clickY = clientY;
+            
+            if(clickX > mapX && clickX < mapX + mapWidth && clickY > mapY && clickY < mapY + mapHeight) {
+                let tileX = Math.floor((clickX - mapX) / cellW);
+                let tileY = Math.floor((clickY - mapY) / cellH);
+                if(tileX >= 0 && tileX < MAP_W && tileY >= 0 && tileY < MAP_H) {
+                    let worldX = tileX * TILE_SIZE + TILE_SIZE/2;
+                    let worldY = tileY * TILE_SIZE + TILE_SIZE/2;
+                    if(isWalkable(worldX, worldY, 24)) {
+                        mapClickTarget = { x: worldX, y: worldY };
+                        moveTo(worldX, worldY);
+                        addMsg(`📍 Перемещение к отмеченной точке на карте`);
+                        showMap = false;
+                    } else {
+                        addMsg(`🚫 В эту точку нельзя пройти (препятствие)`, true);
+                    }
+                }
+            }
+        }
+        
+        canvas.addEventListener('click', (e) => { 
             if(showMap) {
-                showMap = false;
+                handleMapClick(e.clientX, e.clientY);
                 return;
             }
-            let w=getWorldClick(e.clientX,e.clientY); 
-            handleClick(w.x,w.y); 
+            let w = getWorldClick(e.clientX, e.clientY); 
+            handleClick(w.x, w.y); 
         });
-        canvas.addEventListener('touchstart',(e)=>{ 
+        
+        canvas.addEventListener('touchstart', (e) => { 
             e.preventDefault(); 
             if(showMap) {
-                showMap = false;
+                let touch = e.touches[0];
+                handleMapClick(touch.clientX, touch.clientY);
                 return;
             }
-            let t=e.touches[0]; 
-            let w=getWorldClick(t.clientX,t.clientY); 
-            handleClick(w.x,w.y); 
+            let t = e.touches[0]; 
+            let w = getWorldClick(t.clientX, t.clientY); 
+            handleClick(w.x, w.y); 
         });
         
         setInterval(()=>{
@@ -1342,7 +1448,8 @@
             addMsg("🌟 1 - СУПЕРСИЛА | 2 - ЗЕЛЬЕ HP | 3 - ЗЕЛЬЕ MP");
             addMsg("🏪 Торговец в безопасной зоне (иконка 🏪)");
             addMsg("🌀 Убейте 300 мобов для открытия портала!");
-            addMsg("🗺️ Карта: кнопка 7 или кнопка КАРТА");
+            addMsg("🗺️ Карта: кнопка 7 или кнопка КАРТА | Нажмите на карту для перемещения");
+            addMsg("💊 Зелья можно использовать в любой точке карты!");
             addMsg("💾 Игра автоматически сохраняется!");
         }
         
