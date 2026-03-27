@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
-    <title>Rucoy Online - Полная версия</title>
+    <title>Rucoy Online - Полная версия с картой</title>
     <style>
         * {
             margin: 0;
@@ -110,7 +110,8 @@
     </div>
     
     <div class="corner-buttons top-right">
-        <button class="mini-btn" id="statsBtn">⚙️ СТАТ</button>
+        <button class="mini-btn" id="statsBtn">📊 СТАТ</button>
+        <button class="mini-btn" id="mapBtn">🗺️ КАРТА</button>
     </div>
     
     <div class="corner-buttons bottom-left">
@@ -137,8 +138,58 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
+        // ========== РАЗМЕР МИРА ==========
+        const TILE_SIZE = 50;
+        const MAP_W = 116;
+        const MAP_H = 92;
+        const WORLD_WIDTH = MAP_W * TILE_SIZE;
+        const WORLD_HEIGHT = MAP_H * TILE_SIZE;
+        
+        let cameraX = 0, cameraY = 0;
+        let canvasWidth = window.innerWidth;
+        let canvasHeight = window.innerHeight;
+        
+        function resizeCanvas() {
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+        }
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            updateCamera();
+        });
+        resizeCanvas();
+        
+        // ========== КАРТА МИРА ==========
+        let showMap = false;
+        let worldMap = Array(MAP_H).fill().map(() => Array(MAP_W).fill(0));
+        // 0=трава, 1=безопасная зона, 2=ворота, 3=дерево, 4=гора, 5=вода, 6=камень
+        
+        function getMapColor(tile) {
+            if(tile === 0) return "#3a6c2a";
+            if(tile === 1) return "#88aa66";
+            if(tile === 2) return "#c9a87a";
+            if(tile === 3) return "#3c9e3c";
+            if(tile === 4) return "#6e6e7a";
+            if(tile === 5) return "#3a8cbb";
+            if(tile === 6) return "#7a6a5a";
+            return "#3a6c2a";
+        }
+        
+        function getMapSymbol(tile) {
+            if(tile === 0) return "⬜";
+            if(tile === 1) return "🟫";
+            if(tile === 2) return "🚪";
+            if(tile === 3) return "🌲";
+            if(tile === 4) return "⛰️";
+            if(tile === 5) return "💧";
+            if(tile === 6) return "🪨";
+            return "⬜";
+        }
+        
         // ========== МИРЫ ==========
-        let currentWorld = "forest"; // forest, desert, castle
+        let currentWorld = "forest";
         let mobsKilledInWorld = 0;
         const MOBS_NEEDED_FOR_PORTAL = 300;
         let portalActive = false;
@@ -168,25 +219,7 @@
             }
         };
         
-        // ========== РАЗМЕР МИРА ==========
-        const WORLD_WIDTH = 5800;
-        const WORLD_HEIGHT = 4600;
-        
-        let cameraX = 0, cameraY = 0;
-        let canvasWidth = window.innerWidth;
-        let canvasHeight = window.innerHeight;
-        
-        function resizeCanvas() {
-            canvasWidth = window.innerWidth;
-            canvasHeight = window.innerHeight;
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-        }
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            updateCamera();
-        });
-        resizeCanvas();
+        let cameraXmap = 0, cameraYmap = 0;
         
         // ========== СИСТЕМА СОХРАНЕНИЯ ==========
         let playerNickname = null;
@@ -285,7 +318,6 @@
                 addMsg(`🌍 ПЕРСОНАЖ ПЕРЕШЁЛ В МИР: ${WORLDS.desert.name}! Сложность увеличена!`);
                 mobsKilledInWorld = 0;
                 portalActive = false;
-                // Очищаем мобов и спавним новых
                 mobs = [];
                 for(let i=0;i<15;i++) spawnMob();
                 saveGame();
@@ -306,7 +338,6 @@
         function showNicknameModal() {
             return new Promise((resolve) => {
                 const modal = document.createElement('div');
-                modal.className = 'modal';
                 modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:200;display:flex;align-items:center;justify-content:center;';
                 modal.innerHTML = `
                     <div style="background:#2a2e3f;padding:30px;border-radius:20px;text-align:center;border:2px solid #ffaa55;max-width:90%;width:320px;">
@@ -373,30 +404,70 @@
         
         function generateWorld() {
             obstacles = [];
+            for(let i=0;i<MAP_H;i++) {
+                for(let j=0;j<MAP_W;j++) {
+                    worldMap[i][j] = 0;
+                }
+            }
+            // Безопасная зона
+            for(let y=12;y<24;y++) {
+                for(let x=14;x<30;x++) {
+                    worldMap[y][x] = 1;
+                }
+            }
+            // Ворота
+            for(let x=19;x<25;x++) { worldMap[11][x] = 2; worldMap[24][x] = 2; }
+            for(let y=16;y<22;y++) { worldMap[y][13] = 2; worldMap[y][30] = 2; }
+            
             for(let i=0;i<38;i++) {
                 let fx = safeZone.x + i*28;
-                if(!(fx>gates[0].x-20 && fx<gates[0].x+gates[0].width+20)) obstacles.push({x:fx,y:safeZone.y-18,radius:14,type:'fence'});
-                if(!(fx>gates[1].x-20 && fx<gates[1].x+gates[1].width+20)) obstacles.push({x:fx,y:safeZone.y+safeZone.height+8,radius:14,type:'fence'});
+                let fxTile = Math.floor(fx / TILE_SIZE);
+                let fyTile = Math.floor(safeZone.y / TILE_SIZE);
+                if(!(fx>gates[0].x-20 && fx<gates[0].x+gates[0].width+20)) {
+                    obstacles.push({x:fx,y:safeZone.y-18,radius:14,type:'fence'});
+                    if(fxTile >=0 && fxTile < MAP_W && fyTile-1 >=0) worldMap[fyTile-1][fxTile] = 3;
+                }
+                if(!(fx>gates[1].x-20 && fx<gates[1].x+gates[1].width+20)) {
+                    obstacles.push({x:fx,y:safeZone.y+safeZone.height+8,radius:14,type:'fence'});
+                    if(fxTile >=0 && fxTile < MAP_W && fyTile+24 < MAP_H) worldMap[fyTile+24][fxTile] = 3;
+                }
             }
             for(let i=0;i<30;i++) {
                 let fy = safeZone.y + i*28;
-                if(!(fy>gates[2].y-20 && fy<gates[2].y+gates[2].height+20)) obstacles.push({x:safeZone.x-18,y:fy,radius:14,type:'fence'});
-                if(!(fy>gates[3].y-20 && fy<gates[3].y+gates[3].height+20)) obstacles.push({x:safeZone.x+safeZone.width+8,y:fy,radius:14,type:'fence'});
+                let fxTile = Math.floor(safeZone.x / TILE_SIZE);
+                let fyTile = Math.floor(fy / TILE_SIZE);
+                if(!(fy>gates[2].y-20 && fy<gates[2].y+gates[2].height+20)) {
+                    obstacles.push({x:safeZone.x-18,y:fy,radius:14,type:'fence'});
+                    if(fyTile >=0 && fyTile < MAP_H && fxTile-1 >=0) worldMap[fyTile][fxTile-1] = 3;
+                }
+                if(!(fy>gates[3].y-20 && fy<gates[3].y+gates[3].height+20)) {
+                    obstacles.push({x:safeZone.x+safeZone.width+8,y:fy,radius:14,type:'fence'});
+                    if(fyTile >=0 && fyTile < MAP_H && fxTile+29 < MAP_W) worldMap[fyTile][fxTile+29] = 3;
+                }
             }
             for(let i=0;i<420;i++) {
                 let x=80+Math.random()*(WORLD_WIDTH-160), y=80+Math.random()*(WORLD_HEIGHT-160);
                 if(x>safeZone.x-80 && x<safeZone.x+safeZone.width+80 && y>safeZone.y-80 && y<safeZone.y+safeZone.height+80) continue;
                 obstacles.push({x,y,radius:26,type:'tree'});
+                let tx = Math.floor(x/TILE_SIZE);
+                let ty = Math.floor(y/TILE_SIZE);
+                if(tx>=0 && tx<MAP_W && ty>=0 && ty<MAP_H && worldMap[ty][tx]===0) worldMap[ty][tx] = 3;
             }
             for(let i=0;i<85;i++) {
                 let x=100+Math.random()*(WORLD_WIDTH-200), y=100+Math.random()*(WORLD_HEIGHT-200);
                 if(x>safeZone.x-100 && x<safeZone.x+safeZone.width+100 && y>safeZone.y-100 && y<safeZone.y+safeZone.height+100) continue;
                 obstacles.push({x,y,radius:38,type:'mountain'});
+                let tx = Math.floor(x/TILE_SIZE);
+                let ty = Math.floor(y/TILE_SIZE);
+                if(tx>=0 && tx<MAP_W && ty>=0 && ty<MAP_H && worldMap[ty][tx]===0) worldMap[ty][tx] = 4;
             }
             for(let i=0;i<260;i++) {
                 let x=50+Math.random()*(WORLD_WIDTH-100), y=50+Math.random()*(WORLD_HEIGHT-100);
                 if(x>safeZone.x-60 && x<safeZone.x+safeZone.width+60 && y>safeZone.y-60 && y<safeZone.y+safeZone.height+60) continue;
                 obstacles.push({x,y,radius:16,type:'rock'});
+                let tx = Math.floor(x/TILE_SIZE);
+                let ty = Math.floor(y/TILE_SIZE);
+                if(tx>=0 && tx<MAP_W && ty>=0 && ty<MAP_H && worldMap[ty][tx]===0) worldMap[ty][tx] = 6;
             }
         }
         
@@ -595,7 +666,7 @@
             saveGame();
         }
         
-        // АТАКА ИГРОКА - 1.2 секунды (20 фреймов при 60fps)
+        // АТАКА ИГРОКА - 1.2 секунды
         function playerAttack() {
             if(!selectedMob || selectedMob.hp<=0) { selectedMob=null; return false; }
             if(player.attackTimer > 0) return false;
@@ -774,7 +845,11 @@
         }
         
         function handleClick(wx,wy) {
-            if(showStats) { showStats=false; return; }
+            if(showStats || showMap) {
+                showStats = false;
+                showMap = false;
+                return;
+            }
             if(shopOpen) {
                 let cx=canvasWidth/2, cy=canvasHeight/2-40;
                 for(let i=0;i<SHOP.length;i++) {
@@ -800,6 +875,138 @@
             ty=Math.min(Math.max(ty,0),WORLD_HEIGHT-canvasHeight);
             cameraX+=(tx-cameraX)*0.1;
             cameraY+=(ty-cameraY)*0.1;
+        }
+        
+        // ========== ОТРИСОВКА КАРТЫ ==========
+        function drawMinimap() {
+            let mapSize = 180;
+            let mapX = canvasWidth - mapSize - 10;
+            let mapY = 80;
+            let cellSize = mapSize / MAP_W;
+            
+            ctx.fillStyle = "#000000aa";
+            ctx.fillRect(mapX-5, mapY-5, mapSize+10, mapSize+10);
+            ctx.fillStyle = "#1a1e2a";
+            ctx.fillRect(mapX, mapY, mapSize, mapSize);
+            
+            for(let y=0; y<MAP_H; y++) {
+                for(let x=0; x<MAP_W; x++) {
+                    let tile = worldMap[y][x];
+                    let color = getMapColor(tile);
+                    ctx.fillStyle = color;
+                    ctx.fillRect(mapX + x*cellSize, mapY + y*cellSize, cellSize+0.5, cellSize+0.5);
+                }
+            }
+            
+            // Игрок на карте
+            let playerTileX = player.x / TILE_SIZE;
+            let playerTileY = player.y / TILE_SIZE;
+            ctx.fillStyle = "#ff4444";
+            ctx.beginPath();
+            ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.8, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.4, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Портал на карте
+            if(portalActive && currentWorld === "forest") {
+                let portalTileX = portalX / TILE_SIZE;
+                let portalTileY = portalY / TILE_SIZE;
+                ctx.fillStyle = "#ffaa44";
+                ctx.beginPath();
+                ctx.arc(mapX + portalTileX*cellSize, mapY + portalTileY*cellSize, cellSize*0.7, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#ffff88";
+                ctx.beginPath();
+                ctx.arc(mapX + portalTileX*cellSize, mapY + portalTileY*cellSize, cellSize*0.4, 0, Math.PI*2);
+                ctx.fill();
+            }
+            
+            ctx.fillStyle = "#ffcc88";
+            ctx.font = "10px monospace";
+            ctx.fillText("🗺️ КАРТА", mapX+5, mapY-8);
+        }
+        
+        // ========== ПОЛНОЭКРАННАЯ КАРТА ==========
+        function drawFullMap() {
+            let mapWidth = Math.min(canvasWidth - 100, 800);
+            let mapHeight = mapWidth * (MAP_H / MAP_W);
+            let mapX = (canvasWidth - mapWidth) / 2;
+            let mapY = (canvasHeight - mapHeight) / 2;
+            let cellW = mapWidth / MAP_W;
+            let cellH = mapHeight / MAP_H;
+            
+            ctx.fillStyle = "#000000dd";
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            ctx.fillStyle = "#2a2e3f";
+            ctx.fillRect(mapX-10, mapY-10, mapWidth+20, mapHeight+20);
+            
+            for(let y=0; y<MAP_H; y++) {
+                for(let x=0; x<MAP_W; x++) {
+                    let tile = worldMap[y][x];
+                    let color = getMapColor(tile);
+                    ctx.fillStyle = color;
+                    ctx.fillRect(mapX + x*cellW, mapY + y*cellH, cellW+0.5, cellH+0.5);
+                    
+                    // Символы для некоторых объектов
+                    if(tile === 3) {
+                        ctx.fillStyle = "#5aac3a";
+                        ctx.font = `${cellH*0.7}px monospace`;
+                        ctx.fillText("🌲", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8);
+                    } else if(tile === 4) {
+                        ctx.fillStyle = "#8e8e9a";
+                        ctx.font = `${cellH*0.7}px monospace`;
+                        ctx.fillText("⛰️", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8);
+                    } else if(tile === 5) {
+                        ctx.fillStyle = "#5ac8ff";
+                        ctx.font = `${cellH*0.7}px monospace`;
+                        ctx.fillText("💧", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8);
+                    }
+                }
+            }
+            
+            // Игрок
+            let playerTileX = player.x / TILE_SIZE;
+            let playerTileY = player.y / TILE_SIZE;
+            ctx.fillStyle = "#ff4444";
+            ctx.beginPath();
+            ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.6, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = "#ffffff";
+            ctx.beginPath();
+            ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.3, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Портал
+            if(portalActive && currentWorld === "forest") {
+                let portalTileX = portalX / TILE_SIZE;
+                let portalTileY = portalY / TILE_SIZE;
+                ctx.fillStyle = "#ffaa44";
+                ctx.beginPath();
+                ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.55, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#ffff88";
+                ctx.beginPath();
+                ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.3, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = "#ffffff";
+                ctx.font = `${cellH*0.5}px monospace`;
+                ctx.fillText("🌀", mapX + portalTileX*cellW + cellW*0.2, mapY + portalTileY*cellH + cellH*0.7);
+            }
+            
+            ctx.fillStyle = "#ffcc88";
+            ctx.font = `bold ${Math.min(20, canvasWidth/30)}px monospace`;
+            ctx.fillText("🗺️ КАРТА МИРА", canvasWidth/2-80, mapY-20);
+            ctx.fillStyle = "#88aaff";
+            ctx.font = "12px monospace";
+            ctx.fillText("⬜ трава 🟫 безопасная 🚪 ворота 🌲 дерево ⛰️ гора 💧 вода 🪨 камень", canvasWidth/2-200, mapY+mapHeight+25);
+            ctx.fillStyle = "#ffaa88";
+            ctx.fillText("🔴 вы 🔶 портал", canvasWidth/2+120, mapY+mapHeight+25);
+            ctx.fillStyle = "#ccaa88";
+            ctx.font = "10px monospace";
+            ctx.fillText("Нажмите ESC или кликните для закрытия", canvasWidth/2-120, mapY+mapHeight+50);
         }
         
         function drawWorld() {
@@ -834,7 +1041,6 @@
             let szX=safeZone.x-cameraX, szY=safeZone.y-cameraY;
             ctx.fillStyle="#88aa66aa"; ctx.fillRect(szX,szY,safeZone.width,safeZone.height);
             
-            // Портал
             if(portalActive && currentWorld === "forest") {
                 let px = portalX - cameraX;
                 let py = portalY - cameraY;
@@ -1025,6 +1231,13 @@
                 ctx.fillStyle="#ffaa88"; ctx.font="10px monospace";
                 ctx.fillText(`🌟 ${Math.ceil(player.superCooldown/10)}с`,20,canvasHeight-55);
             }
+            // Мини-карта
+            drawMinimap();
+            
+            // Полноэкранная карта
+            if(showMap) {
+                drawFullMap();
+            }
         }
         
         function update() {
@@ -1050,8 +1263,25 @@
             let sx=canvasWidth/rect.width, sy=canvasHeight/rect.height;
             return { x:(cx-rect.left)*sx+cameraX, y:(cy-rect.top)*sy+cameraY };
         }
-        canvas.addEventListener('click',(e)=>{ let w=getWorldClick(e.clientX,e.clientY); handleClick(w.x,w.y); });
-        canvas.addEventListener('touchstart',(e)=>{ e.preventDefault(); let t=e.touches[0]; let w=getWorldClick(t.clientX,t.clientY); handleClick(w.x,w.y); });
+        
+        canvas.addEventListener('click',(e)=>{ 
+            if(showMap) {
+                showMap = false;
+                return;
+            }
+            let w=getWorldClick(e.clientX,e.clientY); 
+            handleClick(w.x,w.y); 
+        });
+        canvas.addEventListener('touchstart',(e)=>{ 
+            e.preventDefault(); 
+            if(showMap) {
+                showMap = false;
+                return;
+            }
+            let t=e.touches[0]; 
+            let w=getWorldClick(t.clientX,t.clientY); 
+            handleClick(w.x,w.y); 
+        });
         
         setInterval(()=>{
             if(selectedMob && selectedMob.hp>0 && Math.hypot(player.x-selectedMob.x, player.y-selectedMob.y) <= CLASSES[player.classType].range + 15) {
@@ -1067,7 +1297,8 @@
         document.getElementById('hpBtn').onclick=()=>useHp();
         document.getElementById('mpBtn').onclick=()=>useMp();
         document.getElementById('classBtn').onclick=()=>switchClass();
-        document.getElementById('statsBtn').onclick=()=>{ showStats=!showStats; };
+        document.getElementById('statsBtn').onclick=()=>{ showStats=!showStats; showMap=false; };
+        document.getElementById('mapBtn').onclick=()=>{ showMap=!showMap; showStats=false; };
         document.getElementById('classWarriorBtn').onclick=()=>switchClass('warrior');
         document.getElementById('classArcherBtn').onclick=()=>switchClass('archer');
         document.getElementById('classMageBtn').onclick=()=>switchClass('mage');
@@ -1078,6 +1309,8 @@
             if(e.key==='3') useMp();
             if(e.key==='s') useSkill();
             if(e.key==='c') switchClass();
+            if(e.key==='7' || e.key==='m' || e.key==='M') { showMap=!showMap; showStats=false; }
+            if(e.key==='Escape') { showMap=false; showStats=false; }
         });
         
         async function startGame() {
@@ -1109,6 +1342,7 @@
             addMsg("🌟 1 - СУПЕРСИЛА | 2 - ЗЕЛЬЕ HP | 3 - ЗЕЛЬЕ MP");
             addMsg("🏪 Торговец в безопасной зоне (иконка 🏪)");
             addMsg("🌀 Убейте 300 мобов для открытия портала!");
+            addMsg("🗺️ Карта: кнопка 7 или кнопка КАРТА");
             addMsg("💾 Игра автоматически сохраняется!");
         }
         
