@@ -2,1281 +2,481 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, shrink-to-fit=no">
-    <title>Rucoy Online - Магазин и инвентарь</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NetErrror - Соседняя комната: Дима слушает</title>
     <style>
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
-        
+
         body {
-            background: #0a0c12;
-            overflow: hidden;
-            position: fixed;
+            background: linear-gradient(145deg, #0a0c14 0%, #03050a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', 'Courier New', monospace;
+            padding: 16px;
+            margin: 0;
+        }
+
+        .game-wrapper {
+            max-width: 1300px;
             width: 100%;
-            height: 100%;
-            font-family: 'Courier New', monospace;
-            touch-action: none;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            border-radius: 64px;
+            border: 1px solid #ff66aa50;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.7);
+            padding: 20px;
         }
-        
-        canvas {
-            display: block;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            background: #1a2a1a;
+
+        /* две комнаты + профили */
+        .duo-rooms {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
         }
-        
-        .corner-buttons {
-            position: fixed;
-            z-index: 100;
-            pointer-events: auto;
-        }
-        .top-left { top: 12px; left: 12px; display: flex; gap: 8px; }
-        .top-right { top: 12px; right: 12px; display: flex; gap: 8px; }
-        .bottom-left { bottom: 12px; left: 12px; display: flex; gap: 8px; }
-        .bottom-right { bottom: 12px; right: 12px; display: flex; gap: 8px; }
-        
-        .mini-btn {
-            background: rgba(44, 47, 74, 0.85);
+
+        .room-card {
+            flex: 1;
+            min-width: 280px;
+            background: #0f121ed9;
+            border-radius: 48px;
+            padding: 20px 16px;
             backdrop-filter: blur(4px);
-            border: 1px solid #ffaa55;
-            color: #ffcc88;
-            font-size: 12px;
+            transition: all 0.2s;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        .mom-area {
+            border-bottom: 5px solid #ff77aa;
+            background: radial-gradient(circle at 20% 10%, #2a1a2c, #0a020f);
+        }
+
+        .dima-area {
+            border-bottom: 5px solid #55ccff;
+            background: radial-gradient(circle at 90% 20%, #141c2c, #02050c);
+        }
+
+        .person {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .avatar {
+            font-size: 80px;
+            filter: drop-shadow(0 8px 12px black);
+            transition: transform 0.2s ease;
+        }
+
+        .mom-avatar { text-shadow: 0 0 8px #ff66aa; }
+        .dima-avatar { text-shadow: 0 0 5px #33aaff; }
+
+        .person h3 {
+            margin: 8px 0 4px;
+            font-size: 1.8rem;
             font-weight: bold;
-            padding: 6px 10px;
-            border-radius: 20px;
-            box-shadow: 0 2px 0 #121420;
-            touch-action: manipulation;
-            cursor: pointer;
-            font-family: monospace;
-            transition: 0.03s linear;
+            background: linear-gradient(135deg, #ffbb88, #ff88aa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .dima-area .person h3 {
+            background: linear-gradient(135deg, #aaffff, #88ccff);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .status-badge {
+            background: #000000aa;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-top: 6px;
+        }
+
+        .money-counter {
+            background: #1e1a2f;
+            padding: 10px;
+            border-radius: 60px;
             text-align: center;
-            min-width: 55px;
-        }
-        .mini-btn:active { transform: translateY(2px); }
-        .fight-mini { background: rgba(200, 80, 60, 0.85); border-color: #ff8866; color: white; }
-        .skill-mini { background: rgba(106, 78, 158, 0.85); border-color: #c88eff; }
-        .class-mini { background: rgba(60, 100, 80, 0.85); border-color: #88ffaa; }
-        
-        .nickname-display {
-            position: fixed;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            padding: 4px 12px;
-            border-radius: 20px;
-            color: #ffcc88;
-            font-size: 12px;
-            z-index: 100;
-            pointer-events: none;
+            font-weight: bold;
+            font-size: 1.7rem;
+            color: #f5c542;
+            margin: 12px 0;
+            border: 1px solid gold;
             font-family: monospace;
         }
-        .portal-progress {
-            position: fixed;
-            bottom: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.7);
-            padding: 4px 12px;
-            border-radius: 20px;
-            color: #88ffaa;
-            font-size: 11px;
-            z-index: 100;
-            pointer-events: none;
-            font-family: monospace;
-            white-space: nowrap;
+
+        button {
+            background: #2a1e3a;
+            border: none;
+            font-family: inherit;
+            font-weight: bold;
+            padding: 12px 18px;
+            border-radius: 60px;
+            color: white;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.08s linear;
+            margin-top: 8px;
+            width: 100%;
+            box-shadow: 0 3px 6px black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        @media (max-width: 700px) {
-            .mini-btn { font-size: 10px; padding: 4px 8px; min-width: 45px; }
-            .nickname-display { font-size: 10px; top: 8px; }
-            .portal-progress { font-size: 9px; bottom: 8px; }
+
+        button:active {
+            transform: scale(0.96);
+        }
+
+        .mom-action-btn {
+            background: #b32d5a;
+            border-bottom: 3px solid #ffb347;
+        }
+
+        .listen-btn {
+            background: #1f6390;
+            border-bottom: 3px solid #aaffdd;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .listen-animation {
+            animation: pulseListen 0.4s ease;
+        }
+
+        @keyframes pulseListen {
+            0% { transform: scale(1); background: #1f6390; }
+            50% { transform: scale(1.03); background: #4aa3df; box-shadow: 0 0 12px #88ddff; }
+            100% { transform: scale(1); }
+        }
+
+        .dima-listen-effect {
+            animation: dimaToWall 0.35s cubic-bezier(0.2, 1.2, 0.8, 1);
+        }
+
+        @keyframes dimaToWall {
+            0% { transform: translateX(0px) rotate(0deg); }
+            50% { transform: translateX(15px) rotate(5deg); }
+            100% { transform: translateX(0px) rotate(0deg); }
+        }
+
+        .room-sounds {
+            background: #03030ad9;
+            border-radius: 36px;
+            padding: 14px;
+            margin: 16px 0 0;
+            min-height: 200px;
+            max-height: 260px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            border: 1px solid #ff66aa30;
+        }
+
+        .sound-entry {
+            border-left: 4px solid #ff99cc;
+            padding: 8px 10px;
+            margin: 8px 0;
+            background: #ffffff08;
+            border-radius: 18px;
+            color: #f0f0f0;
+            font-family: monospace;
+        }
+
+        .dima-sound {
+            border-left-color: #55ccff;
+            background: #11335530;
+        }
+
+        .mom-sound {
+            border-left-color: #ffaa88;
+        }
+
+        .reset-btn {
+            background: #2c2c3a;
+            width: auto;
+            margin-top: 8px;
+            font-size: 0.8rem;
+        }
+
+        .flex-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        footer {
+            font-size: 0.65rem;
+            text-align: center;
+            margin-top: 24px;
+            color: #aaa6;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    
-    <div class="corner-buttons top-left">
-        <button class="mini-btn" id="classBtn">🔄 КЛАСС</button>
+<div class="game-wrapper">
+    <div class="duo-rooms">
+        <!-- КОМНАТА МАМЫ (кухня/гостиная) -->
+        <div class="room-card mom-area">
+            <div class="person">
+                <div class="avatar mom-avatar">💃👩</div>
+                <h3>МАМА (Люда)</h3>
+                <div class="status-badge" id="momStatusText">🏠 Дома (готовит)</div>
+            </div>
+            <div class="money-counter">
+                💰 <span id="moneyAmount">0</span> ₽
+            </div>
+            <button id="callManBtn" class="mom-action-btn">🚪🔞 ПРИВЕСТИ МУЖИКА</button>
+            <div style="font-size: 0.7rem; margin-top: 10px; text-align: center;">*клиент приходит → мама делает минет, ебется, грязные стоны*</div>
+            <!-- зона звуков из комнаты мамы (что там происходит) -->
+            <div class="room-sounds" id="momSoundsArea">
+                <div class="sound-entry mom-sound">🍳 Мама на кухне, гремит посудой.</div>
+                <div class="sound-entry mom-sound">📺 Смотрит сериал, скучно...</div>
+            </div>
+        </div>
+
+        <!-- КОМНАТА ДИМЫ с анимацией прикладывания уха -->
+        <div class="room-card dima-area">
+            <div class="person">
+                <div class="avatar dima-avatar" id="dimaAvatar">🧑🎧</div>
+                <h3>ДИМА (сын)</h3>
+                <div class="status-badge">🔇 сидит в своей комнате</div>
+            </div>
+            <button id="listenWallBtn" class="listen-btn">👂 ПРИЛОЖИТЬ УХО К СТЕНЕ И ПОДСЛУШИВАТЬ</button>
+            <div class="flex-btns">
+                <button id="resetGameBtn" class="reset-btn">♻️ НАЧАТЬ ЗАНОВО</button>
+            </div>
+            <!-- что слышит Дима -->
+            <div class="room-sounds" id="dimaHearArea">
+                <div class="sound-entry dima-sound">🔇 Дима сидит тихо, слышит только шаги мамы на кухне.</div>
+            </div>
+            <div style="font-size:0.7rem; margin-top:8px;">👇 приложи ухо — услышишь всё: минет, стоны, шлепки, крики</div>
+        </div>
     </div>
-    
-    <div class="corner-buttons top-right">
-        <button class="mini-btn" id="statsBtn">📊 СТАТ</button>
-        <button class="mini-btn" id="invBtn">🎒 ИНВ</button>
-        <button class="mini-btn" id="mapBtn">🗺️ КАРТА</button>
-    </div>
-    
-    <div class="corner-buttons bottom-left">
-        <button class="mini-btn" id="hpBtn">❤️ HP</button>
-        <button class="mini-btn" id="mpBtn">💙 MP</button>
-    </div>
-    
-    <div class="corner-buttons bottom-right">
-        <button class="mini-btn fight-mini" id="attackBtn">⚔️ АТАКА</button>
-        <button class="mini-btn skill-mini" id="skillBtn">✨ СКИЛЛ</button>
-    </div>
-    
-    <div class="corner-buttons" style="bottom: 12px; right: 90px; display: flex; gap: 6px;">
-        <button class="mini-btn class-mini" id="classWarriorBtn">⚔️</button>
-        <button class="mini-btn class-mini" id="classArcherBtn">🏹</button>
-        <button class="mini-btn class-mini" id="classMageBtn">🔮</button>
-    </div>
-    
-    <div class="nickname-display" id="nicknameDisplay"></div>
-    <div class="portal-progress" id="portalProgress"></div>
+    <footer>NetErrror || симуляция без границ. Дима подслушивает маму с клиентами. Каждый акт приносит деньги.</footer>
+</div>
 
 <script>
-    (function(){
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // ========== РАЗМЕР МИРА ==========
-        const TILE_SIZE = 50;
-        const MAP_W = 116;
-        const MAP_H = 92;
-        const WORLD_WIDTH = MAP_W * TILE_SIZE;
-        const WORLD_HEIGHT = MAP_H * TILE_SIZE;
-        
-        let cameraX = 0, cameraY = 0;
-        let canvasWidth = window.innerWidth;
-        let canvasHeight = window.innerHeight;
-        let walkCycle = 0;
-        
-        function resizeCanvas() {
-            canvasWidth = window.innerWidth;
-            canvasHeight = window.innerHeight;
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-        }
-        window.addEventListener('resize', () => {
-            resizeCanvas();
-            updateCamera();
-        });
-        resizeCanvas();
-        
-        // ========== ВСЯ БРОНЯ И ОРУЖИЕ (от 1 до 200 уровня) ==========
-        const ALL_ARMOR = [
-            { id: "wooden", name: "Деревянная броня", def: 5, level: 1, price: 100, icon: "🪵" },
-            { id: "leather1", name: "Кожаная броня", def: 10, level: 3, price: 250, icon: "🧥" },
-            { id: "studded", name: "Шипованная броня", def: 18, level: 6, price: 500, icon: "🛡️" },
-            { id: "iron1", name: "Железная броня", def: 28, level: 10, price: 900, icon: "⚙️" },
-            { id: "steel", name: "Стальная броня", def: 40, level: 15, price: 1500, icon: "🔩" },
-            { id: "golden1", name: "Золотая броня", def: 55, level: 20, price: 2500, icon: "✨" },
-            { id: "mithril", name: "Мифриловая броня", def: 72, level: 30, price: 4000, icon: "🔮" },
-            { id: "runic1", name: "Руническая броня", def: 92, level: 40, price: 6000, icon: "📜" },
-            { id: "dragon1", name: "Драконья броня", def: 115, level: 50, price: 9000, icon: "🐉" },
-            { id: "titan", name: "Титановая броня", def: 142, level: 65, price: 13000, icon: "⛰️" },
-            { id: "crystal", name: "Кристальная броня", def: 175, level: 80, price: 18000, icon: "💎" },
-            { id: "shadow", name: "Теневая броня", def: 212, level: 100, price: 25000, icon: "🌑" },
-            { id: "holy", name: "Святая броня", def: 255, level: 120, price: 35000, icon: "✨" },
-            { id: "demonic", name: "Демоническая броня", def: 305, level: 150, price: 50000, icon: "😈" },
-            { id: "legendary1", name: "Легендарная броня", def: 365, level: 180, price: 75000, icon: "⭐" },
-            { id: "divine", name: "Божественная броня", def: 450, level: 200, price: 100000, icon: "👑" }
-        ];
-        
-        const ALL_WEAPONS = [
-            { id: "wooden_sword", name: "Деревянный меч", dmgMin: 8, dmgMax: 14, level: 1, price: 80, icon: "🪵", range: 55, type: "melee" },
-            { id: "iron_sword", name: "Железный меч", dmgMin: 14, dmgMax: 24, level: 5, price: 200, icon: "⚔️", range: 60, type: "melee" },
-            { id: "steel_sword", name: "Стальной меч", dmgMin: 22, dmgMax: 36, level: 10, price: 400, icon: "🗡️", range: 62, type: "melee" },
-            { id: "golden_sword", name: "Золотой меч", dmgMin: 32, dmgMax: 52, level: 20, price: 800, icon: "✨", range: 65, type: "melee" },
-            { id: "mithril_sword", name: "Мифриловый меч", dmgMin: 46, dmgMax: 74, level: 35, price: 1500, icon: "🔮", range: 68, type: "melee" },
-            { id: "dragon_sword", name: "Драконий меч", dmgMin: 64, dmgMax: 98, level: 55, price: 3000, icon: "🐉", range: 70, type: "melee" },
-            { id: "legendary_sword", name: "Легендарный меч", dmgMin: 88, dmgMax: 135, level: 80, price: 6000, icon: "⭐", range: 72, type: "melee" },
-            { id: "wooden_bow", name: "Деревянный лук", dmgMin: 10, dmgMax: 18, level: 1, price: 90, icon: "🏹", range: 150, type: "ranged" },
-            { id: "iron_bow", name: "Железный лук", dmgMin: 18, dmgMax: 32, level: 8, price: 300, icon: "🏹", range: 155, type: "ranged" },
-            { id: "steel_bow", name: "Стальной лук", dmgMin: 28, dmgMax: 48, level: 18, price: 700, icon: "🏹", range: 160, type: "ranged" },
-            { id: "golden_bow", name: "Золотой лук", dmgMin: 42, dmgMax: 70, level: 30, price: 1500, icon: "🏹", range: 165, type: "ranged" },
-            { id: "dragon_bow", name: "Драконий лук", dmgMin: 62, dmgMax: 98, level: 50, price: 3500, icon: "🏹", range: 170, type: "ranged" },
-            { id: "legendary_bow", name: "Легендарный лук", dmgMin: 88, dmgMax: 135, level: 80, price: 7000, icon: "⭐", range: 175, type: "ranged" },
-            { id: "wooden_staff", name: "Деревянный посох", dmgMin: 12, dmgMax: 20, level: 1, price: 85, icon: "🔮", range: 140, type: "mage" },
-            { id: "iron_staff", name: "Железный посох", dmgMin: 22, dmgMax: 38, level: 10, price: 350, icon: "🔮", range: 145, type: "mage" },
-            { id: "crystal_staff", name: "Кристальный посох", dmgMin: 38, dmgMax: 62, level: 25, price: 900, icon: "🔮", range: 150, type: "mage" },
-            { id: "dragon_staff", name: "Драконий посох", dmgMin: 58, dmgMax: 92, level: 45, price: 2500, icon: "🔮", range: 155, type: "mage" },
-            { id: "legendary_staff", name: "Легендарный посох", dmgMin: 85, dmgMax: 130, level: 75, price: 6000, icon: "⭐", range: 160, type: "mage" }
-        ];
-        
-        // ========== КАРТА МИРА ==========
-        let showMap = false;
-        let mapClickTarget = null;
-        let worldMap = Array(MAP_H).fill().map(() => Array(MAP_W).fill(0));
-        
-        function getMapColor(tile) {
-            if(tile === 0) return "#3a6c2a";
-            if(tile === 1) return "#88aa66";
-            if(tile === 2) return "#c9a87a";
-            if(tile === 3) return "#3c9e3c";
-            if(tile === 4) return "#6e6e7a";
-            if(tile === 5) return "#3a8cbb";
-            if(tile === 6) return "#7a6a5a";
-            return "#3a6c2a";
-        }
-        
-        // ========== МИРЫ ==========
-        let currentWorld = "forest";
-        let mobsKilledInWorld = 0;
-        const MOBS_NEEDED_FOR_PORTAL = 300;
-        let portalActive = false;
-        let portalX = 0, portalY = 0;
-        
-        const WORLDS = {
-            forest: { name: "🌲 Лес", bgColor1: "#4a8c3a", bgColor2: "#3a6c2a", mobMultiplier: 1.0, mobColors: ["#6f8c5a", "#8a7a6a", "#8b5a3a", "#b8b8cc", "#8a6a4a", "#c97a3a"] },
-            desert: { name: "🏜️ Пустыня", bgColor1: "#c9ae74", bgColor2: "#e0b87a", mobMultiplier: 1.5, mobColors: ["#c9a87a", "#b87c4a", "#a86a3a", "#d8b87a", "#c89a6a", "#e8c88a"] },
-            castle: { name: "🏰 Замок", bgColor1: "#4a5b6e", bgColor2: "#6c7f8f", mobMultiplier: 2.0, mobColors: ["#6a7a8a", "#8a9aaa", "#5a6a7a", "#7a8a9a", "#9aabbb", "#4a5a6a"] }
-        };
-        
-        // ========== СИСТЕМА СОХРАНЕНИЯ ==========
-        let playerNickname = null;
-        
-        function saveGame() {
-            if(!playerNickname) return;
-            const saveData = {
-                nickname: playerNickname,
-                x: player.x, y: player.y,
-                hp: player.hp, mp: player.mp,
-                level: player.level, exp: player.exp,
-                classType: player.classType,
-                gold: player.gold,
-                potionHp: player.potionHp, potionMp: player.potionMp,
-                potionBigHp: player.potionBigHp, potionBigMp: player.potionBigMp,
-                armorId: player.armorId, weaponId: player.weaponId,
-                currentWorld: currentWorld,
-                mobsKilledInWorld: mobsKilledInWorld,
-                stats: {
-                    mobsKilled: stats.mobsKilled, totalGold: stats.totalGold,
-                    totalDamage: stats.totalDamage, totalDamageTaken: stats.totalDamageTaken,
-                    startTime: stats.startTime
-                }
-            };
-            localStorage.setItem('rucoy_save_' + playerNickname, JSON.stringify(saveData));
-            localStorage.setItem('rucoy_last_nickname', playerNickname);
-        }
-        
-        function loadGame(nickname) {
-            const saveData = localStorage.getItem('rucoy_save_' + nickname);
-            if(saveData) {
-                const data = JSON.parse(saveData);
-                player.x = data.x; player.y = data.y;
-                player.hp = data.hp; player.mp = data.mp;
-                player.level = data.level; player.exp = data.exp;
-                player.classType = data.classType;
-                player.gold = data.gold;
-                player.potionHp = data.potionHp; player.potionMp = data.potionMp;
-                player.potionBigHp = data.potionBigHp; player.potionBigMp = data.potionBigMp;
-                if(data.armorId) player.armorId = data.armorId;
-                if(data.weaponId) player.weaponId = data.weaponId;
-                if(data.currentWorld) currentWorld = data.currentWorld;
-                if(data.mobsKilledInWorld) mobsKilledInWorld = data.mobsKilledInWorld;
-                if(data.stats) {
-                    stats.mobsKilled = data.stats.mobsKilled;
-                    stats.totalGold = data.stats.totalGold;
-                    stats.totalDamage = data.stats.totalDamage;
-                    stats.totalDamageTaken = data.stats.totalDamageTaken;
-                    stats.startTime = data.stats.startTime;
-                }
-                updateStatsFromLevel();
-                addMsg(`✨ Добро пожаловать обратно, ${nickname}! Уровень ${player.level}`);
-                updatePortalStatus();
-                return true;
+    // -------------------- СОСТОЯНИЕ ИГРЫ --------------------
+    let money = 0;
+    let momState = "home_idle";     // home_idle, with_man (делает минет/ебется)
+    let manTimer = null;
+    let currentAct = null;          // детали секса
+
+    // элементы UI
+    const moneySpan = document.getElementById('moneyAmount');
+    const momStatusSpan = document.getElementById('momStatusText');
+    const momSoundsDiv = document.getElementById('momSoundsArea');
+    const dimaHearDiv = document.getElementById('dimaHearArea');
+    const dimaAvatar = document.getElementById('dimaAvatar');
+
+    // ---- библиотека грязных фраз/звуков для разных действий мамы с мужиком ----
+    const sexActions = [
+        { action: "минет", sounds: ["👅 *чавкающие звуки* Мама делает минет на коленях", "🤤 *слышно как мужик стонет* О да, глубже...", "💦 *звуки глубокого минета, мама давится*", "👄 'Так, сосни ещё, шлюха' — командует мужик", "😩 *громкий всхлип* Мама: 'Ммм...'"] },
+        { action: "ебля в позе раком", sounds: ["🍑 *шлепки, влажные удары* Маму трахают сзади", "🔞 *скрип дивана* 'Да, еби её сильнее!'", "😫 *мамин стон* 'О да, еще, ТРАХАЙ'", "💢 *мужик дышит* Какая же ты шлюха, мать", "🥵 *оргазмические крики* Аааааххх!"] },
+        { action: "классическая ебля", sounds: ["🎙️ *тяжелое дыхание, стоны* 'Раздвинь ноги шире'", "🔊 *крики* О да-да-да, кончаю! ", "💸 *звук денег* 'получай, шалава'", "😈 *диалог* 'Сколько за анал? - Плати больше'", "🤪 *мамин визг* Ещё, не останавливайся!!!"] },
+        { action: "групповуха", sounds: ["👥 *два мужика* 'отсоси у моего друга', мама стонет", "💢 *звуки двойного проникновения*", "🤑 'за двойную цену поработай', звон монет", "😵 *мама задыхается от минета и ебли*"] },
+        { action: "жесткий секс", sounds: ["⛓️ *пощёчины, стоны* 'Да, грязная сучка'", "😫 *мама кричит от боли/удовольствия*", "💥 *удары тел, шлепки по лицу*", "🧴 *звук смазки и влажные толчки*"] }
+    ];
+
+    // фразы когда мама одна дома (кухня/быт)
+    const homeSounds = [
+        "🍳 Мама на кухне жарит яичницу, напевает песенку.",
+        "📞 Мама говорит по телефону подруге: 'устала, денег нет...'",
+        "🧹 Мама пылесосит ковёр в гостиной.",
+        "📺 Смотрит 'Дом-2', смеётся в одиночестве.",
+        "🚿 Мама принимает душ, мычит мелодию.",
+        "🍷 Открывает бутылку дешёвого вина, вздыхает."
+    ];
+
+    // звуки которые слышит ДИМА (при подслушивании)
+    function generateHearFromMom() {
+        if (momState === "with_man" && currentAct) {
+            // выбираем случайный звук из текущего акта (секс/минет)
+            const actionPack = currentAct.sounds;
+            const randomIdx = Math.floor(Math.random() * actionPack.length);
+            let rawSound = actionPack[randomIdx];
+            // иногда добавляем специфику про деньги
+            if (Math.random() < 0.4) {
+                rawSound += " 💰 (мама получила чаевые)";
+                let bonus = Math.floor(Math.random() * 300) + 100;
+                money += bonus;
+                updateMoney();
+                addMomLog(`💵 БОНУС! Пока Дима слушал, мужик кинул ${bonus}₽.`, true);
             }
-            return false;
+            return `👂 ДИМА СЛЫШИТ через стену: ${rawSound}`;
+        } 
+        else if (momState === "with_man" && !currentAct) {
+            // fallback
+            return `👂 ДИМА СЛЫШИТ: странные влажные звуки и стоны... мама явно с мужиком`;
         }
-        
-        function updateStatsFromLevel() {
-            let c = CLASSES[player.classType];
-            let armor = getArmorById(player.armorId);
-            let weapon = getWeaponById(player.weaponId);
-            player.maxHp = c.hp + player.level * 15;
-            player.maxMp = c.mp + player.level * 11;
-            if(player.hp > player.maxHp) player.hp = player.maxHp;
-            if(player.mp > player.maxMp) player.mp = player.maxMp;
-            player.expToNext = 90 + player.level * 38;
-            player.defense = (armor ? armor.def : 5) + Math.floor(player.level * 1.2);
-            if(weapon) {
-                player.dmgMin = weapon.dmgMin + Math.floor(player.level * 2);
-                player.dmgMax = weapon.dmgMax + Math.floor(player.level * 2.8);
-                player.attackRange = weapon.range;
-            }
+        else {
+            // мама одна
+            const randomHome = homeSounds[Math.floor(Math.random() * homeSounds.length)];
+            return `👂 ДИМА СЛЫШИТ: ${randomHome} (никаких мужчин)`;
         }
+    }
+
+    // добавить лог в зону мамы (что происходит в её комнате)
+    function addMomLog(message, isBonus = false) {
+        const div = document.createElement('div');
+        div.className = 'sound-entry mom-sound';
+        div.innerHTML = isBonus ? `✨ ${message}` : `💬 ${message}`;
+        momSoundsDiv.appendChild(div);
+        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        while (momSoundsDiv.children.length > 22) momSoundsDiv.removeChild(momSoundsDiv.firstChild);
+    }
+
+    // добавить лог в зону Димы (что он слышит)
+    function addDimaLog(message) {
+        const div = document.createElement('div');
+        div.className = 'sound-entry dima-sound';
+        div.innerHTML = message;
+        dimaHearDiv.appendChild(div);
+        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        while (dimaHearDiv.children.length > 24) dimaHearDiv.removeChild(dimaHearDiv.firstChild);
+    }
+
+    function updateMoney() {
+        moneySpan.innerText = Math.floor(money);
+    }
+
+    // завершить визит мужика
+    function endManVisit() {
+        if (momState !== "with_man") return;
+        if (manTimer) clearTimeout(manTimer);
+        const earnedThisTime = Math.floor(Math.random() * 900) + 500;
+        money += earnedThisTime;
+        updateMoney();
+        momState = "home_idle";
+        currentAct = null;
+        momStatusSpan.innerHTML = "🏠 Дома (готовит/отдыхает)";
+        addMomLog(`🚪 Мужик ушёл, мама заработала ${earnedThisTime}₽. Теперь она одна на кухне.`, false);
+        addMomLog(`🍲 Мама переодевается и идёт пить чай.`);
+        // также добавим для димы намёк
+        addDimaLog(`🔇 Звуки за стеной затихли. Дима слышит только шаги мамы. Мужик ушёл.`);
+        // обновляем аватарку мамы
+    }
+
+    // начать акт с мужиком (минет, ебля и тп)
+    function bringMan() {
+        if (momState === "with_man") {
+            addMomLog(`⚠️ Мама уже трахается с клиентом! Дождись окончания.`, false);
+            return;
+        }
+        // выбираем случайный тип секса
+        const randomAct = sexActions[Math.floor(Math.random() * sexActions.length)];
+        currentAct = randomAct;
+        momState = "with_man";
+        momStatusSpan.innerHTML = "🔞 С КЛИЕНТОМ (делает минет, ебётся)";
         
-        function getArmorById(id) { return ALL_ARMOR.find(a => a.id === id); }
-        function getWeaponById(id) { return ALL_WEAPONS.find(w => w.id === id); }
+        const visitDuration = 8000 + Math.random() * 9000; // 8-17 секунд
+        addMomLog(`🚪🔞 ПРИШЁЛ МУЖИК! Мама сразу начала ${randomAct.action}. Слышны пошлые звуки.`, false);
+        addMomLog(`💢 (стонет, шлепки, неприличные фразы...)`, false);
         
-        function updatePortalStatus() {
-            portalActive = (mobsKilledInWorld >= MOBS_NEEDED_FOR_PORTAL);
-            if(portalActive && currentWorld === "forest") {
-                portalX = safeZone.x + safeZone.width - 80;
-                portalY = safeZone.y + 60;
-            } else { portalActive = false; }
-            const progressPercent = Math.min(100, Math.floor(mobsKilledInWorld / MOBS_NEEDED_FOR_PORTAL * 100));
-            document.getElementById('portalProgress').innerText = `🚪 Прогресс портала: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL} (${progressPercent}%)`;
-            if(portalActive) {
-                document.getElementById('portalProgress').innerHTML = `✨ ПОРТАЛ ОТКРЫТ! ✨ (Нажмите на него)`;
-                document.getElementById('portalProgress').style.color = "#ffaa66";
+        // показать в логах Димы первое уведомление
+        addDimaLog(`🚨 Дима услышал мужской голос и дверной звонок. Мама с кем-то зашла в комнату!`);
+        
+        if (manTimer) clearTimeout(manTimer);
+        manTimer = setTimeout(() => {
+            endManVisit();
+        }, visitDuration);
+        
+        // каждые 3 секунды во время акта автоматически пишем в комнату мамы грязные детали (опционально)
+        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
+        window.autoSexInterval = setInterval(() => {
+            if (momState === "with_man" && currentAct) {
+                const randomAuto = currentAct.sounds[Math.floor(Math.random() * currentAct.sounds.length)];
+                addMomLog(`🔞 ${randomAuto}`, false);
             } else {
-                document.getElementById('portalProgress').style.color = "#88ffaa";
+                clearInterval(window.autoSexInterval);
             }
+        }, 4000);
+    }
+
+    // ---- ПОДСЛУШИВАНИЕ с анимацией Димы ----
+    function listenToWall() {
+        // Анимация: Дима прикладывает ухо к стене
+        dimaAvatar.classList.add('dima-listen-effect');
+        const listenBtn = document.getElementById('listenWallBtn');
+        listenBtn.classList.add('listen-animation');
+        setTimeout(() => {
+            dimaAvatar.classList.remove('dima-listen-effect');
+            listenBtn.classList.remove('listen-animation');
+        }, 350);
+        
+        // получаем что слышит Дима в зависимости от состояния мамы
+        const hearMessage = generateHearFromMom();
+        addDimaLog(hearMessage);
+        
+        // если мама с мужиком, дополнительный бонус - иногда подслушивание приносит деньги (типа нашёл в коридоре)
+        if (momState === "with_man" && Math.random() < 0.25) {
+            const foundMoney = Math.floor(Math.random() * 150) + 20;
+            money += foundMoney;
+            updateMoney();
+            addDimaLog(`💸 Дима нашёл в коридоре купюру (вероятно, мужик обронил) +${foundMoney}₽`);
         }
         
-        function activatePortal() {
-            if(!portalActive) return;
-            if(currentWorld === "forest") {
-                currentWorld = "desert";
-                addMsg(`🌍 ПЕРСОНАЖ ПЕРЕШЁЛ В МИР: ${WORLDS.desert.name}! Сложность увеличена!`);
-                mobsKilledInWorld = 0;
-                portalActive = false;
-                mobs = [];
-                for(let i=0;i<15;i++) spawnMob();
-                saveGame();
-                updatePortalStatus();
-            } else if(currentWorld === "desert") {
-                currentWorld = "castle";
-                addMsg(`🌍 ПЕРСОНАЖ ПЕРЕШЁЛ В МИР: ${WORLDS.castle.name}! Максимальная сложность!`);
-                mobsKilledInWorld = 0;
-                portalActive = false;
-                mobs = [];
-                for(let i=0;i<18;i++) spawnMob();
-                saveGame();
-                updatePortalStatus();
-            }
+        // Дополнительная реакция: если мама делает минет, то Дима слышит очень чётко
+        if (momState === "with_man" && currentAct && currentAct.action === "минет") {
+            addDimaLog(`😨 Дима отодвинулся от стены, услышав как мама давится членом. Отвращение и стыд.`);
         }
-        
-        function showNicknameModal() {
-            return new Promise((resolve) => {
-                const modal = document.createElement('div');
-                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:200;display:flex;align-items:center;justify-content:center;';
-                modal.innerHTML = `
-                    <div style="background:#2a2e3f;padding:30px;border-radius:20px;text-align:center;border:2px solid #ffaa55;max-width:90%;width:320px;">
-                        <h2 style="color:#ffcc88;margin-bottom:20px;">⚔️ Введите имя ⚔️</h2>
-                        <input type="text" id="nicknameInput" placeholder="Ваш никнейм" maxlength="20" style="width:100%;padding:12px;font-size:18px;background:#1a1e2a;border:1px solid #ffaa55;color:#ffcc88;border-radius:10px;margin-bottom:20px;font-family:monospace;text-align:center;">
-                        <button id="startBtn" style="background:#ffaa55;color:#1a1e2a;border:none;padding:10px 20px;font-size:18px;font-weight:bold;border-radius:10px;cursor:pointer;">Начать игру</button>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-                const input = modal.querySelector('#nicknameInput');
-                const btn = modal.querySelector('#startBtn');
-                const start = () => { let nick = input.value.trim(); if(nick === "") nick = "Герой_" + Math.floor(Math.random() * 1000); modal.remove(); resolve(nick); };
-                btn.onclick = start;
-                input.onkeypress = (e) => { if(e.key === 'Enter') start(); };
-                input.focus();
-            });
+        if (momState === "with_man" && currentAct && currentAct.action.includes("групповуха")) {
+            addDimaLog(`🤯 Дима в шоке: похоже у мамы сразу несколько мужиков! Слышны голоса со всех сторон.`);
         }
-        
-        // ========== СТАТИСТИКА ==========
-        let stats = {
-            mobsKilled: 0, totalGold: 0, totalDamage: 0, totalDamageTaken: 0,
-            startTime: Date.now()
-        };
-        
-        function getPlayTime() {
-            let s = Math.floor((Date.now() - stats.startTime) / 1000);
-            return { h: Math.floor(s/3600), m: Math.floor((s%3600)/60), s: s%60 };
+    }
+    
+    // полный сброс игры
+    function fullReset() {
+        if (manTimer) clearTimeout(manTimer);
+        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
+        money = 0;
+        momState = "home_idle";
+        currentAct = null;
+        updateMoney();
+        momStatusSpan.innerHTML = "🏠 Дома (готовит)";
+        // очистить логи
+        momSoundsDiv.innerHTML = '';
+        dimaHearDiv.innerHTML = '';
+        addMomLog(`🔄 СИСТЕМА ПЕРЕЗАПУЩЕНА. Мама снова на кухне.`, false);
+        addMomLog(`🍳 Готовит ужин, Дима в своей комнате.`);
+        addDimaLog(`🔇 Тишина. Дима сидит в углу.`);
+        addDimaLog(`👂 Может приложить ухо к стене и подслушивать...`);
+        // добавим пару стандартных
+        addMomLog(`📺 Включила телевизор, ждёт "клиентов"`);
+    }
+    
+    // инициализация кнопок и начальное состояние
+    document.getElementById('callManBtn').addEventListener('click', () => {
+        bringMan();
+    });
+    document.getElementById('listenWallBtn').addEventListener('click', () => {
+        listenToWall();
+    });
+    document.getElementById('resetGameBtn').addEventListener('click', () => {
+        fullReset();
+    });
+    
+    // имитация бытовых звуков когда мама одна (каждые 10-15 секунд)
+    setInterval(() => {
+        if (momState === "home_idle") {
+            const randomHomeSound = homeSounds[Math.floor(Math.random() * homeSounds.length)];
+            addMomLog(randomHomeSound, false);
         }
-        
-        // ========== БЕЗОПАСНАЯ ЗОНА ==========
-        let safeZone = { x: 500, y: 420, width: 560, height: 440 };
-        let shopNPC = { x: safeZone.x + safeZone.width - 80, y: safeZone.y + safeZone.height - 60, radius: 28 };
-        
-        let gates = [
-            { x: safeZone.x + safeZone.width/2 - 50, y: safeZone.y - 30, width: 100, height: 40 },
-            { x: safeZone.x + safeZone.width/2 - 50, y: safeZone.y + safeZone.height - 10, width: 100, height: 40 },
-            { x: safeZone.x - 30, y: safeZone.y + safeZone.height/2 - 50, width: 40, height: 100 },
-            { x: safeZone.x + safeZone.width - 10, y: safeZone.y + safeZone.height/2 - 50, width: 40, height: 100 }
-        ];
-        
-        function isInSafeZone(x, y) { return x > safeZone.x && x < safeZone.x + safeZone.width && y > safeZone.y && y < safeZone.y + safeZone.height; }
-        function isAtGate(x, y) { for(let g of gates) if(x > g.x && x < g.x+g.width && y > g.y && y < g.y+g.height) return true; return false; }
-        function canCrossBoundary(fx, fy, tx, ty) {
-            let was = isInSafeZone(fx, fy);
-            let will = isInSafeZone(tx, ty);
-            if(was === will) return true;
-            let mx = (fx+tx)/2, my = (fy+ty)/2;
-            return isAtGate(mx, my) || isAtGate(tx, ty) || isAtGate(fx, fy);
-        }
-        
-        let obstacles = [];
-        
-        function generateWorld() {
-            obstacles = [];
-            for(let i=0;i<MAP_H;i++) for(let j=0;j<MAP_W;j++) worldMap[i][j] = 0;
-            for(let y=12;y<24;y++) for(let x=14;x<30;x++) worldMap[y][x] = 1;
-            for(let x=19;x<25;x++) { worldMap[11][x] = 2; worldMap[24][x] = 2; }
-            for(let y=16;y<22;y++) { worldMap[y][13] = 2; worldMap[y][30] = 2; }
-            for(let i=0;i<38;i++) {
-                let fx = safeZone.x + i*28, fxTile = Math.floor(fx / TILE_SIZE), fyTile = Math.floor(safeZone.y / TILE_SIZE);
-                if(!(fx>gates[0].x-20 && fx<gates[0].x+gates[0].width+20)) { obstacles.push({x:fx,y:safeZone.y-18,radius:14,type:'fence'}); if(fxTile >=0 && fxTile < MAP_W && fyTile-1 >=0) worldMap[fyTile-1][fxTile] = 3; }
-                if(!(fx>gates[1].x-20 && fx<gates[1].x+gates[1].width+20)) { obstacles.push({x:fx,y:safeZone.y+safeZone.height+8,radius:14,type:'fence'}); if(fxTile >=0 && fxTile < MAP_W && fyTile+24 < MAP_H) worldMap[fyTile+24][fxTile] = 3; }
-            }
-            for(let i=0;i<30;i++) {
-                let fy = safeZone.y + i*28, fxTile = Math.floor(safeZone.x / TILE_SIZE), fyTile = Math.floor(fy / TILE_SIZE);
-                if(!(fy>gates[2].y-20 && fy<gates[2].y+gates[2].height+20)) { obstacles.push({x:safeZone.x-18,y:fy,radius:14,type:'fence'}); if(fyTile >=0 && fyTile < MAP_H && fxTile-1 >=0) worldMap[fyTile][fxTile-1] = 3; }
-                if(!(fy>gates[3].y-20 && fy<gates[3].y+gates[3].height+20)) { obstacles.push({x:safeZone.x+safeZone.width+8,y:fy,radius:14,type:'fence'}); if(fyTile >=0 && fyTile < MAP_H && fxTile+29 < MAP_W) worldMap[fyTile][fxTile+29] = 3; }
-            }
-            for(let i=0;i<420;i++) {
-                let x=80+Math.random()*(WORLD_WIDTH-160), y=80+Math.random()*(WORLD_HEIGHT-160);
-                if(x>safeZone.x-80 && x<safeZone.x+safeZone.width+80 && y>safeZone.y-80 && y<safeZone.y+safeZone.height+80) continue;
-                obstacles.push({x,y,radius:26,type:'tree'});
-                let tx = Math.floor(x/TILE_SIZE), ty = Math.floor(y/TILE_SIZE);
-                if(tx>=0 && tx<MAP_W && ty>=0 && ty<MAP_H && worldMap[ty][tx]===0) worldMap[ty][tx] = 3;
-            }
-            for(let i=0;i<85;i++) {
-                let x=100+Math.random()*(WORLD_WIDTH-200), y=100+Math.random()*(WORLD_HEIGHT-200);
-                if(x>safeZone.x-100 && x<safeZone.x+safeZone.width+100 && y>safeZone.y-100 && y<safeZone.y+safeZone.height+100) continue;
-                obstacles.push({x,y,radius:38,type:'mountain'});
-                let tx = Math.floor(x/TILE_SIZE), ty = Math.floor(y/TILE_SIZE);
-                if(tx>=0 && tx<MAP_W && ty>=0 && ty<MAP_H && worldMap[ty][tx]===0) worldMap[ty][tx] = 4;
-            }
-            for(let i=0;i<260;i++) {
-                let x=50+Math.random()*(WORLD_WIDTH-100), y=50+Math.random()*(WORLD_HEIGHT-100);
-                if(x>safeZone.x-60 && x<safeZone.x+safeZone.width+60 && y>safeZone.y-60 && y<safeZone.y+safeZone.height+60) continue;
-                obstacles.push({x,y,radius:16,type:'rock'});
-                let tx = Math.floor(x/TILE_SIZE), ty = Math.floor(y/TILE_SIZE);
-                if(tx>=0 && tx<MAP_W && ty>=0 && ty<MAP_H && worldMap[ty][tx]===0) worldMap[ty][tx] = 6;
-            }
-        }
-        
-        function isWalkable(x,y,r=24) {
-            if(x-r<25 || x+r>WORLD_WIDTH-25 || y-r<25 || y+r>WORLD_HEIGHT-25) return false;
-            for(let o of obstacles) if(Math.hypot(x-o.x,y-o.y)<r+o.radius) return false;
-            return true;
-        }
-        
-        function canMoveTo(x,y,r=24) {
-            if(!isWalkable(x,y,r)) return false;
-            if(!canCrossBoundary(player.x,player.y,x,y)) return false;
-            return true;
-        }
-        
-        // ========== КЛАССЫ ==========
-        const CLASSES = {
-            warrior: { name: "Мечник", icon: "⚔️", color: "#5a7a9a", armorColor: "#4a6a8a", hp: 320, mp: 75, dmgMin: 34, dmgMax: 60, skill: "Вихрь", range: 60, skillRange: 75, isMelee: true, skinColor: "#e0c8a0", hairColor: "#8b5a2b" },
-            archer: { name: "Лучник", icon: "🏹", color: "#6a8a5a", armorColor: "#5a7a4a", hp: 260, mp: 120, dmgMin: 32, dmgMax: 58, skill: "Тройной выстрел", range: 180, skillRange: 210, isMelee: false, skinColor: "#e0c8a0", hairColor: "#6b4a2a" },
-            mage: { name: "Маг", icon: "🔮", color: "#9a6aba", armorColor: "#8a5aaa", hp: 210, mp: 210, dmgMin: 40, dmgMax: 70, skill: "Огненный взрыв", range: 170, skillRange: 200, isMelee: false, skinColor: "#e0c8a0", hairColor: "#4a2a6a" }
-        };
-        
-        // МОБЫ
-        const MOB_TYPES = [
-            { name: "Гоблин", hp: 70, dmg: 16, exp: 38, color: "#6f8c5a", skin: "#8cae6a", icon: "👺", speed: 1.0, range: 55, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-12,y-18,24,32); ctx.fillStyle=this.color; ctx.fillRect(x-10,y-10,20,24); ctx.fillStyle="#000"; ctx.fillRect(x-6,y-12,4,4); ctx.fillRect(x+2,y-12,4,4); ctx.fillStyle="#8b5a2b"; ctx.fillRect(x-8,y+4,16,8); } },
-            { name: "Волк", hp: 95, dmg: 24, exp: 55, color: "#8a7a6a", skin: "#c0a890", icon: "🐺", speed: 1.3, range: 50, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-14,y-16,28,28); ctx.fillStyle=this.color; ctx.fillRect(x-12,y-12,24,22); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-10,4,4); ctx.fillRect(x+4,y-10,4,4); ctx.fillStyle="#4a3a2a"; ctx.fillRect(x-4,y+2,8,6); } },
-            { name: "Медведь", hp: 150, dmg: 32, exp: 78, color: "#8b5a3a", skin: "#b87a4a", icon: "🐻", speed: 0.9, range: 58, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-16,y-20,32,36); ctx.fillStyle=this.color; ctx.fillRect(x-14,y-12,28,28); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-14,5,5); ctx.fillRect(x+3,y-14,5,5); ctx.fillStyle="#5a3a2a"; ctx.fillRect(x-6,y+2,12,8); } },
-            { name: "Скелет", hp: 170, dmg: 32, exp: 95, color: "#b8b8cc", skin: "#d0d0e0", icon: "💀", speed: 1.1, range: 55, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-12,y-20,24,36); ctx.fillStyle=this.color; ctx.fillRect(x-10,y-12,20,28); ctx.fillStyle="#000"; ctx.fillRect(x-6,y-14,4,4); ctx.fillRect(x+2,y-14,4,4); ctx.fillStyle="#8a8a8a"; ctx.fillRect(x-8,y+2,16,6); } },
-            { name: "Орк", hp: 240, dmg: 45, exp: 132, color: "#8a6a4a", skin: "#aa8262", icon: "👺", speed: 0.85, range: 58, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-14,y-20,28,36); ctx.fillStyle=this.color; ctx.fillRect(x-12,y-12,24,28); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-14,5,5); ctx.fillRect(x+3,y-14,5,5); ctx.fillStyle="#b87c3a"; ctx.fillRect(x-10,y+2,20,10); } },
-            { name: "Дракон", hp: 310, dmg: 58, exp: 210, color: "#c97a3a", skin: "#e09a5a", icon: "🐉", speed: 0.6, range: 65, draw: function(x,y) { ctx.fillStyle=this.skin; ctx.fillRect(x-16,y-22,32,40); ctx.fillStyle=this.color; ctx.fillRect(x-14,y-14,28,32); ctx.fillStyle="#000"; ctx.fillRect(x-8,y-16,5,5); ctx.fillRect(x+3,y-16,5,5); ctx.fillStyle="#d97a3a"; ctx.fillRect(x-12,y-2,24,8); } }
-        ];
-        
-        let mobs = [], spawnTimer = 0;
-        const MAX_MOBS = 40;
-        
-        function createMob() {
-            let t = MOB_TYPES[Math.floor(Math.random() * MOB_TYPES.length)];
-            let lvl = Math.max(1, player.level + Math.floor(Math.random() * 4) - 2);
-            let worldMult = WORLDS[currentWorld].mobMultiplier;
-            let hpMult = 1 + (lvl-1)*0.15, dmgMult = 1 + (lvl-1)*0.13;
-            return {
-                name: t.name + " Lv." + lvl, level: lvl,
-                hp: Math.floor(t.hp * hpMult * worldMult), maxHp: Math.floor(t.hp * hpMult * worldMult),
-                dmg: Math.floor(t.dmg * dmgMult * (1 + (worldMult-1)*0.3)),
-                exp: Math.floor(t.exp * (0.85 + lvl*0.12) * worldMult),
-                color: WORLDS[currentWorld].mobColors[Math.floor(Math.random() * WORLDS[currentWorld].mobColors.length)],
-                skin: t.skin, icon: t.icon, speed: t.speed, attackRange: t.range, drawFunc: t.draw,
-                x: 0, y: 0, attackTimer: 0
-            };
-        }
-        
-        function spawnMob() {
-            if(mobs.length >= MAX_MOBS) return;
-            for(let a=0;a<50;a++) {
-                let x=150+Math.random()*(WORLD_WIDTH-300), y=120+Math.random()*(WORLD_HEIGHT-240);
-                if(isWalkable(x,y,26) && !isInSafeZone(x,y) && Math.hypot(x-player.x,y-player.y)>200) {
-                    let m=createMob(); m.x=x; m.y=y; mobs.push(m); return;
-                }
-            }
-        }
-        
-        let player = {
-            x: safeZone.x + safeZone.width/2, y: safeZone.y + safeZone.height/2,
-            targetX: null, targetY: null,
-            hp: 320, maxHp: 320, mp: 75, maxMp: 75,
-            level: 1, exp: 0, expToNext: 90,
-            classType: "warrior",
-            potionHp: 5, potionMp: 5, potionBigHp: 1, potionBigMp: 1,
-            armorId: "wooden", weaponId: "wooden_sword",
-            gold: 450, speed: 4.5, defense: 15,
-            attackTimer: 0, superCooldown: 0,
-            isMoving: false, dmgMin: 8, dmgMax: 14, attackRange: 55
-        };
-        
-        // ========== ДВИЖЕНИЕ ==========
-        function moveTo(x, y) { player.targetX = x; player.targetY = y; }
-        function updateMove() {
-            if(player.targetX === null || player.targetY === null) { player.isMoving = false; return; }
-            let dx = player.targetX - player.x, dy = player.targetY - player.y, dist = Math.hypot(dx, dy);
-            if(dist < 8) { player.targetX = null; player.targetY = null; player.isMoving = false; return; }
-            player.isMoving = true;
-            let step = Math.min(player.speed, dist), ang = Math.atan2(dy, dx);
-            let nx = player.x + Math.cos(ang) * step, ny = player.y + Math.sin(ang) * step;
-            if(canMoveTo(nx, ny, 24)) { player.x = nx; player.y = ny; }
-            else { player.targetX = null; player.targetY = null; player.isMoving = false; }
-        }
-        
-        // РЕАЛИСТИЧНАЯ МОДЕЛЬ ИГРОКА
-        function drawRealisticPlayer(x, y, isMoving) {
-            const c = CLASSES[player.classType];
-            if(isMoving) walkCycle = (walkCycle + 0.15) % (Math.PI * 2);
-            else walkCycle = walkCycle * 0.95;
-            const legOffset = Math.sin(walkCycle) * 6;
-            const armOffset = Math.sin(walkCycle + Math.PI) * 8;
-            ctx.fillStyle = "#2a2a2a";
-            ctx.beginPath(); ctx.moveTo(x-12, y+15); ctx.lineTo(x-16 + (legOffset * 0.5), y+28); ctx.lineTo(x-10, y+28); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(x+12, y+15); ctx.lineTo(x+16 - (legOffset * 0.5), y+28); ctx.lineTo(x+10, y+28); ctx.fill();
-            ctx.fillStyle = "#4a3a2a"; ctx.fillRect(x-18 + (legOffset * 0.3), y+27, 12, 6); ctx.fillRect(x+6 - (legOffset * 0.3), y+27, 12, 6);
-            ctx.fillStyle = c.color;
-            ctx.beginPath(); ctx.moveTo(x-14, y+4); ctx.quadraticCurveTo(x, y+14, x+14, y+4); ctx.lineTo(x+12, y-2); ctx.quadraticCurveTo(x, y+2, x-12, y-2); ctx.fill();
-            ctx.fillStyle = c.armorColor; ctx.fillRect(x-10, y+2, 20, 12);
-            ctx.fillStyle = c.skinColor;
-            ctx.beginPath(); ctx.moveTo(x-12, y+2); ctx.quadraticCurveTo(x-18 + armOffset, y+6, x-14 + armOffset*0.7, y+12); ctx.lineTo(x-10, y+4); ctx.fill();
-            ctx.beginPath(); ctx.moveTo(x+12, y+2); ctx.quadraticCurveTo(x+18 - armOffset, y+6, x+14 - armOffset*0.7, y+12); ctx.lineTo(x+10, y+4); ctx.fill();
-            ctx.fillRect(x-16 + armOffset*0.6, y+10, 6, 5); ctx.fillRect(x+10 - armOffset*0.6, y+10, 6, 5);
-            ctx.fillStyle = c.skinColor; ctx.beginPath(); ctx.ellipse(x, y-8, 10, 12, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = c.hairColor; ctx.beginPath(); ctx.ellipse(x-2, y-15, 8, 6, 0, 0, Math.PI*2); ctx.ellipse(x+2, y-15, 8, 6, 0, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(x-5, y-11, 2.5, 0, Math.PI*2); ctx.arc(x+5, y-11, 2.5, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#1a2a3a"; ctx.beginPath(); ctx.arc(x-5, y-11, 1.5, 0, Math.PI*2); ctx.arc(x+5, y-11, 1.5, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(x-5.8, y-12, 0.8, 0, Math.PI*2); ctx.arc(x+4.2, y-12, 0.8, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.strokeStyle = "#8b5a3a"; ctx.lineWidth = 2; ctx.arc(x, y-5, 5, 0.1, Math.PI - 0.1); ctx.stroke();
-            ctx.fillStyle = "#c99e6f"; ctx.beginPath(); ctx.moveTo(x-2, y-8); ctx.lineTo(x, y-6); ctx.lineTo(x+2, y-8); ctx.fill();
-            let weapon = getWeaponById(player.weaponId);
-            if(c.name === "Мечник" || (weapon && weapon.type === "melee")) {
-                ctx.fillStyle = "#ccaa88"; ctx.fillRect(x+12 - armOffset*0.3, y-2, 16, 6);
-                ctx.fillStyle = "#aa8866"; ctx.fillRect(x+24 - armOffset*0.5, y-4, 6, 12);
-            } else if(c.name === "Лучник" || (weapon && weapon.type === "ranged")) {
-                ctx.fillStyle = "#c4b27a"; ctx.beginPath(); ctx.moveTo(x+14 - armOffset*0.3, y-4); ctx.lineTo(x+28 - armOffset*0.5, y); ctx.lineTo(x+14 - armOffset*0.3, y+4); ctx.fill();
-                ctx.fillStyle = "#aa8866"; ctx.fillRect(x+24 - armOffset*0.5, y-2, 4, 8);
-            } else {
-                ctx.fillStyle = "#ffaa66"; ctx.beginPath(); ctx.ellipse(x+14 - armOffset*0.3, y, 8, 6, 0, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#ff8844"; ctx.beginPath(); ctx.ellipse(x+16 - armOffset*0.4, y, 4, 3, 0, 0, Math.PI*2); ctx.fill();
-                ctx.shadowBlur = 10; ctx.shadowColor = "#ffaa44";
-                ctx.fillStyle = "#ffaa44"; ctx.beginPath(); ctx.ellipse(x+14 - armOffset*0.3, y, 3, 2, 0, 0, Math.PI*2); ctx.fill();
-                ctx.shadowBlur = 0;
-            }
-            ctx.fillStyle = "#8b5a2b"; ctx.fillRect(x-8, y+8, 16, 3);
-        }
-        
-        // ========== МАГАЗИН С ПРОКРУТКОЙ ==========
-        let shopOpen = false;
-        let shopScroll = 0;
-        let shopTab = "potions"; // "potions", "armor", "weapons"
-        let shopItemsPerPage = 6;
-        
-        function drawShop() {
-            let w = 500, h = 500;
-            let x = canvasWidth/2 - w/2, y = canvasHeight/2 - h/2;
-            ctx.fillStyle = "#1a1e2add"; ctx.fillRect(x, y, w, h);
-            ctx.strokeStyle = "#ffaa55"; ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
-            ctx.fillStyle = "#ffcc88"; ctx.font = "bold 20px monospace"; ctx.fillText("🏪 МАГАЗИН", x+20, y+35);
-            ctx.fillStyle = "#ffaa55"; ctx.fillRect(x+w-40, y+15, 30, 30);
-            ctx.fillStyle = "#ffcc88"; ctx.font = "24px monospace"; ctx.fillText("✕", x+w-32, y+40);
-            ctx.fillStyle = "#aa8866"; ctx.fillRect(x+20, y+55, 460, 3);
-            
-            // Вкладки
-            let tabW = 100, tabH = 30;
-            ctx.fillStyle = shopTab === "potions" ? "#ffaa55" : "#2a2e3f";
-            ctx.fillRect(x+20, y+65, tabW, tabH);
-            ctx.fillStyle = shopTab === "armor" ? "#ffaa55" : "#2a2e3f";
-            ctx.fillRect(x+130, y+65, tabW, tabH);
-            ctx.fillStyle = shopTab === "weapons" ? "#ffaa55" : "#2a2e3f";
-            ctx.fillRect(x+240, y+65, tabW, tabH);
-            ctx.fillStyle = "#ffcc88"; ctx.font = "14px monospace";
-            ctx.fillText("Зелья", x+50, y+88);
-            ctx.fillText("Броня", x+160, y+88);
-            ctx.fillText("Оружие", x+270, y+88);
-            
-            let items = [];
-            if(shopTab === "potions") {
-                items = [
-                    { name: "Зелье HP", type: "hp", price: 60, icon: "❤️", desc: "Восстанавливает 70% HP" },
-                    { name: "Зелье MP", type: "mp", price: 55, icon: "💙", desc: "Восстанавливает 75% MP" },
-                    { name: "Большое HP", type: "hp_big", price: 160, icon: "❤️✨", desc: "Восстанавливает 90% HP" },
-                    { name: "Большое MP", type: "mp_big", price: 150, icon: "💙✨", desc: "Восстанавливает 100% MP" }
-                ];
-            } else if(shopTab === "armor") {
-                items = ALL_ARMOR.filter(a => a.level <= player.level + 10);
-            } else {
-                items = ALL_WEAPONS.filter(w => w.level <= player.level + 10);
-            }
-            
-            let startIdx = Math.floor(shopScroll / shopItemsPerPage) * shopItemsPerPage;
-            let endIdx = Math.min(startIdx + shopItemsPerPage, items.length);
-            let itemY = y + 110;
-            for(let i = startIdx; i < endIdx; i++) {
-                let it = items[i];
-                let itemX = x + 20;
-                let itemH = 70;
-                ctx.fillStyle = "#2a2e4a"; ctx.fillRect(itemX, itemY, w-40, itemH-5);
-                ctx.fillStyle = "#ffcc88"; ctx.font = "18px monospace"; ctx.fillText(it.icon, itemX+10, itemY+28);
-                ctx.fillStyle = "#ffffaa"; ctx.font = "12px monospace"; ctx.fillText(it.name, itemX+40, itemY+22);
-                if(it.desc) { ctx.fillStyle = "#aa8866"; ctx.font = "9px monospace"; ctx.fillText(it.desc, itemX+40, itemY+42); }
-                if(it.def) ctx.fillText(`Защита: +${it.def} | Ур.${it.level}`, itemX+40, itemY+58);
-                if(it.dmgMin) ctx.fillText(`Урон: ${it.dmgMin}-${it.dmgMax} | Ур.${it.level}`, itemX+40, itemY+58);
-                ctx.fillStyle = "#88ffaa"; ctx.font = "bold 12px monospace"; ctx.fillText(`${it.price}💰`, itemX + w-80, itemY+28);
-                ctx.fillStyle = "#ffaa55"; ctx.fillRect(itemX + w-100, itemY+35, 60, 25);
-                ctx.fillStyle = "#000"; ctx.font = "10px monospace"; ctx.fillText("КУПИТЬ", itemX + w-90, itemY+53);
-                itemY += itemH;
-            }
-            
-            // Прокрутка
-            if(items.length > shopItemsPerPage) {
-                let scrollBarX = x + w - 20;
-                let scrollBarH = h - 120;
-                let scrollBarY = y + 70;
-                let scrollPercent = shopScroll / (items.length - shopItemsPerPage);
-                let thumbH = Math.max(40, scrollBarH * (shopItemsPerPage / items.length));
-                let thumbY = scrollBarY + scrollPercent * (scrollBarH - thumbH);
-                ctx.fillStyle = "#4a4e6a"; ctx.fillRect(scrollBarX, scrollBarY, 10, scrollBarH);
-                ctx.fillStyle = "#ffaa55"; ctx.fillRect(scrollBarX, thumbY, 10, thumbH);
-            }
-        }
-        
-        function handleShopClick(mx, my) {
-            let w = 500, h = 500;
-            let x = canvasWidth/2 - w/2, y = canvasHeight/2 - h/2;
-            if(mx > x+w-40 && mx < x+w-10 && my > y+15 && my < y+45) { shopOpen = false; return true; }
-            if(mx > x+20 && mx < x+120 && my > y+65 && my < y+95) { shopTab = "potions"; shopScroll = 0; return true; }
-            if(mx > x+130 && mx < x+230 && my > y+65 && my < y+95) { shopTab = "armor"; shopScroll = 0; return true; }
-            if(mx > x+240 && mx < x+340 && my > y+65 && my < y+95) { shopTab = "weapons"; shopScroll = 0; return true; }
-            
-            let items = [];
-            if(shopTab === "potions") {
-                items = [
-                    { name: "Зелье HP", type: "hp", price: 60, icon: "❤️" },
-                    { name: "Зелье MP", type: "mp", price: 55, icon: "💙" },
-                    { name: "Большое HP", type: "hp_big", price: 160, icon: "❤️✨" },
-                    { name: "Большое MP", type: "mp_big", price: 150, icon: "💙✨" }
-                ];
-            } else if(shopTab === "armor") {
-                items = ALL_ARMOR.filter(a => a.level <= player.level + 10);
-            } else {
-                items = ALL_WEAPONS.filter(w => w.level <= player.level + 10);
-            }
-            
-            let startIdx = Math.floor(shopScroll / shopItemsPerPage) * shopItemsPerPage;
-            let endIdx = Math.min(startIdx + shopItemsPerPage, items.length);
-            let itemY = y + 110;
-            for(let i = startIdx; i < endIdx; i++) {
-                let it = items[i];
-                let itemX = x + 20;
-                let itemH = 70;
-                if(my > itemY && my < itemY + itemH-5) {
-                    let buyX = itemX + w-100;
-                    if(mx > buyX && mx < buyX + 60 && my > itemY+35 && my < itemY+60) {
-                        if(player.gold >= it.price) {
-                            player.gold -= it.price;
-                            if(it.type === "hp") player.potionHp++;
-                            else if(it.type === "mp") player.potionMp++;
-                            else if(it.type === "hp_big") player.potionBigHp++;
-                            else if(it.type === "mp_big") player.potionBigMp++;
-                            else if(it.def) { player.armorId = it.id; updateStatsFromLevel(); addMsg(`🛡️ Куплена ${it.name}!`); }
-                            else if(it.dmgMin) { player.weaponId = it.id; updateStatsFromLevel(); addMsg(`⚔️ Куплено ${it.name}!`); }
-                            addMsg(`✅ Куплен ${it.name}!`);
-                            saveGame();
-                        } else addMsg(`💰 Не хватает золота!`, true);
-                        return true;
-                    }
-                }
-                itemY += itemH;
-            }
-            return false;
-        }
-        
-        // ========== ИНВЕНТАРЬ ==========
-        let showInventory = false;
-        let invScroll = 0;
-        
-        function drawInventory() {
-            let w = 450, h = 500;
-            let x = canvasWidth/2 - w/2, y = canvasHeight/2 - h/2;
-            ctx.fillStyle = "#1a1e2add"; ctx.fillRect(x, y, w, h);
-            ctx.strokeStyle = "#ffaa55"; ctx.lineWidth = 3; ctx.strokeRect(x, y, w, h);
-            ctx.fillStyle = "#ffcc88"; ctx.font = "bold 20px monospace"; ctx.fillText("🎒 ИНВЕНТАРЬ", x+20, y+35);
-            ctx.fillStyle = "#ffaa55"; ctx.fillRect(x+w-40, y+15, 30, 30);
-            ctx.fillStyle = "#ffcc88"; ctx.font = "24px monospace"; ctx.fillText("✕", x+w-32, y+40);
-            ctx.fillStyle = "#aa8866"; ctx.fillRect(x+20, y+55, w-40, 3);
-            
-            // Зелья
-            ctx.fillStyle = "#ffaa88"; ctx.font = "bold 14px monospace"; ctx.fillText("ЗЕЛЬЯ", x+20, y+90);
-            ctx.fillStyle = "#edbc"; ctx.font = "12px monospace";
-            ctx.fillText(`🧪 Малые зелья HP: ${player.potionHp}`, x+30, y+115);
-            ctx.fillText(`💙 Малые зелья MP: ${player.potionMp}`, x+30, y+140);
-            ctx.fillText(`✨ Большие зелья HP: ${player.potionBigHp}`, x+30, y+165);
-            ctx.fillText(`✨ Большие зелья MP: ${player.potionBigMp}`, x+30, y+190);
-            
-            // Экипировка
-            ctx.fillStyle = "#ffaa88"; ctx.font = "bold 14px monospace"; ctx.fillText("ЭКИПИРОВКА", x+20, y+225);
-            let armor = getArmorById(player.armorId);
-            let weapon = getWeaponById(player.weaponId);
-            ctx.fillStyle = "#edbc"; ctx.font = "12px monospace";
-            ctx.fillText(`🛡️ Броня: ${armor ? armor.name : "Нет"} (Ур.${armor ? armor.level : 0}) +${armor ? armor.def : 0}`, x+30, y+255);
-            ctx.fillText(`⚔️ Оружие: ${weapon ? weapon.name : "Нет"} (Ур.${weapon ? weapon.level : 0}) ${weapon ? weapon.dmgMin+"-"+weapon.dmgMax : ""}`, x+30, y+285);
-            
-            // Доступная броня
-            ctx.fillStyle = "#ffaa88"; ctx.font = "bold 14px monospace"; ctx.fillText("ДОСТУПНАЯ БРОНЯ", x+20, y+325);
-            let availableArmor = ALL_ARMOR.filter(a => a.level <= player.level);
-            let armY = y + 355;
-            for(let i = 0; i < Math.min(4, availableArmor.length); i++) {
-                let a = availableArmor[i];
-                ctx.fillStyle = player.armorId === a.id ? "#88ffaa" : "#edbc";
-                ctx.font = "11px monospace";
-                ctx.fillText(`${a.icon} ${a.name} +${a.def} (Ур.${a.level})`, x+30, armY);
-                if(player.armorId !== a.id) {
-                    ctx.fillStyle = "#ffaa55"; ctx.fillRect(x+w-80, armY-12, 60, 20);
-                    ctx.fillStyle = "#000"; ctx.font = "9px monospace"; ctx.fillText("НАДЕТЬ", x+w-70, armY-2);
-                } else {
-                    ctx.fillStyle = "#88ffaa"; ctx.fillText("✓ НАДЕТО", x+w-80, armY-2);
-                }
-                armY += 28;
-            }
-            
-            // Доступное оружие
-            ctx.fillStyle = "#ffaa88"; ctx.font = "bold 14px monospace"; ctx.fillText("ДОСТУПНОЕ ОРУЖИЕ", x+20, armY+15);
-            let availableWeapons = ALL_WEAPONS.filter(w => w.level <= player.level);
-            armY += 45;
-            for(let i = 0; i < Math.min(4, availableWeapons.length); i++) {
-                let w = availableWeapons[i];
-                ctx.fillStyle = player.weaponId === w.id ? "#88ffaa" : "#edbc";
-                ctx.font = "10px monospace";
-                ctx.fillText(`${w.icon} ${w.name} ${w.dmgMin}-${w.dmgMax} (Ур.${w.level})`, x+30, armY);
-                if(player.weaponId !== w.id) {
-                    ctx.fillStyle = "#ffaa55"; ctx.fillRect(x+w-80, armY-12, 60, 20);
-                    ctx.fillStyle = "#000"; ctx.font = "9px monospace"; ctx.fillText("НАДЕТЬ", x+w-70, armY-2);
-                } else {
-                    ctx.fillStyle = "#88ffaa"; ctx.fillText("✓ НАДЕТО", x+w-80, armY-2);
-                }
-                armY += 28;
-            }
-        }
-        
-        function handleInventoryClick(mx, my) {
-            let w = 450, h = 500;
-            let x = canvasWidth/2 - w/2, y = canvasHeight/2 - h/2;
-            if(mx > x+w-40 && mx < x+w-10 && my > y+15 && my < y+45) { showInventory = false; return true; }
-            
-            let armY = y + 355;
-            let availableArmor = ALL_ARMOR.filter(a => a.level <= player.level);
-            for(let i = 0; i < availableArmor.length; i++) {
-                let a = availableArmor[i];
-                if(my > armY-12 && my < armY+8 && mx > x+w-80 && mx < x+w-20 && player.armorId !== a.id) {
-                    player.armorId = a.id;
-                    updateStatsFromLevel();
-                    addMsg(`🛡️ Надета ${a.name}!`);
-                    saveGame();
-                    return true;
-                }
-                armY += 28;
-            }
-            
-            armY += 45;
-            let availableWeapons = ALL_WEAPONS.filter(w => w.level <= player.level);
-            for(let i = 0; i < availableWeapons.length; i++) {
-                let w = availableWeapons[i];
-                if(my > armY-12 && my < armY+8 && mx > x+w-80 && mx < x+w-20 && player.weaponId !== w.id) {
-                    player.weaponId = w.id;
-                    updateStatsFromLevel();
-                    addMsg(`⚔️ Надето ${w.name}!`);
-                    saveGame();
-                    return true;
-                }
-                armY += 28;
-            }
-            return false;
-        }
-        
-        // ========== ОСТАЛЬНЫЕ ФУНКЦИИ (атака, мобы, зелья и т.д.) ==========
-        let selectedMob = null, messages = [], damageFloats = [], showStats = false;
-        
-        function addMsg(t, e=false) { messages.unshift({text:t,isErr:e,life:180}); if(messages.length>5) messages.pop(); }
-        function getDamageRange() { return { min: player.dmgMin, max: player.dmgMax }; }
-        function showDamage(x,y,dmg,isPlayer=false) { damageFloats.push({x,y,dmg,life:20,isPlayer}); }
-        
-        function killMob(mob) {
-            let expGain=mob.exp, goldGain=Math.floor(25+Math.random()*(player.level*13));
-            player.exp+=expGain; player.gold+=goldGain;
-            stats.mobsKilled++; stats.totalGold+=goldGain;
-            mobsKilledInWorld++;
-            updatePortalStatus();
-            addMsg(`✨ +${expGain} опыта, +${goldGain}💰 | Убито в мире: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL}`);
-            if(Math.random()<0.5) { if(Math.random()<0.6) player.potionHp++; else player.potionMp++; addMsg(`🧪 Выпало зелье!`); }
-            let idx=mobs.indexOf(mob); if(idx!==-1) mobs.splice(idx,1);
-            if(selectedMob===mob) selectedMob=null;
-            while(player.exp>=player.expToNext) {
-                player.exp-=player.expToNext; player.level++;
-                updateStatsFromLevel();
-                player.hp=player.maxHp; player.mp=player.maxMp;
-                player.expToNext=90+player.level*38;
-                addMsg(`⭐⭐ УРОВЕНЬ ${player.level}! ⭐⭐`);
-                saveGame();
-            }
-            saveGame();
-        }
-        
-        function playerAttack() {
-            if(!selectedMob || selectedMob.hp<=0) { selectedMob=null; return false; }
-            if(player.attackTimer > 0) return false;
-            let dist = Math.hypot(player.x-selectedMob.x, player.y-selectedMob.y);
-            if(dist > player.attackRange) { addMsg(`🏃 Слишком далеко! (нужно ${player.attackRange}px)`, true); return false; }
-            let dmg = Math.floor(Math.random()*(player.dmgMax-player.dmgMin+1)+player.dmgMin);
-            selectedMob.hp -= dmg;
-            stats.totalDamage += dmg;
-            player.attackTimer = 20;
-            addMsg(`⚔️ ${CLASSES[player.classType].name} → ${dmg} урона ${selectedMob.name}!`);
-            showDamage(selectedMob.x, selectedMob.y, dmg);
-            if(selectedMob.hp <= 0) killMob(selectedMob);
-            saveGame();
-            return true;
-        }
-        
-        function useSkill() {
-            if(!selectedMob || selectedMob.hp<=0) { addMsg(`🎯 Выберите цель!`, true); return; }
-            let c=CLASSES[player.classType];
-            let dist=Math.hypot(player.x-selectedMob.x,player.y-selectedMob.y);
-            if(dist>c.skillRange) { addMsg(`🏃 Слишком далеко для способности!`, true); return; }
-            let manaCost=30+Math.floor(player.level/2);
-            if(player.mp<manaCost) { addMsg(`💙 Не хватает маны! (${manaCost} MP)`, true); return; }
-            player.mp-=manaCost;
-            let avg=(player.dmgMin+player.dmgMax)/2;
-            let dmg=Math.floor(avg*2.4);
-            selectedMob.hp-=dmg;
-            stats.totalDamage+=dmg;
-            addMsg(`✨ ${c.skill}! ${dmg} урона по ${selectedMob.name}!`);
-            showDamage(selectedMob.x,selectedMob.y,dmg);
-            if(selectedMob.hp<=0) killMob(selectedMob);
-            saveGame();
-        }
-        
-        function updateMobs() {
-            for(let m of mobs) {
-                if(m.hp<=0) continue;
-                let dx=player.x-m.x, dy=player.y-m.y, dist=Math.hypot(dx,dy);
-                if(dist<230 && !isInSafeZone(player.x,player.y)) {
-                    let ang=Math.atan2(dy,dx), step=Math.min(m.speed,dist-48);
-                    if(step>0) { let nx=m.x+Math.cos(ang)*step, ny=m.y+Math.sin(ang)*step; if(isWalkable(nx,ny,26) && !isInSafeZone(nx,ny)) { m.x=nx; m.y=ny; } }
-                    if(dist < m.attackRange + 15) {
-                        if(m.attackTimer <= 0) {
-                            let dmg=Math.max(5, m.dmg - Math.floor(player.defense/3));
-                            player.hp -= dmg; stats.totalDamageTaken += dmg; m.attackTimer = 30;
-                            addMsg(`💀 ${m.name} нанес ${dmg} урона!`, true);
-                            showDamage(m.x, m.y, dmg, true);
-                            if(player.hp <= 0) {
-                                player.hp = player.maxHp; player.mp = player.maxMp;
-                                player.x = safeZone.x + safeZone.width/2; player.y = safeZone.y + safeZone.height/2;
-                                player.targetX = null; player.targetY = null;
-                                addMsg(`💀 ВОСКРЕШЕНИЕ В БЕЗОПАСНОЙ ЗОНЕ 💀`, true);
-                                saveGame();
-                            }
-                        } else m.attackTimer--;
-                    } else if(m.attackTimer>0) m.attackTimer--;
-                } else if(m.attackTimer>0) m.attackTimer--;
-            }
-        }
-        
-        function useHp() {
-            if(player.potionHp <= 0 && player.potionBigHp <= 0) { addMsg(`❌ Нет зелий HP! Купите у торговца`, true); return; }
-            if(player.potionBigHp > 0 && player.hp < player.maxHp * 0.5) {
-                let heal = Math.floor(player.maxHp * 0.9); player.hp = Math.min(player.maxHp, player.hp + heal); player.potionBigHp--;
-                addMsg(`❤️❤️ БОЛЬШОЕ ЗЕЛЬЕ! +${heal} HP`);
-            } else if(player.potionHp > 0) {
-                let heal = Math.floor(player.maxHp * 0.7); player.hp = Math.min(player.maxHp, player.hp + heal); player.potionHp--;
-                addMsg(`❤️ +${heal} HP (осталось ${player.potionHp})`);
-            } else addMsg(`❌ Нет малых зелий!`, true);
-            saveGame();
-        }
-        
-        function useMp() {
-            if(player.potionMp <= 0 && player.potionBigMp <= 0) { addMsg(`❌ Нет зелий MP! Купите у торговца`, true); return; }
-            if(player.potionBigMp > 0 && player.mp < player.maxMp * 0.5) {
-                let mana = Math.floor(player.maxMp); player.mp = Math.min(player.maxMp, player.mp + mana); player.potionBigMp--;
-                addMsg(`💙💙 БОЛЬШОЕ ЗЕЛЬЕ! +${mana} MP`);
-            } else if(player.potionMp > 0) {
-                let mana = Math.floor(player.maxMp * 0.75); player.mp = Math.min(player.maxMp, player.mp + mana); player.potionMp--;
-                addMsg(`💙 +${mana} MP (осталось ${player.potionMp})`);
-            } else addMsg(`❌ Нет малых зелий!`, true);
-            saveGame();
-        }
-        
-        function switchClass(className) {
-            let classes = Object.keys(CLASSES);
-            let newClass = className || classes[(classes.indexOf(player.classType)+1)%classes.length];
-            if(player.classType===newClass) return;
-            let hpPercent=player.hp/player.maxHp, mpPercent=player.mp/player.maxMp;
-            player.classType=newClass;
-            updateStatsFromLevel();
-            player.hp=Math.max(1,Math.min(player.maxHp,Math.floor(player.maxHp*hpPercent)));
-            player.mp=Math.max(1,Math.min(player.maxMp,Math.floor(player.maxMp*mpPercent)));
-            addMsg(`🔄 Класс: ${CLASSES[newClass].name} ${CLASSES[newClass].icon} | Дальность: ${player.attackRange}px`);
-            saveGame();
-        }
-        
-        function isClickOnNPC(wx, wy) {
-            let distToNPC = Math.hypot(wx - shopNPC.x, wy - shopNPC.y);
-            if(distToNPC < shopNPC.radius + 15) { shopOpen = true; showInventory = false; return true; }
-            return false;
-        }
-        
-        function isClickOnPortal(wx, wy) {
-            if(!portalActive) return false;
-            if(Math.hypot(wx - portalX, wy - portalY) < 35) { activatePortal(); return true; }
-            return false;
-        }
-        
-        function selectMobAt(wx,wy) {
-            for(let m of mobs) { if(Math.hypot(m.x-wx,m.y-wy)<55 && m.hp>0) { selectedMob=m; addMsg(`🎯 Цель: ${m.name} (${m.hp}/${m.maxHp} HP)`); return true; } }
-            return false;
-        }
-        
-        function handleClick(wx,wy) {
-            if(showStats) { showStats=false; return; }
-            if(showInventory) { if(handleInventoryClick(wx, wy)) return; showInventory=false; return; }
-            if(shopOpen) { if(handleShopClick(wx, wy)) return; shopOpen=false; return; }
-            if(showMap) { handleMapClick(wx, wy); return; }
-            if(explosionTarget?.active) { castExplosion(wx,wy); return; }
-            if(isClickOnPortal(wx,wy)) return;
-            if(isClickOnNPC(wx,wy)) return;
-            if(selectMobAt(wx,wy)) return;
-            moveTo(wx,wy);
-        }
-        
-        function updateCamera() {
-            let tx=player.x-canvasWidth/2, ty=player.y-canvasHeight/2;
-            tx=Math.min(Math.max(tx,0),WORLD_WIDTH-canvasWidth);
-            ty=Math.min(Math.max(ty,0),WORLD_HEIGHT-canvasHeight);
-            cameraX+=(tx-cameraX)*0.1; cameraY+=(ty-cameraY)*0.1;
-        }
-        
-        // СУПЕРСПОСОБНОСТИ
-        let explosionTarget = null;
-        let whirlwindActive = false;
-        let whirlwindTimer = 0;
-        
-        function useSuper() {
-            if(player.superCooldown > 0) { addMsg(`🌟 Суперспособность: ${Math.ceil(player.superCooldown/10)} сек`, true); return; }
-            let c = CLASSES[player.classType];
-            if(c.name === "Мечник") {
-                whirlwindActive = true; whirlwindTimer = 30; player.superCooldown = 180;
-                addMsg(`🌀 ВИХРЬ! Урон x2 по всем врагам!`);
-                for(let mob of mobs) {
-                    if(Math.hypot(player.x-mob.x,player.y-mob.y)<100 && mob.hp>0) {
-                        let avg=(player.dmgMin+player.dmgMax)/2, dmg=Math.floor(avg*2);
-                        mob.hp-=dmg; stats.totalDamage+=dmg; showDamage(mob.x,mob.y,dmg);
-                        addMsg(`🌀 Вихрь → ${dmg} урона ${mob.name}!`);
-                        if(mob.hp<=0) killMob(mob);
-                    }
-                }
-            } else if(c.name === "Лучник") {
-                let targets = mobs.filter(m=>m.hp>0 && Math.hypot(player.x-m.x,player.y-m.y)<220);
-                targets.sort((a,b)=>Math.hypot(player.x-a.x,player.y-a.y)-Math.hypot(player.x-b.x,player.y-b.y));
-                let hit=0;
-                for(let mob of targets.slice(0,3)) {
-                    let avg=(player.dmgMin+player.dmgMax)/2, dmg=Math.floor(avg*3);
-                    mob.hp-=dmg; stats.totalDamage+=dmg; showDamage(mob.x,mob.y,dmg);
-                    addMsg(`🏹 Тройной выстрел → ${dmg} урона ${mob.name}!`);
-                    if(mob.hp<=0) killMob(mob); hit++;
-                }
-                if(hit>0) player.superCooldown=180;
-                else addMsg(`🏹 Нет врагов поблизости!`, true);
-            } else if(c.name === "Маг") {
-                addMsg(`🔥 Нажмите на любое место для взрыва!`);
-                explosionTarget = { active: true };
-                return;
-            }
-        }
-        
-        function castExplosion(wx, wy) {
-            if(!explosionTarget?.active) return;
-            explosionTarget = null;
-            let avg=(player.dmgMin+player.dmgMax)/2, dmg=Math.floor(avg*2.5), hit=false;
-            for(let mob of mobs) {
-                if(Math.hypot(wx-mob.x,wy-mob.y)<90 && mob.hp>0) {
-                    mob.hp-=dmg; stats.totalDamage+=dmg; showDamage(mob.x,mob.y,dmg);
-                    addMsg(`🔥 Взрыв → ${dmg} урона ${mob.name}!`);
-                    if(mob.hp<=0) killMob(mob); hit=true;
-                }
-            }
-            damageFloats.push({x:wx,y:wy,dmg:"💥",life:15,isExplosion:true});
-            if(!hit) addMsg(`🔥 Взрыв не задел врагов!`, true);
-            player.superCooldown = 180;
-        }
-        
-        // ========== ОТРИСОВКА ==========
-        function drawWorld() {
-            let w = WORLDS[currentWorld];
-            for(let i=0;i<WORLD_WIDTH/52+10;i++) for(let j=0;j<WORLD_HEIGHT/52+10;j++) {
-                let x=i*52-cameraX, y=j*52-cameraY;
-                if(x>-60 && x<canvasWidth+60 && y>-60 && y<canvasHeight+60) {
-                    ctx.fillStyle=((i+j)%2===0)?w.bgColor1:w.bgColor2;
-                    ctx.fillRect(x,y,51,51);
-                }
-            }
-            for(let o of obstacles) {
-                let x=o.x-cameraX, y=o.y-cameraY;
-                if(x>-120 && x<canvasWidth+120 && y>-120 && y<canvasHeight+120) {
-                    if(o.type==='tree') {
-                        ctx.fillStyle="#3c9e3c"; ctx.fillRect(x-18,y-32,36,58);
-                        ctx.fillStyle="#8b5a2b"; ctx.fillRect(x-10,y-8,20,32);
-                        ctx.fillStyle="#5aac3a"; ctx.beginPath(); ctx.ellipse(x,y-42,26,30,0,0,Math.PI*2); ctx.fill();
-                    } else if(o.type==='mountain') {
-                        ctx.fillStyle="#6e6e7a"; ctx.beginPath(); ctx.moveTo(x,y-45); ctx.lineTo(x-40,y+15); ctx.lineTo(x+40,y+15); ctx.fill();
-                        ctx.fillStyle="#8e8e9a"; ctx.beginPath(); ctx.moveTo(x-12,y-15); ctx.lineTo(x,y-38); ctx.lineTo(x+12,y-15); ctx.fill();
-                    } else if(o.type==='rock') {
-                        ctx.fillStyle="#7a6a5a"; ctx.beginPath(); ctx.ellipse(x,y,18,14,0,0,Math.PI*2); ctx.fill();
-                    } else if(o.type==='fence') {
-                        ctx.fillStyle="#c99e6f"; ctx.fillRect(x-10,y-14,20,32);
-                        for(let i=0;i<3;i++) ctx.fillRect(x-6+i*6,y-22,3,14);
-                    }
-                }
-            }
-            let szX=safeZone.x-cameraX, szY=safeZone.y-cameraY;
-            ctx.fillStyle="#88aa66aa"; ctx.fillRect(szX,szY,safeZone.width,safeZone.height);
-            if(portalActive && currentWorld === "forest") {
-                let px = portalX - cameraX, py = portalY - cameraY;
-                ctx.fillStyle = "#aa44ffaa"; ctx.beginPath(); ctx.arc(px, py, 28, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#ff88ff"; ctx.beginPath(); ctx.arc(px, py, 20, 0, Math.PI*2); ctx.fill();
-                ctx.font = "20px monospace"; ctx.fillStyle = "#ffffff"; ctx.fillText("🌀", px-12, py+8);
-                ctx.font = "9px monospace"; ctx.fillStyle = "#ffffaa"; ctx.fillText("ПОРТАЛ", px-18, py-20);
-            }
-            let npcX = shopNPC.x - cameraX, npcY = shopNPC.y - cameraY;
-            ctx.fillStyle = "#c99e6f"; ctx.fillRect(npcX-18, npcY-25, 36, 45);
-            ctx.fillStyle = "#e8c28a"; ctx.fillRect(npcX-12, npcY-15, 24, 30);
-            ctx.fillStyle = "#000"; ctx.fillRect(npcX-8, npcY-10, 5, 5); ctx.fillRect(npcX+3, npcY-10, 5, 5);
-            ctx.font = "24px monospace"; ctx.fillStyle = "#ffdd99"; ctx.fillText("🏪", npcX-12, npcY+5);
-            ctx.font = "10px monospace"; ctx.fillStyle = "#ffffaa"; ctx.fillText("Торговец", npcX-20, npcY-28);
-            for(let g of gates) {
-                let gx=g.x-cameraX, gy=g.y-cameraY;
-                ctx.fillStyle="#c9a87a"; ctx.fillRect(gx,gy,g.width,g.height);
-                ctx.fillStyle="#e8c28a";
-                if(g.width>g.height) { for(let i=0;i<3;i++) ctx.fillRect(gx+15+i*25,gy+12,12,18); }
-                else { for(let i=0;i<3;i++) ctx.fillRect(gx+12,gy+15+i*25,18,12); }
-            }
-        }
-        
-        function drawMob(m) {
-            let x = m.x - cameraX, y = m.y - cameraY;
-            if(x < -80 || x > canvasWidth+80) return;
-            m.drawFunc(x, y);
-            let percent = m.hp / m.maxHp;
-            ctx.fillStyle = "#a33"; ctx.fillRect(x-24, y-32, 48, 6);
-            ctx.fillStyle = "#4f6"; ctx.fillRect(x-24, y-32, 48 * percent, 6);
-            ctx.font = "9px monospace"; ctx.fillStyle = "#ffffaa"; ctx.fillText(m.name, x-20, y-38);
-        }
-        
-        function drawMinimap() {
-            let mapSize = 180, mapX = canvasWidth - mapSize - 10, mapY = 80, cellSize = mapSize / MAP_W;
-            ctx.fillStyle = "#000000aa"; ctx.fillRect(mapX-5, mapY-5, mapSize+10, mapSize+10);
-            ctx.fillStyle = "#1a1e2a"; ctx.fillRect(mapX, mapY, mapSize, mapSize);
-            for(let y=0; y<MAP_H; y++) for(let x=0; x<MAP_W; x++) {
-                ctx.fillStyle = getMapColor(worldMap[y][x]);
-                ctx.fillRect(mapX + x*cellSize, mapY + y*cellSize, cellSize+0.5, cellSize+0.5);
-            }
-            let playerTileX = player.x / TILE_SIZE, playerTileY = player.y / TILE_SIZE;
-            ctx.fillStyle = "#ff4444"; ctx.beginPath(); ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.8, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(mapX + playerTileX*cellSize, mapY + playerTileY*cellSize, cellSize*0.4, 0, Math.PI*2); ctx.fill();
-            if(portalActive && currentWorld === "forest") {
-                let portalTileX = portalX / TILE_SIZE, portalTileY = portalY / TILE_SIZE;
-                ctx.fillStyle = "#ffaa44"; ctx.beginPath(); ctx.arc(mapX + portalTileX*cellSize, mapY + portalTileY*cellSize, cellSize*0.7, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#ffff88"; ctx.beginPath(); ctx.arc(mapX + portalTileX*cellSize, mapY + portalTileY*cellSize, cellSize*0.4, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.fillStyle = "#ffcc88"; ctx.font = "10px monospace"; ctx.fillText("🗺️ КАРТА", mapX+5, mapY-8);
-        }
-        
-        function drawFullMap() {
-            let mapWidth = Math.min(canvasWidth - 100, 800), mapHeight = mapWidth * (MAP_H / MAP_W);
-            let mapX = (canvasWidth - mapWidth) / 2, mapY = (canvasHeight - mapHeight) / 2;
-            let cellW = mapWidth / MAP_W, cellH = mapHeight / MAP_H;
-            ctx.fillStyle = "#000000dd"; ctx.fillRect(0, 0, canvasWidth, canvasHeight);
-            ctx.fillStyle = "#2a2e3f"; ctx.fillRect(mapX-10, mapY-10, mapWidth+20, mapHeight+20);
-            for(let y=0; y<MAP_H; y++) for(let x=0; x<MAP_W; x++) {
-                ctx.fillStyle = getMapColor(worldMap[y][x]);
-                ctx.fillRect(mapX + x*cellW, mapY + y*cellH, cellW+0.5, cellH+0.5);
-                if(worldMap[y][x] === 3) { ctx.fillStyle = "#5aac3a"; ctx.font = `${cellH*0.7}px monospace`; ctx.fillText("🌲", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8); }
-                else if(worldMap[y][x] === 4) { ctx.fillStyle = "#8e8e9a"; ctx.font = `${cellH*0.7}px monospace`; ctx.fillText("⛰️", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8); }
-                else if(worldMap[y][x] === 5) { ctx.fillStyle = "#5ac8ff"; ctx.font = `${cellH*0.7}px monospace`; ctx.fillText("💧", mapX + x*cellW + cellW*0.2, mapY + y*cellH + cellH*0.8); }
-            }
-            let playerTileX = player.x / TILE_SIZE, playerTileY = player.y / TILE_SIZE;
-            ctx.fillStyle = "#ff4444"; ctx.beginPath(); ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.6, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = "#ffffff"; ctx.beginPath(); ctx.arc(mapX + playerTileX*cellW, mapY + playerTileY*cellH, cellW*0.3, 0, Math.PI*2); ctx.fill();
-            if(portalActive && currentWorld === "forest") {
-                let portalTileX = portalX / TILE_SIZE, portalTileY = portalY / TILE_SIZE;
-                ctx.fillStyle = "#ffaa44"; ctx.beginPath(); ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.55, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#ffff88"; ctx.beginPath(); ctx.arc(mapX + portalTileX*cellW, mapY + portalTileY*cellH, cellW*0.3, 0, Math.PI*2); ctx.fill();
-            }
-            if(mapClickTarget) {
-                let targetTileX = mapClickTarget.x / TILE_SIZE, targetTileY = mapClickTarget.y / TILE_SIZE;
-                ctx.fillStyle = "#ffdd44"; ctx.beginPath(); ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.7, 0, Math.PI*2); ctx.fill();
-                ctx.fillStyle = "#ffaa00"; ctx.beginPath(); ctx.arc(mapX + targetTileX*cellW, mapY + targetTileY*cellH, cellW*0.35, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.fillStyle = "#ffcc88"; ctx.font = `bold ${Math.min(20, canvasWidth/30)}px monospace`; ctx.fillText("🗺️ КАРТА МИРА", canvasWidth/2-80, mapY-20);
-            ctx.fillStyle = "#88aaff"; ctx.font = "12px monospace"; ctx.fillText("⬜ трава 🟫 безопасная 🚪 ворота 🌲 дерево ⛰️ гора 💧 вода 🪨 камень", canvasWidth/2-200, mapY+mapHeight+25);
-            ctx.fillStyle = "#ffaa88"; ctx.fillText("🔴 вы 🔶 портал 🟡 метка", canvasWidth/2+150, mapY+mapHeight+25);
-            ctx.fillStyle = "#ccaa88"; ctx.font = "10px monospace"; ctx.fillText("Нажмите на карту - персонаж пойдёт туда | ESC или клик для закрытия", canvasWidth/2-200, mapY+mapHeight+50);
-        }
-        
-        function handleMapClick(clientX, clientY) {
-            let mapWidth = Math.min(canvasWidth - 100, 800), mapHeight = mapWidth * (MAP_H / MAP_W);
-            let mapX = (canvasWidth - mapWidth) / 2, mapY = (canvasHeight - mapHeight) / 2;
-            let cellW = mapWidth / MAP_W, cellH = mapHeight / MAP_H;
-            if(clientX > mapX && clientX < mapX + mapWidth && clientY > mapY && clientY < mapY + mapHeight) {
-                let tileX = Math.floor((clientX - mapX) / cellW), tileY = Math.floor((clientY - mapY) / cellH);
-                if(tileX >= 0 && tileX < MAP_W && tileY >= 0 && tileY < MAP_H) {
-                    let worldX = tileX * TILE_SIZE + TILE_SIZE/2, worldY = tileY * TILE_SIZE + TILE_SIZE/2;
-                    if(isWalkable(worldX, worldY, 24)) {
-                        mapClickTarget = { x: worldX, y: worldY };
-                        moveTo(worldX, worldY);
-                        addMsg(`📍 Перемещение к отмеченной точке на карте`);
-                        showMap = false;
-                    } else { addMsg(`🚫 В эту точку нельзя пройти (препятствие)`, true); }
-                }
-            }
-        }
-        
-        function drawUI() {
-            let c=CLASSES[player.classType], fs=Math.max(12,Math.min(16,canvasWidth/65));
-            ctx.fillStyle="#000000aa"; ctx.fillRect(12,12,210,75);
-            ctx.fillStyle="#c55"; ctx.fillRect(18,18,190,18);
-            ctx.fillStyle="#f75"; ctx.fillRect(18,18,190*(player.hp/player.maxHp),18);
-            ctx.fillStyle="#58f"; ctx.fillRect(18,42,190*(player.mp/player.maxMp),16);
-            ctx.fillStyle="#fff"; ctx.font=`bold ${fs}px monospace`;
-            ctx.fillText(`❤️ ${Math.floor(player.hp)}/${player.maxHp}`,22,34);
-            ctx.fillText(`💙 ${Math.floor(player.mp)}/${player.maxMp}`,22,56);
-            ctx.fillStyle="#fd9"; ctx.font=`bold ${fs+2}px monospace`;
-            ctx.fillText(`${c.name} Lv.${player.level}`,22,88);
-            ctx.fillStyle="#000000aa"; ctx.fillRect(12,96,210,14);
-            ctx.fillStyle="#8af"; ctx.fillRect(12,96,210*(player.exp/player.expToNext),14);
-            ctx.fillStyle="#fff"; ctx.font=`${fs-2}px monospace`;
-            ctx.fillText(`EXP: ${player.exp}/${player.expToNext}`,18,108);
-            ctx.fillStyle="#000000aa"; ctx.fillRect(canvasWidth-145,12,133,60);
-            ctx.fillStyle="#fc8"; ctx.font=`bold ${fs}px monospace`;
-            ctx.fillText(`💰 ${player.gold}`,canvasWidth-135,35);
-            ctx.fillText(`🧪${player.potionHp}  🔮${player.potionMp}`,canvasWidth-135,60);
-            for(let i=0;i<Math.min(4,messages.length);i++) { let m=messages[i]; ctx.fillStyle=m.isErr?"#f86c":"#edbc"; ctx.font=`${fs-2}px monospace`; ctx.fillText(m.text.substring(0,32),15,canvasHeight-45-i*18); }
-            if(selectedMob&&selectedMob.hp>0) { let x=selectedMob.x-cameraX, y=selectedMob.y-cameraY; ctx.strokeStyle="#fa4"; ctx.lineWidth=4; ctx.strokeRect(x-20,y-30,56,56); }
-            if(player.targetX!==null && player.targetY!==null) { let tx=player.targetX-cameraX, ty=player.targetY-cameraY; ctx.fillStyle="#fc4a"; ctx.beginPath(); ctx.arc(tx,ty,16,0,Math.PI*2); ctx.fill(); ctx.fillStyle="#fa0"; ctx.beginPath(); ctx.arc(tx,ty,8,0,Math.PI*2); ctx.fill(); }
-            for(let i=0;i<damageFloats.length;i++) { let d=damageFloats[i], x=d.x-cameraX, y=d.y-cameraY; if(d.isExplosion) { ctx.font="bold 32px monospace"; ctx.fillStyle="#ff8844"; ctx.fillText("💥",x-15,y-20); } else { ctx.font=`bold ${d.isPlayer?18:22}px monospace`; ctx.fillStyle=d.isPlayer?"#fa6":"#f84"; ctx.fillText(`-${d.dmg}`,x-12,y-28); } d.life--; if(d.life<=0) damageFloats.splice(i,1), i--; }
-            if(showStats) {
-                let t=getPlayTime();
-                ctx.fillStyle="#000000dd"; ctx.fillRect(canvasWidth/2-190,canvasHeight/2-170,380,340);
-                ctx.fillStyle="#fd9"; ctx.font=`bold ${Math.min(24,canvasWidth/30)}px monospace`; ctx.fillText("⚙️ СТАТИСТИКА",canvasWidth/2-95,canvasHeight/2-120);
-                ctx.font=`${Math.min(14,canvasWidth/50)}px monospace`; ctx.fillStyle="#edb";
-                ctx.fillText(`👾 Убито: ${stats.mobsKilled}`,canvasWidth/2-150,canvasHeight/2-55);
-                ctx.fillText(`💰 Золота: ${stats.totalGold}`,canvasWidth/2-150,canvasHeight/2-20);
-                ctx.fillText(`⚔️ Урона: ${stats.totalDamage}`,canvasWidth/2-150,canvasHeight/2+15);
-                ctx.fillText(`🛡️ Получено: ${stats.totalDamageTaken}`,canvasWidth/2-150,canvasHeight/2+50);
-                ctx.fillText(`⏱️ Время: ${t.h}h ${t.m}m ${t.s}s`,canvasWidth/2-150,canvasHeight/2+85);
-                ctx.fillText(`⭐ Уровень: ${player.level}`,canvasWidth/2-150,canvasHeight/2+120);
-                ctx.fillText(`🌍 Мир: ${WORLDS[currentWorld].name}`,canvasWidth/2-150,canvasHeight/2+155);
-                ctx.fillText(`🚪 Убито для портала: ${mobsKilledInWorld}/${MOBS_NEEDED_FOR_PORTAL}`,canvasWidth/2-150,canvasHeight/2+190);
-            }
-            if(player.superCooldown>0) { let p=player.superCooldown/180; ctx.fillStyle="#000000aa"; ctx.fillRect(15,canvasHeight-70,70,12); ctx.fillStyle="#ffaa44"; ctx.fillRect(15,canvasHeight-70,70*(1-p),12); ctx.fillStyle="#ffaa88"; ctx.font="10px monospace"; ctx.fillText(`🌟 ${Math.ceil(player.superCooldown/10)}с`,20,canvasHeight-55); }
-            drawMinimap();
-            if(showMap) drawFullMap();
-            if(shopOpen) drawShop();
-            if(showInventory) drawInventory();
-        }
-        
-        function update() {
-            updateMove(); updateMobs(); updateCamera();
-            if(player.attackTimer > 0) player.attackTimer--;
-            if(player.superCooldown > 0) player.superCooldown--;
-            if(spawnTimer <= 0) { if(mobs.length < MAX_MOBS) for(let i=0;i<3;i++) spawnMob(); spawnTimer = 12; } else spawnTimer--;
-            for(let i=0;i<messages.length;i++) if(messages[i].life) messages[i].life--;
-            messages=messages.filter(m=>!m.life||m.life>0);
-        }
-        
-        function getWorldClick(cx,cy) {
-            let rect=canvas.getBoundingClientRect();
-            let sx=canvasWidth/rect.width, sy=canvasHeight/rect.height;
-            return { x:(cx-rect.left)*sx+cameraX, y:(cy-rect.top)*sy+cameraY };
-        }
-        
-        canvas.addEventListener('click', (e) => { 
-            if(showMap) { handleMapClick(e.clientX, e.clientY); return; }
-            let w = getWorldClick(e.clientX, e.clientY); handleClick(w.x, w.y); 
-        });
-        canvas.addEventListener('touchstart', (e) => { 
-            e.preventDefault(); 
-            if(showMap) { let touch = e.touches[0]; handleMapClick(touch.clientX, touch.clientY); return; }
-            let t = e.touches[0]; let w = getWorldClick(t.clientX, t.clientY); handleClick(w.x, w.y); 
-        });
-        
-        setInterval(()=>{ if(selectedMob && selectedMob.hp>0 && Math.hypot(player.x-selectedMob.x, player.y-selectedMob.y) <= player.attackRange + 15) playerAttack(); }, 1200);
-        setInterval(() => { if(playerNickname) saveGame(); }, 30000);
-        window.addEventListener('beforeunload', () => { if(playerNickname) saveGame(); });
-        
-        document.getElementById('attackBtn').onclick=()=>{ if(selectedMob&&selectedMob.hp>0) playerAttack(); else addMsg("🎯 Выберите цель",true); };
-        document.getElementById('skillBtn').onclick=()=>useSkill();
-        document.getElementById('hpBtn').onclick=()=>useHp();
-        document.getElementById('mpBtn').onclick=()=>useMp();
-        document.getElementById('classBtn').onclick=()=>switchClass();
-        document.getElementById('statsBtn').onclick=()=>{ showStats=!showStats; showInventory=false; showMap=false; };
-        document.getElementById('invBtn').onclick=()=>{ showInventory=!showInventory; showStats=false; showMap=false; };
-        document.getElementById('mapBtn').onclick=()=>{ showMap=!showMap; showStats=false; showInventory=false; };
-        document.getElementById('classWarriorBtn').onclick=()=>switchClass('warrior');
-        document.getElementById('classArcherBtn').onclick=()=>switchClass('archer');
-        document.getElementById('classMageBtn').onclick=()=>switchClass('mage');
-        
-        window.addEventListener('keydown',(e)=>{
-            if(e.key==='1') useSuper();
-            if(e.key==='2') useHp();
-            if(e.key==='3') useMp();
-            if(e.key==='s') useSkill();
-            if(e.key==='c') switchClass();
-            if(e.key==='7' || e.key==='m' || e.key==='M') { showMap=!showMap; showStats=false; showInventory=false; }
-            if(e.key==='Escape') { showMap=false; showStats=false; showInventory=false; shopOpen=false; }
-        });
-        
-        async function startGame() {
-            await (async () => {
-                const lastNick = localStorage.getItem('rucoy_last_nickname');
-                if(lastNick && localStorage.getItem('rucoy_save_' + lastNick)) {
-                    playerNickname = lastNick;
-                    loadGame(lastNick);
-                    document.getElementById('nicknameDisplay').innerText = `👤 ${lastNick}`;
-                    return;
-                }
-                playerNickname = await showNicknameModal();
-                document.getElementById('nicknameDisplay').innerText = `👤 ${playerNickname}`;
-                if(!loadGame(playerNickname)) { addMsg(`✨ Добро пожаловать, ${playerNickname}! Новая игра начинается!`); }
-            })();
-            generateWorld();
-            updateStatsFromLevel();
-            if(player.hp <= 0) { player.hp = player.maxHp; player.mp = player.maxMp; }
-            for(let i=0;i<15;i++) spawnMob();
-            updatePortalStatus();
-            addMsg("✨ Добро пожаловать!");
-            addMsg(`🗡️ ${CLASSES.warrior.name} - ближний бой (${player.attackRange}px)`);
-            addMsg(`🏹 ${CLASSES.archer.name} - дальний бой (${player.attackRange}px)`);
-            addMsg(`🔮 ${CLASSES.mage.name} - дальний бой (${player.attackRange}px)`);
-            addMsg("⚔️ Атака игрока - 1.2 секунды");
-            addMsg("💀 Атака мобов - 2 секунды");
-            addMsg("🌟 1 - СУПЕРСИЛА | 2 - ЗЕЛЬЕ HP | 3 - ЗЕЛЬЕ MP");
-            addMsg("🏪 Торговец в безопасной зоне (нажмите на него)");
-            addMsg("🌀 Убейте 300 мобов для открытия портала!");
-            addMsg("🗺️ Карта: кнопка 7 или кнопка КАРТА");
-            addMsg("💊 Зелья можно использовать в любой точке карты!");
-            addMsg("🎒 Инвентарь: кнопка ИНВ");
-            addMsg("💾 Игра автоматически сохраняется!");
-        }
-        
-        startGame();
-        
-        function render() { drawWorld(); for(let m of mobs) drawMob(m); drawRealisticPlayer(player.x - cameraX, player.y - cameraY, player.isMoving); drawUI(); }
-        function loop() { update(); render(); requestAnimationFrame(loop); }
-        loop();
-    })();
+    }, 11000);
+    
+    // начальная загрузка
+    fullReset();
 </script>
 </body>
 </html>
