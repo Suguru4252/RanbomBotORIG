@@ -1,652 +1,459 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, viewport-fit=cover">
-  <title>GTA San Andreas • Мобильная версия</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-touch-callout: none;
-    }
-
-    body {
-      background: #000;
-      overflow: hidden;
-      font-family: 'Arial', sans-serif;
-      touch-action: manipulation;
-      position: fixed;
-      width: 100%;
-      height: 100%;
-    }
-
-    #gameCanvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      touch-action: none;
-    }
-
-    /* HUD */
-    .hud-top {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      right: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      pointer-events: none;
-      z-index: 10;
-    }
-
-    .money {
-      color: #ffaa00;
-      font-family: 'Courier New', monospace;
-      font-size: 18px;
-      font-weight: bold;
-      text-shadow: 0 0 10px #ff6600, 2px 2px 0 #000;
-      background: rgba(0,0,0,0.7);
-      padding: 8px 15px;
-      border: 2px solid #c47a1a;
-      border-radius: 4px;
-      letter-spacing: 2px;
-    }
-
-    .wanted {
-      color: #ff4444;
-      font-family: 'Courier New', monospace;
-      font-size: 18px;
-      font-weight: bold;
-      text-shadow: 0 0 10px #ff0000, 2px 2px 0 #000;
-      background: rgba(0,0,0,0.7);
-      padding: 8px 15px;
-      border: 2px solid #c47a1a;
-      border-radius: 4px;
-    }
-
-    .radio-bar {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: #ffcc66;
-      font-family: 'Courier New', monospace;
-      font-size: 12px;
-      background: rgba(0,0,0,0.8);
-      padding: 8px 20px;
-      border: 1px solid #c47a1a;
-      border-radius: 20px;
-      text-shadow: 1px 1px 0 #000;
-      pointer-events: none;
-      z-index: 10;
-      animation: radioGlow 1.5s infinite alternate;
-    }
-
-    @keyframes radioGlow {
-      from { box-shadow: 0 0 5px #ff8800; }
-      to { box-shadow: 0 0 15px #ff8800; }
-    }
-
-    /* Джойстик движения */
-    .joystick-move {
-      position: absolute;
-      bottom: 40px;
-      left: 40px;
-      width: 130px;
-      height: 130px;
-      background: rgba(255,255,255,0.08);
-      border: 3px solid rgba(255,170,0,0.5);
-      border-radius: 50%;
-      z-index: 20;
-      touch-action: none;
-    }
-
-    .joystick-move-thumb {
-      position: absolute;
-      width: 55px;
-      height: 55px;
-      background: rgba(255,170,0,0.6);
-      border: 2px solid #ffaa00;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 15px rgba(255,170,0,0.5);
-    }
-
-    /* Джойстик камеры */
-    .joystick-camera {
-      position: absolute;
-      bottom: 40px;
-      right: 40px;
-      width: 130px;
-      height: 130px;
-      background: rgba(255,255,255,0.08);
-      border: 3px solid rgba(255,170,0,0.5);
-      border-radius: 50%;
-      z-index: 20;
-      touch-action: none;
-    }
-
-    .joystick-camera-thumb {
-      position: absolute;
-      width: 55px;
-      height: 55px;
-      background: rgba(255,170,0,0.6);
-      border: 2px solid #ffaa00;
-      border-radius: 50%;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 15px rgba(255,170,0,0.5);
-    }
-
-    /* Кнопка респауна */
-    .btn-respawn {
-      position: absolute;
-      top: 100px;
-      right: 20px;
-      width: 55px;
-      height: 55px;
-      background: rgba(255,68,68,0.7);
-      border: 2px solid #ff4444;
-      border-radius: 50%;
-      color: white;
-      font-size: 24px;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-      text-shadow: 0 0 10px #ff0000;
-      box-shadow: 0 0 15px rgba(255,0,0,0.4);
-    }
-
-    /* Инструкция */
-    .hint {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #ffaa00;
-      font-family: 'Courier New', monospace;
-      font-size: 14px;
-      text-align: center;
-      background: rgba(0,0,0,0.8);
-      padding: 15px 25px;
-      border: 2px solid #c47a1a;
-      border-radius: 8px;
-      pointer-events: none;
-      z-index: 5;
-      animation: fadeOut 3s forwards;
-      animation-delay: 2s;
-    }
-
-    @keyframes fadeOut {
-      to { opacity: 0; }
-    }
-
-    @media (max-width: 400px) {
-      .joystick-move, .joystick-camera {
-        width: 110px;
-        height: 110px;
-        bottom: 30px;
-      }
-      .joystick-move { left: 25px; }
-      .joystick-camera { right: 25px; }
-      .joystick-move-thumb, .joystick-camera-thumb {
-        width: 45px;
-        height: 45px;
-      }
-      .money, .wanted {
-        font-size: 14px;
-        padding: 6px 10px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Chugur — Музыкальный плеер</title>
+    <style>
+        /* --- Стили (оставлены без изменений, но для краткости я их сжал) --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f0f0f;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #eee;
+        }
+        .app {
+            max-width: 550px;
+            width: 100%;
+            background: #151515;
+            border: 1px solid #2a2a2a;
+        }
+        .header { padding: 20px 24px 8px 24px; border-bottom: 1px solid #222; }
+        .header h1 { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.5px; color: #fff; }
+        .header p { font-size: 0.7rem; color: #888; margin-top: 6px; }
+        .player-panel { padding: 20px; background: #111; border-bottom: 1px solid #222; }
+        .current-label { font-size: 0.65rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .current-track { font-size: 1rem; font-weight: 500; margin: 8px 0 16px; word-break: break-word; }
+        audio { width: 100%; height: 44px; }
+        .add-panel { padding: 16px 20px; background: #0c0c0c; border-bottom: 1px solid #222; display: flex; gap: 12px; flex-wrap: wrap; }
+        .add-file-btn {
+            background: #2a2a2a;
+            border: 1px solid #4a4a4a;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #ddd;
+            cursor: pointer;
+            flex: 1;
+            text-align: center;
+        }
+        .add-file-btn:hover { background: #3a3a3a; }
+        .library-header { display: flex; justify-content: space-between; align-items: baseline; padding: 18px 24px 8px 24px; }
+        .library-header h3 { font-size: 0.8rem; font-weight: 500; color: #aaa; letter-spacing: 0.5px; }
+        .clear-btn { background: none; border: 1px solid #3a2a28; padding: 4px 12px; font-size: 0.7rem; color: #b88a7a; cursor: pointer; }
+        .songs-list { padding: 16px 20px 24px 20px; max-height: 380px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .song-item {
+            background: #121212;
+            border: 1px solid #252525;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .song-item:hover { background: #1a1a1a; }
+        .song-info { flex: 1; }
+        .song-title { font-size: 0.85rem; font-weight: 500; word-break: break-word; }
+        .song-date { font-size: 0.6rem; color: #6a6a6a; margin-top: 4px; }
+        .song-actions { display: flex; gap: 6px; }
+        .play-song-btn, .delete-song-btn {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            color: #ccc;
+        }
+        .play-song-btn:hover { background: #3a4a3a; }
+        .delete-song-btn:hover { background: #4a2a2a; border-color: #aa5a42; }
+        .empty-message {
+            text-align: center;
+            color: #5a5a5a;
+            padding: 40px;
+            font-size: 0.8rem;
+            border: 1px dashed #2a2a2a;
+        }
+        .footer {
+            padding: 12px 20px;
+            border-top: 1px solid #1f1f1f;
+            font-size: 0.6rem;
+            color: #6f6f6f;
+            text-align: center;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #3a3a3a; }
+        #fileInput { display: none; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2a4a2a;
+            color: white;
+            padding: 10px 24px;
+            font-size: 14px;
+            z-index: 999;
+            border: 1px solid #5a8a5a;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+        .toast.error { background: #4a2a2a; border-color: #aa5a42; }
+    </style>
 </head>
 <body>
-  <div class="hud-top">
-    <div class="money">💵 $350</div>
-    <div class="wanted">⭐ 0</div>
-  </div>
-  <div class="radio-bar">📻 RADIO LOS SANTOS</div>
-  
-  <!-- Джойстик движения -->
-  <div class="joystick-move" id="joystickMove">
-    <div class="joystick-move-thumb" id="joystickMoveThumb"></div>
-  </div>
-  
-  <!-- Джойстик камеры -->
-  <div class="joystick-camera" id="joystickCamera">
-    <div class="joystick-camera-thumb" id="joystickCameraThumb"></div>
-  </div>
-  
-  <!-- Кнопка респауна -->
-  <div class="btn-respawn" id="btnRespawn">↺</div>
-  
-  <div class="hint" id="hint">🎮 Левый джойстик — движение<br>Правый — камера</div>
+<div class="app">
+    <div class="header">
+        <h1>Chugur</h1>
+        <p>Добавляй MP3 — сохраняются навсегда (без ограничений)</p>
+    </div>
 
-  <canvas id="gameCanvas"></canvas>
+    <div class="player-panel">
+        <div class="current-label">Сейчас играет</div>
+        <div class="current-track" id="currentTrackName">—</div>
+        <audio id="audioPlayer" controls preload="metadata"></audio>
+    </div>
 
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
-      }
-    }
-  </script>
+    <div class="add-panel">
+        <button id="addFileBtn" class="add-file-btn">📁 Добавить MP3 файл</button>
+    </div>
 
-  <script type="module">
-    import * as THREE from 'three';
+    <div class="library-header">
+        <h3>Мои треки (сохраняются в IndexedDB — безлимит)</h3>
+        <button id="clearAllBtn" class="clear-btn">Очистить всё</button>
+    </div>
 
-    // ========== ХОЛСТ ==========
-    const canvas = document.getElementById('gameCanvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    <div id="songsList" class="songs-list">
+        <div class="empty-message">Нет треков. Нажмите «Добавить MP3 файл».</div>
+    </div>
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a0a00);
-    scene.fog = new THREE.FogExp2(0x1a0a00, 0.00012);
+    <div class="footer">
+        🎵 IndexedDB — можно хранить гигабайты музыки. Закрывайте браузер — ничего не пропадёт.
+    </div>
+</div>
 
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.5, 300);
-    camera.position.set(0, 7, 14);
-    camera.lookAt(0, 0, 8);
+<input type="file" id="fileInput" accept=".mp3,.m4a,.aac,.ogg,.wav">
 
-    // ========== ОСВЕЩЕНИЕ ==========
-    const ambientLight = new THREE.AmbientLight(0xff9944, 0.5);
-    scene.add(ambientLight);
+<!-- Элемент для уведомлений -->
+<div id="toast" class="toast"></div>
 
-    const sunLight = new THREE.DirectionalLight(0xff8833, 1.0);
-    sunLight.position.set(50, 30, -20);
-    sunLight.castShadow = true;
-    sunLight.receiveShadow = true;
-    sunLight.shadow.mapSize.width = 256;
-    sunLight.shadow.mapSize.height = 256;
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 120;
-    sunLight.shadow.camera.left = -25;
-    sunLight.shadow.camera.right = 25;
-    sunLight.shadow.camera.top = 25;
-    sunLight.shadow.camera.bottom = -15;
-    scene.add(sunLight);
+<script>
+    // =============== CHUGUR — ПЛЕЕР НА INDEXEDDB (ИСПРАВЛЕННЫЙ) ===============
+    let songs = [];
+    let currentSongId = null;
+    let db = null;
+    const DB_NAME = 'ChugurDB';
+    const STORE_NAME = 'songs';
 
-    // ========== МИР ==========
-    function createRoad(x, z, w, d) {
-      const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
-      const road = new THREE.Mesh(new THREE.PlaneGeometry(w, d), roadMat);
-      road.rotation.x = -Math.PI / 2;
-      road.position.set(x, 0.01, z);
-      road.receiveShadow = true;
-      scene.add(road);
-    }
+    // --- DOM элементы ---
+    const audio = document.getElementById('audioPlayer');
+    const currentTrackSpan = document.getElementById('currentTrackName');
+    const songsListDiv = document.getElementById('songsList');
+    const addFileBtn = document.getElementById('addFileBtn');
+    const fileInput = document.getElementById('fileInput');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    const toastEl = document.getElementById('toast');
 
-    createRoad(0, 0, 10, 70);
-    createRoad(0, -15, 35, 10);
-    createRoad(0, 15, 35, 10);
-
-    // Тротуары
-    const swMat = new THREE.MeshStandardMaterial({ color: 0x555544, roughness: 0.8 });
-    function createSidewalk(x, z, w, d) {
-      const sw = new THREE.Mesh(new THREE.PlaneGeometry(w, d), swMat);
-      sw.rotation.x = -Math.PI / 2;
-      sw.position.set(x, 0.12, z);
-      sw.receiveShadow = true;
-      scene.add(sw);
-    }
-    createSidewalk(6.5, 0, 2, 70);
-    createSidewalk(-6.5, 0, 2, 70);
-
-    // Здания
-    function createBuilding(x, z, w, h, d, color) {
-      const group = new THREE.Group();
-      const bodyMat = new THREE.MeshStandardMaterial({ color, roughness: 0.6 });
-      const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bodyMat);
-      body.position.y = h / 2;
-      body.castShadow = true;
-      body.receiveShadow = true;
-      group.add(body);
-
-      const windowMat = new THREE.MeshStandardMaterial({
-        color: 0xffcc66,
-        roughness: 0.3,
-        emissive: new THREE.Color(0x331100)
-      });
-
-      for (let wy = 0.8; wy < h; wy += 1.8) {
-        for (let wz = -d / 2 + 1; wz < d / 2; wz += 2) {
-          const win = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1, 0.15), windowMat);
-          win.position.set(w / 2 + 0.05, wy, wz);
-          group.add(win);
-          const win2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1, 0.15), windowMat);
-          win2.position.set(-w / 2 - 0.05, wy, wz);
-          group.add(win2);
+    // --- Вспомогательные функции (уведомления) ---
+    let toastTimer = null;
+    function showToast(message, isError = false) {
+        if (toastTimer) {
+            clearTimeout(toastTimer);
+            toastEl.classList.remove('show', 'error');
         }
-      }
-
-      group.position.set(x, 0.12, z);
-      scene.add(group);
+        toastEl.textContent = message;
+        toastEl.className = 'toast';
+        if (isError) toastEl.classList.add('error');
+        // Небольшая задержка для применения класса
+        requestAnimationFrame(() => {
+            toastEl.classList.add('show');
+        });
+        toastTimer = setTimeout(() => {
+            toastEl.classList.remove('show');
+            toastTimer = null;
+        }, 3000);
     }
 
-    const buildings = [
-      [9, -22, 4, 8, 4, 0xcc8855], [-9, -22, 4, 11, 4, 0xbb7744],
-      [9, -12, 4, 6, 4, 0xdd9966], [-9, -12, 4, 13, 4, 0xaa6633],
-      [9, -2, 4, 10, 4, 0xcc8855], [-9, -2, 4, 7, 4, 0xbb7744],
-      [9, 8, 4, 12, 4, 0xdd9966], [-9, 8, 4, 9, 4, 0xaa6633],
-      [9, 18, 4, 8, 4, 0xcc8855], [-9, 18, 4, 12, 4, 0xbb7744],
-      [9, 28, 4, 10, 4, 0xdd9966], [-9, 28, 4, 7, 4, 0xaa6633],
-      [16, -18, 5, 14, 5, 0x996644], [-16, -18, 5, 16, 5, 0x885533],
-      [16, 12, 5, 12, 5, 0x996644], [-16, 12, 5, 18, 5, 0x885533],
-    ];
-    buildings.forEach(b => createBuilding(...b));
+    // ============ РАБОТА С INDEXEDDB ============
 
-    // Пальмы
-    function createPalm(x, z) {
-      const palm = new THREE.Group();
-      const trunk = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.18, 0.3, 4.5, 6),
-        new THREE.MeshStandardMaterial({ color: 0x8b6b4d, roughness: 0.9 })
-      );
-      trunk.position.y = 2.25;
-      trunk.castShadow = true;
-      palm.add(trunk);
-
-      const leafMat = new THREE.MeshStandardMaterial({ color: 0x338833, roughness: 0.5, side: THREE.DoubleSide });
-      for (let i = 0; i < 7; i++) {
-        const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.5, 2.2, 5), leafMat);
-        leaf.position.y = 4.7;
-        leaf.rotation.x = Math.PI / 3;
-        leaf.rotation.y = (i / 7) * Math.PI * 2;
-        leaf.castShadow = true;
-        palm.add(leaf);
-      }
-
-      palm.position.set(x, 0.12, z);
-      scene.add(palm);
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                db = request.result;
+                resolve(db);
+            };
+            request.onupgradeneeded = (event) => {
+                const dbRef = event.target.result;
+                if (!dbRef.objectStoreNames.contains(STORE_NAME)) {
+                    dbRef.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+                }
+            };
+        });
     }
 
-    for (let z = -30; z <= 30; z += 8) {
-      createPalm(6.2, z);
-      createPalm(-6.2, z);
+    // Сохранить песню в IndexedDB
+    function saveSongToDB(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const arrayBuffer = e.target.result;
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+
+                const songData = {
+                    name: file.name.replace(/\.[^.]+$/, ''), // убираем расширение
+                    date: new Date().toLocaleString(),
+                    blob: arrayBuffer, // Сохраняем как ArrayBuffer
+                    mimeType: file.type || 'audio/mpeg'
+                };
+
+                const request = store.add(songData);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsArrayBuffer(file);
+        });
     }
 
-    // Фонари
-    function createLampPost(x, z) {
-      const post = new THREE.Group();
-      const pole = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.12, 0.18, 6, 6),
-        new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.5, metalness: 0.8 })
-      );
-      pole.position.y = 3;
-      pole.castShadow = true;
-      post.add(pole);
+    // Загрузить все песни из IndexedDB
+    function loadAllSongsFromDB() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
 
-      const lamp = new THREE.Mesh(
-        new THREE.SphereGeometry(0.4, 6),
-        new THREE.MeshStandardMaterial({ color: 0xffcc88, roughness: 0.3, emissive: new THREE.Color(0xff6600), emissiveIntensity: 0.6 })
-      );
-      lamp.position.y = 6.2;
-      post.add(lamp);
-
-      post.position.set(x, 0.12, z);
-      scene.add(post);
+            request.onsuccess = () => {
+                const results = request.result;
+                songs = [];
+                for (let item of results) {
+                    // Преобразуем ArrayBuffer обратно в Blob
+                    const blob = new Blob([item.blob], { type: item.mimeType || 'audio/mpeg' });
+                    const url = URL.createObjectURL(blob);
+                    songs.push({
+                        id: item.id,
+                        name: item.name,
+                        date: item.date,
+                        blob: blob,
+                        url: url
+                    });
+                }
+                resolve(songs);
+            };
+            request.onerror = () => reject(request.error);
+        });
     }
 
-    for (let z = -28; z <= 28; z += 10) {
-      createLampPost(5.5, z);
-      createLampPost(-5.5, z);
+    // Удалить песню из IndexedDB
+    function deleteSongFromDB(id) {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
     }
 
-    // ========== МАШИНА (облегченная) ==========
-    const carGroup = new THREE.Group();
-
-    const bodyGeom = new THREE.BoxGeometry(2, 0.6, 4);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xcc3355, roughness: 0.3, metalness: 0.6 });
-    const carBody = new THREE.Mesh(bodyGeom, bodyMat);
-    carBody.position.y = 0.5;
-    carBody.castShadow = true;
-    carGroup.add(carBody);
-
-    const cabinGeom = new THREE.BoxGeometry(1.7, 0.5, 2);
-    const cabinMat = new THREE.MeshStandardMaterial({ color: 0xaa2244, roughness: 0.2, metalness: 0.5 });
-    const cabin = new THREE.Mesh(cabinGeom, cabinMat);
-    cabin.position.set(0, 0.9, -0.2);
-    cabin.castShadow = true;
-    carGroup.add(cabin);
-
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
-    function createWheel(x, z) {
-      const wg = new THREE.Group();
-      const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.35, 8), wheelMat);
-      tire.rotation.z = Math.PI / 2;
-      tire.castShadow = true;
-      wg.add(tire);
-      wg.position.set(x, 0.4, z);
-      return wg;
-    }
-    carGroup.add(createWheel(-1.1, 1.5));
-    carGroup.add(createWheel(1.1, 1.5));
-    carGroup.add(createWheel(-1.1, -1.5));
-    carGroup.add(createWheel(1.1, -1.5));
-
-    // Фары
-    const hlMat = new THREE.MeshStandardMaterial({ color: 0xffffcc, roughness: 0.2, emissive: new THREE.Color(0xffaa22), emissiveIntensity: 0.4 });
-    const hl1 = new THREE.Mesh(new THREE.SphereGeometry(0.18, 6), hlMat);
-    hl1.position.set(-0.55, 0.45, -2);
-    carGroup.add(hl1);
-    const hl2 = new THREE.Mesh(new THREE.SphereGeometry(0.18, 6), hlMat);
-    hl2.position.set(0.55, 0.45, -2);
-    carGroup.add(hl2);
-
-    carGroup.position.set(0, 0.4, 0);
-    scene.add(carGroup);
-
-    // ========== ЧАСТИЦЫ ==========
-    const particlesGeom = new THREE.BufferGeometry();
-    const particlesCount = 200;
-    const positions = new Float32Array(particlesCount * 3);
-    for (let i = 0; i < particlesCount * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 50;
-      positions[i + 1] = Math.random() * 12;
-      positions[i + 2] = (Math.random() - 0.5) * 60;
-    }
-    particlesGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const particles = new THREE.Points(particlesGeom, new THREE.PointsMaterial({
-      color: 0xffaa44, size: 0.06, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.35
-    }));
-    scene.add(particles);
-
-    // ========== СЕНСОРНОЕ УПРАВЛЕНИЕ ==========
-    const joystickMove = document.getElementById('joystickMove');
-    const joystickMoveThumb = document.getElementById('joystickMoveThumb');
-    const joystickCamera = document.getElementById('joystickCamera');
-    const joystickCameraThumb = document.getElementById('joystickCameraThumb');
-    const btnRespawn = document.getElementById('btnRespawn');
-
-    let moveX = 0, moveY = 0;
-    let camX = 0, camY = 0;
-    let moveActive = false;
-    let camActive = false;
-    let moveTouchId = null;
-    let camTouchId = null;
-
-    const moveRect = joystickMove.getBoundingClientRect();
-    const camRect = joystickCamera.getBoundingClientRect();
-    const moveCenter = { x: moveRect.left + moveRect.width / 2, y: moveRect.top + moveRect.height / 2 };
-    const camCenter = { x: camRect.left + camRect.width / 2, y: camRect.top + camRect.height / 2 };
-    const maxDist = 45;
-
-    function updateMoveThumb() {
-      const dist = Math.sqrt(moveX * moveX + moveY * moveY);
-      const clampedDist = Math.min(dist, maxDist);
-      const angle = Math.atan2(moveY, moveX);
-      const tx = Math.cos(angle) * clampedDist;
-      const ty = Math.sin(angle) * clampedDist;
-      joystickMoveThumb.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
+    // Очистить всю базу
+    function clearAllSongsFromDB() {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.clear();
+            request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
     }
 
-    function updateCamThumb() {
-      const dist = Math.sqrt(camX * camX + camY * camY);
-      const clampedDist = Math.min(dist, maxDist);
-      const angle = Math.atan2(camY, camX);
-      const tx = Math.cos(angle) * clampedDist;
-      const ty = Math.sin(angle) * clampedDist;
-      joystickCameraThumb.style.transform = `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px))`;
-    }
+    // ============ ОСНОВНЫЕ ФУНКЦИИ ИНТЕРФЕЙСА ============
 
-    joystickMove.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      if (moveActive) return;
-      const touch = e.changedTouches[0];
-      moveTouchId = touch.identifier;
-      moveActive = true;
-      const rect = joystickMove.getBoundingClientRect();
-      moveCenter.x = rect.left + rect.width / 2;
-      moveCenter.y = rect.top + rect.height / 2;
-    });
-
-    joystickMove.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const touch = e.changedTouches[i];
-        if (touch.identifier === moveTouchId) {
-          moveX = touch.clientX - moveCenter.x;
-          moveY = touch.clientY - moveCenter.y;
-          updateMoveThumb();
+    // Добавление песни из файла (вызывается при выборе файла)
+    async function addSongFromFile(file) {
+        // Проверка, что это аудиофайл
+        if (!file.type.startsWith('audio/') && !file.name.match(/\.(mp3|m4a|aac|ogg|wav)$/i)) {
+            showToast('Пожалуйста, выберите аудиофайл (MP3, M4A, AAC, OGG, WAV)', true);
+            return;
         }
-      }
-    });
 
-    joystickMove.addEventListener('touchend', (e) => {
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === moveTouchId) {
-          moveActive = false;
-          moveTouchId = null;
-          moveX = 0;
-          moveY = 0;
-          updateMoveThumb();
+        // Проверка размера (например, не более 100 МБ, но можно убрать)
+        // if (file.size > 100 * 1024 * 1024) {
+        //     showToast('Файл слишком большой (максимум 100 МБ)', true);
+        //     return;
+        // }
+
+        try {
+            showToast('⏳ Сохранение...');
+            const id = await saveSongToDB(file);
+            await loadAllSongsFromDB();
+            renderSongsList();
+            showToast(`✓ Добавлено: ${file.name.replace(/\.[^.]+$/, '')}`);
+        } catch (e) {
+            console.error('Ошибка сохранения:', e);
+            showToast('❌ Не удалось сохранить песню. Возможно, недостаточно места.', true);
         }
-      }
-    });
-
-    joystickCamera.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      if (camActive) return;
-      const touch = e.changedTouches[0];
-      camTouchId = touch.identifier;
-      camActive = true;
-      const rect = joystickCamera.getBoundingClientRect();
-      camCenter.x = rect.left + rect.width / 2;
-      camCenter.y = rect.top + rect.height / 2;
-    });
-
-    joystickCamera.addEventListener('touchmove', (e) => {
-      e.preventDefault();
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const touch = e.changedTouches[i];
-        if (touch.identifier === camTouchId) {
-          camX = touch.clientX - camCenter.x;
-          camY = touch.clientY - camCenter.y;
-          updateCamThumb();
-        }
-      }
-    });
-
-    joystickCamera.addEventListener('touchend', (e) => {
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === camTouchId) {
-          camActive = false;
-          camTouchId = null;
-          camX = 0;
-          camY = 0;
-          updateCamThumb();
-        }
-      }
-    });
-
-    // Респаун
-    btnRespawn.addEventListener('click', () => {
-      carGroup.position.set(0, 0.4, 0);
-      carGroup.rotation.y = 0;
-    });
-
-    // Скрыть подсказку через 4 секунды
-    setTimeout(() => {
-      const hint = document.getElementById('hint');
-      if (hint) hint.style.display = 'none';
-    }, 4000);
-
-    // ========== ИГРОВОЙ ЦИКЛ ==========
-    let speed = 0;
-    const maxSpeed = 0.35;
-    const acceleration = 0.012;
-    const friction = 0.015;
-    const turnSpeed = 0.04;
-
-    function animate() {
-      requestAnimationFrame(animate);
-
-      // Движение от левого джойстика
-      const inputY = -moveY / maxDist;
-      const inputX = moveX / maxDist;
-
-      if (Math.abs(inputY) > 0.15) {
-        speed += inputY * acceleration;
-        speed = Math.max(-maxSpeed * 0.5, Math.min(maxSpeed, speed));
-      } else {
-        if (speed > 0) speed = Math.max(speed - friction, 0);
-        else if (speed < 0) speed = Math.min(speed + friction, 0);
-      }
-
-      if (Math.abs(inputX) > 0.2) {
-        carGroup.rotation.y -= inputX * turnSpeed * (Math.abs(speed) + 0.15);
-      }
-
-      carGroup.position.x += Math.sin(carGroup.rotation.y) * speed;
-      carGroup.position.z += Math.cos(carGroup.rotation.y) * speed;
-
-      carGroup.position.x = Math.max(-22, Math.min(22, carGroup.position.x));
-      carGroup.position.z = Math.max(-33, Math.min(33, carGroup.position.z));
-
-      // Камера от правого джойстика
-      const camInputX = camX / maxDist;
-      const camInputY = -camY / maxDist;
-      const camAngle = carGroup.rotation.y + camInputX * 0.8;
-      const camHeight = 5 + camInputY * 3;
-
-      const targetCamPos = new THREE.Vector3(
-        carGroup.position.x + Math.sin(camAngle) * 12,
-        carGroup.position.y + camHeight,
-        carGroup.position.z + Math.cos(camAngle) * 12
-      );
-
-      camera.position.lerp(targetCamPos, 0.08);
-      camera.lookAt(carGroup.position.x, carGroup.position.y + 0.7, carGroup.position.z);
-
-      particles.rotation.y += 0.0002;
-
-      renderer.render(scene, camera);
     }
 
-    animate();
+    // Отрисовка плейлиста
+    function renderSongsList() {
+        if (!songsListDiv) return;
 
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+        if (songs.length === 0) {
+            songsListDiv.innerHTML = '<div class="empty-message">🎵 Нет треков. Нажмите «Добавить MP3 файл».</div>';
+            return;
+        }
+
+        songsListDiv.innerHTML = '';
+        songs.forEach(song => {
+            const div = document.createElement('div');
+            div.className = 'song-item';
+            div.innerHTML = `
+                <div class="song-info">
+                    <div class="song-title">${escapeHtml(song.name)}</div>
+                    <div class="song-date">${song.date}</div>
+                </div>
+                <div class="song-actions">
+                    <button class="play-song-btn" data-id="${song.id}">▶</button>
+                    <button class="delete-song-btn" data-id="${song.id}">🗑</button>
+                </div>
+            `;
+
+            const playBtn = div.querySelector('.play-song-btn');
+            const delBtn = div.querySelector('.delete-song-btn');
+
+            playBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                playSongById(song.id);
+            });
+
+            delBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                if (confirm(`Удалить "${song.name}"?`)) {
+                    try {
+                        await deleteSongFromDB(song.id);
+                        // Освобождаем URL-объект
+                        if (song.url) URL.revokeObjectURL(song.url);
+                        if (currentSongId === song.id) {
+                            audio.pause();
+                            audio.src = '';
+                            currentTrackSpan.textContent = '—';
+                            currentSongId = null;
+                        }
+                        await loadAllSongsFromDB();
+                        renderSongsList();
+                        showToast(`🗑 Удалено: ${song.name}`);
+                    } catch (e) {
+                        console.error('Ошибка удаления:', e);
+                        showToast('❌ Не удалось удалить песню.', true);
+                    }
+                }
+            });
+
+            songsListDiv.appendChild(div);
+        });
+    }
+
+    // Воспроизведение песни
+    function playSongById(id) {
+        const song = songs.find(s => s.id === id);
+        if (song && song.url) {
+            audio.src = song.url;
+            audio.load();
+            audio.play().catch(e => {
+                console.log('Автовоспроизведение заблокировано:', e);
+                // Показываем сообщение, но не критично
+                // showToast('Нажмите ▶ для воспроизведения');
+            });
+            currentTrackSpan.textContent = song.name;
+            currentSongId = song.id;
+        } else {
+            showToast('❌ Не удалось воспроизвести файл.', true);
+        }
+    }
+
+    // Очистка всего плейлиста
+    async function clearAllSongs() {
+        if (songs.length === 0) return;
+        if (confirm('Удалить ВСЕ песни из библиотеки?')) {
+            try {
+                await clearAllSongsFromDB();
+                // Освобождаем все URL-объекты
+                songs.forEach(song => {
+                    if (song.url) URL.revokeObjectURL(song.url);
+                });
+                songs = [];
+                audio.pause();
+                audio.src = '';
+                currentTrackSpan.textContent = '—';
+                currentSongId = null;
+                renderSongsList();
+                showToast('🗑 Все песни удалены');
+            } catch (e) {
+                console.error('Ошибка очистки:', e);
+                showToast('❌ Не удалось очистить плейлист.', true);
+            }
+        }
+    }
+
+    // ============ ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ============
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ============ ОБРАБОТЧИКИ СОБЫТИЙ ============
+
+    addFileBtn.addEventListener('click', () => {
+        fileInput.click();
     });
-  </script>
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            const file = e.target.files[0];
+            addSongFromFile(file);
+            // Сбрасываем value, чтобы можно было выбрать тот же файл снова
+            fileInput.value = '';
+        }
+    });
+
+    clearAllBtn.addEventListener('click', clearAllSongs);
+
+    // ============ ИНИЦИАЛИЗАЦИЯ ============
+
+    async function init() {
+        try {
+            await initDB();
+            await loadAllSongsFromDB();
+            renderSongsList();
+            console.log('✅ Chugur готов, песен загружено:', songs.length);
+            if (songs.length > 0) {
+                showToast(`🎵 Загружено ${songs.length} песен`);
+            }
+        } catch (e) {
+            console.error('Ошибка инициализации:', e);
+            showToast('❌ Ошибка загрузки базы данных.', true);
+        }
+    }
+
+    // Запуск приложения
+    init();
+</script>
 </body>
 </html>
