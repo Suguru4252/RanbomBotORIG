@@ -1,482 +1,591 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>NetErrror - Соседняя комната: Дима слушает</title>
-    <style>
-        * {
-            user-select: none;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: linear-gradient(145deg, #0a0c14 0%, #03050a 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Segoe UI', 'Courier New', monospace;
-            padding: 16px;
-            margin: 0;
-        }
-
-        .game-wrapper {
-            max-width: 1300px;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(6px);
-            border-radius: 64px;
-            border: 1px solid #ff66aa50;
-            box-shadow: 0 25px 40px rgba(0,0,0,0.7);
-            padding: 20px;
-        }
-
-        /* две комнаты + профили */
-        .duo-rooms {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            justify-content: center;
-        }
-
-        .room-card {
-            flex: 1;
-            min-width: 280px;
-            background: #0f121ed9;
-            border-radius: 48px;
-            padding: 20px 16px;
-            backdrop-filter: blur(4px);
-            transition: all 0.2s;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-        }
-
-        .mom-area {
-            border-bottom: 5px solid #ff77aa;
-            background: radial-gradient(circle at 20% 10%, #2a1a2c, #0a020f);
-        }
-
-        .dima-area {
-            border-bottom: 5px solid #55ccff;
-            background: radial-gradient(circle at 90% 20%, #141c2c, #02050c);
-        }
-
-        .person {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .avatar {
-            font-size: 80px;
-            filter: drop-shadow(0 8px 12px black);
-            transition: transform 0.2s ease;
-        }
-
-        .mom-avatar { text-shadow: 0 0 8px #ff66aa; }
-        .dima-avatar { text-shadow: 0 0 5px #33aaff; }
-
-        .person h3 {
-            margin: 8px 0 4px;
-            font-size: 1.8rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #ffbb88, #ff88aa);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .dima-area .person h3 {
-            background: linear-gradient(135deg, #aaffff, #88ccff);
-            -webkit-background-clip: text;
-            background-clip: text;
-        }
-
-        .status-badge {
-            background: #000000aa;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-top: 6px;
-        }
-
-        .money-counter {
-            background: #1e1a2f;
-            padding: 10px;
-            border-radius: 60px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.7rem;
-            color: #f5c542;
-            margin: 12px 0;
-            border: 1px solid gold;
-            font-family: monospace;
-        }
-
-        button {
-            background: #2a1e3a;
-            border: none;
-            font-family: inherit;
-            font-weight: bold;
-            padding: 12px 18px;
-            border-radius: 60px;
-            color: white;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.08s linear;
-            margin-top: 8px;
-            width: 100%;
-            box-shadow: 0 3px 6px black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        button:active {
-            transform: scale(0.96);
-        }
-
-        .mom-action-btn {
-            background: #b32d5a;
-            border-bottom: 3px solid #ffb347;
-        }
-
-        .listen-btn {
-            background: #1f6390;
-            border-bottom: 3px solid #aaffdd;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .listen-animation {
-            animation: pulseListen 0.4s ease;
-        }
-
-        @keyframes pulseListen {
-            0% { transform: scale(1); background: #1f6390; }
-            50% { transform: scale(1.03); background: #4aa3df; box-shadow: 0 0 12px #88ddff; }
-            100% { transform: scale(1); }
-        }
-
-        .dima-listen-effect {
-            animation: dimaToWall 0.35s cubic-bezier(0.2, 1.2, 0.8, 1);
-        }
-
-        @keyframes dimaToWall {
-            0% { transform: translateX(0px) rotate(0deg); }
-            50% { transform: translateX(15px) rotate(5deg); }
-            100% { transform: translateX(0px) rotate(0deg); }
-        }
-
-        .room-sounds {
-            background: #03030ad9;
-            border-radius: 36px;
-            padding: 14px;
-            margin: 16px 0 0;
-            min-height: 200px;
-            max-height: 260px;
-            overflow-y: auto;
-            font-size: 0.85rem;
-            border: 1px solid #ff66aa30;
-        }
-
-        .sound-entry {
-            border-left: 4px solid #ff99cc;
-            padding: 8px 10px;
-            margin: 8px 0;
-            background: #ffffff08;
-            border-radius: 18px;
-            color: #f0f0f0;
-            font-family: monospace;
-        }
-
-        .dima-sound {
-            border-left-color: #55ccff;
-            background: #11335530;
-        }
-
-        .mom-sound {
-            border-left-color: #ffaa88;
-        }
-
-        .reset-btn {
-            background: #2c2c3a;
-            width: auto;
-            margin-top: 8px;
-            font-size: 0.8rem;
-        }
-
-        .flex-btns {
-            display: flex;
-            gap: 10px;
-            margin-top: 6px;
-        }
-
-        footer {
-            font-size: 0.65rem;
-            text-align: center;
-            margin-top: 24px;
-            color: #aaa6;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>GTA San Andreas • 3D Браузер</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Arial', sans-serif;
+      background: #000;
+    }
+    #info {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      color: #ffaa00;
+      font-family: 'Courier New', monospace;
+      font-size: 16px;
+      text-shadow: 0 0 10px #ff6600, 2px 2px 0 #000;
+      background: rgba(0,0,0,0.7);
+      padding: 12px 20px;
+      border: 2px solid #c47a1a;
+      border-radius: 4px;
+      letter-spacing: 2px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .hud {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #ffaa00;
+      font-family: 'Courier New', monospace;
+      font-size: 24px;
+      font-weight: bold;
+      text-shadow: 0 0 15px #ff8800, 3px 3px 0 #000;
+      background: rgba(0,0,0,0.6);
+      padding: 10px 25px;
+      border: 2px solid #c47a1a;
+      border-radius: 4px;
+      letter-spacing: 3px;
+      z-index: 10;
+    }
+    .radio {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      color: #ffcc66;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 18px;
+      border: 1px solid #c47a1a;
+      border-radius: 4px;
+      text-shadow: 1px 1px 0 #000;
+      z-index: 10;
+      animation: radioGlow 1.5s infinite alternate;
+    }
+    @keyframes radioGlow {
+      from { box-shadow: 0 0 5px #ff8800; }
+      to { box-shadow: 0 0 20px #ff8800; }
+    }
+  </style>
 </head>
 <body>
-<div class="game-wrapper">
-    <div class="duo-rooms">
-        <!-- КОМНАТА МАМЫ (кухня/гостиная) -->
-        <div class="room-card mom-area">
-            <div class="person">
-                <div class="avatar mom-avatar">💃👩</div>
-                <h3>МАМА (Люда)</h3>
-                <div class="status-badge" id="momStatusText">🏠 Дома (готовит)</div>
-            </div>
-            <div class="money-counter">
-                💰 <span id="moneyAmount">0</span> ₽
-            </div>
-            <button id="callManBtn" class="mom-action-btn">🚪🔞 ПРИВЕСТИ МУЖИКА</button>
-            <div style="font-size: 0.7rem; margin-top: 10px; text-align: center;">*клиент приходит → мама делает минет, ебется, грязные стоны*</div>
-            <!-- зона звуков из комнаты мамы (что там происходит) -->
-            <div class="room-sounds" id="momSoundsArea">
-                <div class="sound-entry mom-sound">🍳 Мама на кухне, гремит посудой.</div>
-                <div class="sound-entry mom-sound">📺 Смотрит сериал, скучно...</div>
-            </div>
-        </div>
+  <div id="info">▼ W A S D — ехать | ▲ R — респаун | ◄ ► мышью — смотреть</div>
+  <div class="hud">🍔 CLUCKIN' BELL</div>
+  <div class="radio">📻 RADIO LOS SANTOS</div>
 
-        <!-- КОМНАТА ДИМЫ с анимацией прикладывания уха -->
-        <div class="room-card dima-area">
-            <div class="person">
-                <div class="avatar dima-avatar" id="dimaAvatar">🧑🎧</div>
-                <h3>ДИМА (сын)</h3>
-                <div class="status-badge">🔇 сидит в своей комнате</div>
-            </div>
-            <button id="listenWallBtn" class="listen-btn">👂 ПРИЛОЖИТЬ УХО К СТЕНЕ И ПОДСЛУШИВАТЬ</button>
-            <div class="flex-btns">
-                <button id="resetGameBtn" class="reset-btn">♻️ НАЧАТЬ ЗАНОВО</button>
-            </div>
-            <!-- что слышит Дима -->
-            <div class="room-sounds" id="dimaHearArea">
-                <div class="sound-entry dima-sound">🔇 Дима сидит тихо, слышит только шаги мамы на кухне.</div>
-            </div>
-            <div style="font-size:0.7rem; margin-top:8px;">👇 приложи ухо — услышишь всё: минет, стоны, шлепки, крики</div>
-        </div>
-    </div>
-    <footer>NetErrror || симуляция без границ. Дима подслушивает маму с клиентами. Каждый акт приносит деньги.</footer>
-</div>
-
-<script>
-    // -------------------- СОСТОЯНИЕ ИГРЫ --------------------
-    let money = 0;
-    let momState = "home_idle";     // home_idle, with_man (делает минет/ебется)
-    let manTimer = null;
-    let currentAct = null;          // детали секса
-
-    // элементы UI
-    const moneySpan = document.getElementById('moneyAmount');
-    const momStatusSpan = document.getElementById('momStatusText');
-    const momSoundsDiv = document.getElementById('momSoundsArea');
-    const dimaHearDiv = document.getElementById('dimaHearArea');
-    const dimaAvatar = document.getElementById('dimaAvatar');
-
-    // ---- библиотека грязных фраз/звуков для разных действий мамы с мужиком ----
-    const sexActions = [
-        { action: "минет", sounds: ["👅 *чавкающие звуки* Мама делает минет на коленях", "🤤 *слышно как мужик стонет* О да, глубже...", "💦 *звуки глубокого минета, мама давится*", "👄 'Так, сосни ещё, шлюха' — командует мужик", "😩 *громкий всхлип* Мама: 'Ммм...'"] },
-        { action: "ебля в позе раком", sounds: ["🍑 *шлепки, влажные удары* Маму трахают сзади", "🔞 *скрип дивана* 'Да, еби её сильнее!'", "😫 *мамин стон* 'О да, еще, ТРАХАЙ'", "💢 *мужик дышит* Какая же ты шлюха, мать", "🥵 *оргазмические крики* Аааааххх!"] },
-        { action: "классическая ебля", sounds: ["🎙️ *тяжелое дыхание, стоны* 'Раздвинь ноги шире'", "🔊 *крики* О да-да-да, кончаю! ", "💸 *звук денег* 'получай, шалава'", "😈 *диалог* 'Сколько за анал? - Плати больше'", "🤪 *мамин визг* Ещё, не останавливайся!!!"] },
-        { action: "групповуха", sounds: ["👥 *два мужика* 'отсоси у моего друга', мама стонет", "💢 *звуки двойного проникновения*", "🤑 'за двойную цену поработай', звон монет", "😵 *мама задыхается от минета и ебли*"] },
-        { action: "жесткий секс", sounds: ["⛓️ *пощёчины, стоны* 'Да, грязная сучка'", "😫 *мама кричит от боли/удовольствия*", "💥 *удары тел, шлепки по лицу*", "🧴 *звук смазки и влажные толчки*"] }
-    ];
-
-    // фразы когда мама одна дома (кухня/быт)
-    const homeSounds = [
-        "🍳 Мама на кухне жарит яичницу, напевает песенку.",
-        "📞 Мама говорит по телефону подруге: 'устала, денег нет...'",
-        "🧹 Мама пылесосит ковёр в гостиной.",
-        "📺 Смотрит 'Дом-2', смеётся в одиночестве.",
-        "🚿 Мама принимает душ, мычит мелодию.",
-        "🍷 Открывает бутылку дешёвого вина, вздыхает."
-    ];
-
-    // звуки которые слышит ДИМА (при подслушивании)
-    function generateHearFromMom() {
-        if (momState === "with_man" && currentAct) {
-            // выбираем случайный звук из текущего акта (секс/минет)
-            const actionPack = currentAct.sounds;
-            const randomIdx = Math.floor(Math.random() * actionPack.length);
-            let rawSound = actionPack[randomIdx];
-            // иногда добавляем специфику про деньги
-            if (Math.random() < 0.4) {
-                rawSound += " 💰 (мама получила чаевые)";
-                let bonus = Math.floor(Math.random() * 300) + 100;
-                money += bonus;
-                updateMoney();
-                addMomLog(`💵 БОНУС! Пока Дима слушал, мужик кинул ${bonus}₽.`, true);
-            }
-            return `👂 ДИМА СЛЫШИТ через стену: ${rawSound}`;
-        } 
-        else if (momState === "with_man" && !currentAct) {
-            // fallback
-            return `👂 ДИМА СЛЫШИТ: странные влажные звуки и стоны... мама явно с мужиком`;
-        }
-        else {
-            // мама одна
-            const randomHome = homeSounds[Math.floor(Math.random() * homeSounds.length)];
-            return `👂 ДИМА СЛЫШИТ: ${randomHome} (никаких мужчин)`;
-        }
+  <!-- Подключаем Three.js и модули -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
     }
+  </script>
 
-    // добавить лог в зону мамы (что происходит в её комнате)
-    function addMomLog(message, isBonus = false) {
-        const div = document.createElement('div');
-        div.className = 'sound-entry mom-sound';
-        div.innerHTML = isBonus ? `✨ ${message}` : `💬 ${message}`;
-        momSoundsDiv.appendChild(div);
-        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        while (momSoundsDiv.children.length > 22) momSoundsDiv.removeChild(momSoundsDiv.firstChild);
-    }
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-    // добавить лог в зону Димы (что он слышит)
-    function addDimaLog(message) {
-        const div = document.createElement('div');
-        div.className = 'sound-entry dima-sound';
-        div.innerHTML = message;
-        dimaHearDiv.appendChild(div);
-        div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        while (dimaHearDiv.children.length > 24) dimaHearDiv.removeChild(dimaHearDiv.firstChild);
-    }
-
-    function updateMoney() {
-        moneySpan.innerText = Math.floor(money);
-    }
-
-    // завершить визит мужика
-    function endManVisit() {
-        if (momState !== "with_man") return;
-        if (manTimer) clearTimeout(manTimer);
-        const earnedThisTime = Math.floor(Math.random() * 900) + 500;
-        money += earnedThisTime;
-        updateMoney();
-        momState = "home_idle";
-        currentAct = null;
-        momStatusSpan.innerHTML = "🏠 Дома (готовит/отдыхает)";
-        addMomLog(`🚪 Мужик ушёл, мама заработала ${earnedThisTime}₽. Теперь она одна на кухне.`, false);
-        addMomLog(`🍲 Мама переодевается и идёт пить чай.`);
-        // также добавим для димы намёк
-        addDimaLog(`🔇 Звуки за стеной затихли. Дима слышит только шаги мамы. Мужик ушёл.`);
-        // обновляем аватарку мамы
-    }
-
-    // начать акт с мужиком (минет, ебля и тп)
-    function bringMan() {
-        if (momState === "with_man") {
-            addMomLog(`⚠️ Мама уже трахается с клиентом! Дождись окончания.`, false);
-            return;
-        }
-        // выбираем случайный тип секса
-        const randomAct = sexActions[Math.floor(Math.random() * sexActions.length)];
-        currentAct = randomAct;
-        momState = "with_man";
-        momStatusSpan.innerHTML = "🔞 С КЛИЕНТОМ (делает минет, ебётся)";
-        
-        const visitDuration = 8000 + Math.random() * 9000; // 8-17 секунд
-        addMomLog(`🚪🔞 ПРИШЁЛ МУЖИК! Мама сразу начала ${randomAct.action}. Слышны пошлые звуки.`, false);
-        addMomLog(`💢 (стонет, шлепки, неприличные фразы...)`, false);
-        
-        // показать в логах Димы первое уведомление
-        addDimaLog(`🚨 Дима услышал мужской голос и дверной звонок. Мама с кем-то зашла в комнату!`);
-        
-        if (manTimer) clearTimeout(manTimer);
-        manTimer = setTimeout(() => {
-            endManVisit();
-        }, visitDuration);
-        
-        // каждые 3 секунды во время акта автоматически пишем в комнату мамы грязные детали (опционально)
-        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
-        window.autoSexInterval = setInterval(() => {
-            if (momState === "with_man" && currentAct) {
-                const randomAuto = currentAct.sounds[Math.floor(Math.random() * currentAct.sounds.length)];
-                addMomLog(`🔞 ${randomAuto}`, false);
-            } else {
-                clearInterval(window.autoSexInterval);
-            }
-        }, 4000);
-    }
-
-    // ---- ПОДСЛУШИВАНИЕ с анимацией Димы ----
-    function listenToWall() {
-        // Анимация: Дима прикладывает ухо к стене
-        dimaAvatar.classList.add('dima-listen-effect');
-        const listenBtn = document.getElementById('listenWallBtn');
-        listenBtn.classList.add('listen-animation');
-        setTimeout(() => {
-            dimaAvatar.classList.remove('dima-listen-effect');
-            listenBtn.classList.remove('listen-animation');
-        }, 350);
-        
-        // получаем что слышит Дима в зависимости от состояния мамы
-        const hearMessage = generateHearFromMom();
-        addDimaLog(hearMessage);
-        
-        // если мама с мужиком, дополнительный бонус - иногда подслушивание приносит деньги (типа нашёл в коридоре)
-        if (momState === "with_man" && Math.random() < 0.25) {
-            const foundMoney = Math.floor(Math.random() * 150) + 20;
-            money += foundMoney;
-            updateMoney();
-            addDimaLog(`💸 Дима нашёл в коридоре купюру (вероятно, мужик обронил) +${foundMoney}₽`);
-        }
-        
-        // Дополнительная реакция: если мама делает минет, то Дима слышит очень чётко
-        if (momState === "with_man" && currentAct && currentAct.action === "минет") {
-            addDimaLog(`😨 Дима отодвинулся от стены, услышав как мама давится членом. Отвращение и стыд.`);
-        }
-        if (momState === "with_man" && currentAct && currentAct.action.includes("групповуха")) {
-            addDimaLog(`🤯 Дима в шоке: похоже у мамы сразу несколько мужиков! Слышны голоса со всех сторон.`);
-        }
-    }
+    // ---------- НАСТРОЙКИ ----------
+    const scene = new THREE.Scene();
     
-    // полный сброс игры
-    function fullReset() {
-        if (manTimer) clearTimeout(manTimer);
-        if (window.autoSexInterval) clearInterval(window.autoSexInterval);
-        money = 0;
-        momState = "home_idle";
-        currentAct = null;
-        updateMoney();
-        momStatusSpan.innerHTML = "🏠 Дома (готовит)";
-        // очистить логи
-        momSoundsDiv.innerHTML = '';
-        dimaHearDiv.innerHTML = '';
-        addMomLog(`🔄 СИСТЕМА ПЕРЕЗАПУЩЕНА. Мама снова на кухне.`, false);
-        addMomLog(`🍳 Готовит ужин, Дима в своей комнате.`);
-        addDimaLog(`🔇 Тишина. Дима сидит в углу.`);
-        addDimaLog(`👂 Может приложить ухо к стене и подслушивать...`);
-        // добавим пару стандартных
-        addMomLog(`📺 Включила телевизор, ждёт "клиентов"`);
-    }
+    // Знаменитое оранжевое небо Лос-Сантоса
+    scene.background = new THREE.Color(0x1a0a00);
     
-    // инициализация кнопок и начальное состояние
-    document.getElementById('callManBtn').addEventListener('click', () => {
-        bringMan();
+    // Туман для атмосферы
+    scene.fog = new THREE.FogExp2(0x1a0a00, 0.00015);
+
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.5, 500);
+    camera.position.set(0, 8, 15);
+    camera.lookAt(0, 0, 10);
+
+    // Основной рендерер
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    document.body.appendChild(renderer.domElement);
+
+    // CSS2 рендерер для текстовых надписей
+    const labelRenderer = new CSS2DRenderer();
+    labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    labelRenderer.domElement.style.position = 'absolute';
+    labelRenderer.domElement.style.top = '0px';
+    labelRenderer.domElement.style.left = '0px';
+    labelRenderer.domElement.style.pointerEvents = 'none';
+    document.body.appendChild(labelRenderer.domElement);
+
+    // ---------- ОСВЕЩЕНИЕ (закатное) ----------
+    const ambientLight = new THREE.AmbientLight(0xff9944, 0.5);
+    scene.add(ambientLight);
+    
+    const sunLight = new THREE.DirectionalLight(0xff8833, 1.2);
+    sunLight.position.set(50, 30, -20);
+    sunLight.castShadow = true;
+    sunLight.receiveShadow = true;
+    sunLight.shadow.mapSize.width = 512;
+    sunLight.shadow.mapSize.height = 512;
+    sunLight.shadow.camera.near = 0.5;
+    sunLight.shadow.camera.far = 150;
+    sunLight.shadow.camera.left = -30;
+    sunLight.shadow.camera.right = 30;
+    sunLight.shadow.camera.top = 30;
+    sunLight.shadow.camera.bottom = -15;
+    scene.add(sunLight);
+    
+    // Теплый заполняющий свет
+    const fillLight = new THREE.DirectionalLight(0xff6633, 0.4);
+    fillLight.position.set(-20, 5, 20);
+    scene.add(fillLight);
+
+    // ---------- СОЗДАНИЕ МИРА ----------
+    
+    // Дорога (сетка улиц)
+    function createRoad(x, z, w, d) {
+      const roadMat = new THREE.MeshStandardMaterial({ 
+        color: 0x333333, 
+        roughness: 0.9,
+        metalness: 0.1
+      });
+      const road = new THREE.Mesh(new THREE.PlaneGeometry(w, d), roadMat);
+      road.rotation.x = -Math.PI / 2;
+      road.position.set(x, 0.01, z);
+      road.receiveShadow = true;
+      scene.add(road);
+      
+      // Разметка
+      if (w > d) {
+        for (let i = -w/2 + 2; i < w/2; i += 4) {
+          const line = new THREE.Mesh(
+            new THREE.PlaneGeometry(1.5, 0.3),
+            new THREE.MeshStandardMaterial({ color: 0xffdd44, roughness: 0.4, emissive: new THREE.Color(0x442200) })
+          );
+          line.rotation.x = -Math.PI / 2;
+          line.position.set(x + i, 0.02, z);
+          line.receiveShadow = true;
+          scene.add(line);
+        }
+      } else {
+        for (let i = -d/2 + 2; i < d/2; i += 4) {
+          const line = new THREE.Mesh(
+            new THREE.PlaneGeometry(0.3, 1.5),
+            new THREE.MeshStandardMaterial({ color: 0xffdd44, roughness: 0.4, emissive: new THREE.Color(0x442200) })
+          );
+          line.rotation.x = -Math.PI / 2;
+          line.position.set(x, 0.02, z + i);
+          line.receiveShadow = true;
+          scene.add(line);
+        }
+      }
+    }
+
+    // Главная дорога
+    createRoad(0, 0, 12, 80);
+    // Перекресток
+    createRoad(0, -15, 40, 12);
+    createRoad(0, 15, 40, 12);
+
+    // Тротуары
+    const sidewalkMat = new THREE.MeshStandardMaterial({ color: 0x555544, roughness: 0.8 });
+    function createSidewalk(x, z, w, d) {
+      const sw = new THREE.Mesh(new THREE.PlaneGeometry(w, d), sidewalkMat);
+      sw.rotation.x = -Math.PI / 2;
+      sw.position.set(x, 0.15, z);
+      sw.receiveShadow = true;
+      scene.add(sw);
+    }
+    createSidewalk(7.5, 0, 2, 80);
+    createSidewalk(-7.5, 0, 2, 80);
+
+    // Здания в стиле Лос-Сантос
+    function createBuilding(x, z, w, h, d, color) {
+      const group = new THREE.Group();
+      
+      const bodyMat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, metalness: 0.2 });
+      const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), bodyMat);
+      body.position.y = h/2;
+      body.castShadow = true;
+      body.receiveShadow = true;
+      group.add(body);
+      
+      // Окна (светящиеся)
+      const windowMat = new THREE.MeshStandardMaterial({ 
+        color: 0xffcc66, 
+        roughness: 0.3, 
+        emissive: new THREE.Color(0x553311),
+        metalness: 0.4
+      });
+      
+      for (let wy = 0.8; wy < h; wy += 1.8) {
+        for (let wz = -d/2 + 1; wz < d/2; wz += 2.2) {
+          const windowBox = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.1, 0.2), windowMat);
+          windowBox.position.set(w/2 + 0.05, wy, wz);
+          windowBox.castShadow = true;
+          group.add(windowBox);
+          
+          const windowBox2 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.1, 0.2), windowMat);
+          windowBox2.position.set(-w/2 - 0.05, wy, wz);
+          windowBox2.castShadow = true;
+          group.add(windowBox2);
+        }
+      }
+      
+      // Крыша
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x443322, roughness: 0.7 });
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(w+0.3, 0.2, d+0.3), roofMat);
+      roof.position.y = h + 0.1;
+      roof.castShadow = true;
+      roof.receiveShadow = true;
+      group.add(roof);
+      
+      group.position.set(x, 0.15, z);
+      scene.add(group);
+      return group;
+    }
+
+    // Здания вдоль улицы
+    createBuilding(10, -25, 5, 9, 5, 0xcc8855);
+    createBuilding(-10, -25, 5, 12, 5, 0xbb7744);
+    createBuilding(10, -15, 5, 7, 5, 0xdd9966);
+    createBuilding(-10, -15, 5, 15, 5, 0xaa6633);
+    createBuilding(10, -5, 5, 11, 5, 0xcc8855);
+    createBuilding(-10, -5, 5, 8, 5, 0xbb7744);
+    createBuilding(10, 5, 5, 13, 5, 0xdd9966);
+    createBuilding(-10, 5, 5, 10, 5, 0xaa6633);
+    createBuilding(10, 15, 5, 9, 5, 0xcc8855);
+    createBuilding(-10, 15, 5, 14, 5, 0xbb7744);
+    createBuilding(10, 25, 5, 11, 5, 0xdd9966);
+    createBuilding(-10, 25, 5, 8, 5, 0xaa6633);
+    
+    // Пара зданий подальше
+    createBuilding(18, -20, 6, 16, 6, 0x996644);
+    createBuilding(-18, -20, 6, 18, 6, 0x885533);
+    createBuilding(18, 10, 6, 14, 6, 0x996644);
+    createBuilding(-18, 10, 6, 20, 6, 0x885533);
+
+    // Пальмы (знаменитые пальмы Лос-Сантоса)
+    function createPalm(x, z) {
+      const palm = new THREE.Group();
+      
+      // Ствол
+      const trunkGeom = new THREE.CylinderGeometry(0.2, 0.35, 5, 8);
+      const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8b6b4d, roughness: 0.9 });
+      const trunk = new THREE.Mesh(trunkGeom, trunkMat);
+      trunk.position.y = 2.5;
+      trunk.castShadow = true;
+      trunk.receiveShadow = true;
+      palm.add(trunk);
+      
+      // Листья
+      const leafMat = new THREE.MeshStandardMaterial({ color: 0x338833, roughness: 0.5, side: THREE.DoubleSide });
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.6, 2.5, 6), leafMat);
+        leaf.position.y = 5.2;
+        leaf.rotation.x = Math.PI / 3;
+        leaf.rotation.y = angle;
+        leaf.castShadow = true;
+        leaf.receiveShadow = true;
+        palm.add(leaf);
+      }
+      
+      // Кокосы
+      const coconutMat = new THREE.MeshStandardMaterial({ color: 0x8b5a2b, roughness: 0.7 });
+      for (let i = 0; i < 5; i++) {
+        const coconut = new THREE.Mesh(new THREE.SphereGeometry(0.25, 6), coconutMat);
+        coconut.position.y = 5.5;
+        const a = (i / 5) * Math.PI * 2;
+        coconut.position.x = Math.cos(a) * 0.5;
+        coconut.position.z = Math.sin(a) * 0.5;
+        coconut.castShadow = true;
+        palm.add(coconut);
+      }
+      
+      palm.position.set(x, 0.15, z);
+      scene.add(palm);
+      return palm;
+    }
+
+    // Пальмы вдоль дороги
+    for (let z = -35; z <= 35; z += 8) {
+      createPalm(7.2, z);
+      createPalm(-7.2, z);
+    }
+    createPalm(17, -25);
+    createPalm(-17, -25);
+    createPalm(17, 20);
+    createPalm(-17, 20);
+
+    // Фонарные столбы
+    function createLampPost(x, z) {
+      const post = new THREE.Group();
+      const poleMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.5, metalness: 0.8 });
+      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 7), poleMat);
+      pole.position.y = 3.5;
+      pole.castShadow = true;
+      pole.receiveShadow = true;
+      post.add(pole);
+      
+      // Лампа
+      const lampMat = new THREE.MeshStandardMaterial({ 
+        color: 0xffcc88, 
+        roughness: 0.3, 
+        emissive: new THREE.Color(0xff6600),
+        emissiveIntensity: 0.8
+      });
+      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8), lampMat);
+      lamp.position.y = 7.2;
+      lamp.castShadow = true;
+      post.add(lamp);
+      
+      // Световой конус (визуальный)
+      const lightCone = new THREE.Mesh(
+        new THREE.ConeGeometry(0.4, 1.2, 8),
+        new THREE.MeshStandardMaterial({ color: 0xffaa44, roughness: 0.2, emissive: new THREE.Color(0x442200), transparent: true, opacity: 0.3 })
+      );
+      lightCone.position.y = 6.6;
+      post.add(lightCone);
+      
+      post.position.set(x, 0.15, z);
+      scene.add(post);
+      return post;
+    }
+
+    for (let z = -30; z <= 30; z += 10) {
+      createLampPost(6, z);
+      createLampPost(-6, z);
+    }
+
+    // Вывеска Cluckin' Bell (3D текст)
+    function createSign(text, x, y, z, color) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = color;
+      ctx.font = 'bold 28px "Courier New", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, 128, 42);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.strokeText(text, 128, 42);
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const signMat = new THREE.MeshStandardMaterial({ map: texture, emissive: new THREE.Color(0x331100), roughness: 0.4 });
+      const signBoard = new THREE.Mesh(new THREE.PlaneGeometry(5, 1.5), signMat);
+      signBoard.position.set(x, y, z);
+      signBoard.castShadow = true;
+      scene.add(signBoard);
+      return signBoard;
+    }
+    createSign('CLUCKIN\' BELL', 10, 8, -15, '#ff8800');
+    createSign('AMMU-NATION', -10, 9, 15, '#ff4444');
+
+    // ---------- МАШИНА ИГРОКА (Low Rider стиль) ----------
+    const carGroup = new THREE.Group();
+    
+    // Кузов
+    const bodyGeom = new THREE.BoxGeometry(2.2, 0.7, 4.5);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xcc3355, roughness: 0.3, metalness: 0.7 });
+    const carBody = new THREE.Mesh(bodyGeom, bodyMat);
+    carBody.position.y = 0.6;
+    carBody.castShadow = true;
+    carBody.receiveShadow = true;
+    carGroup.add(carBody);
+    
+    // Кабина
+    const cabinGeom = new THREE.BoxGeometry(1.8, 0.55, 2.2);
+    const cabinMat = new THREE.MeshStandardMaterial({ color: 0xaa2244, roughness: 0.2, metalness: 0.5 });
+    const cabin = new THREE.Mesh(cabinGeom, cabinMat);
+    cabin.position.set(0, 1.05, -0.2);
+    cabin.castShadow = true;
+    cabin.receiveShadow = true;
+    carGroup.add(cabin);
+    
+    // Окна
+    const windowMat = new THREE.MeshStandardMaterial({ color: 0x334466, roughness: 0.1, metalness: 0.8, emissive: new THREE.Color(0x001122) });
+    const frontWindow = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.4, 0.1), windowMat);
+    frontWindow.position.set(0, 1.15, -1.2);
+    carGroup.add(frontWindow);
+    const rearWindow = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.4, 0.1), windowMat);
+    rearWindow.position.set(0, 1.15, 0.8);
+    carGroup.add(rearWindow);
+    
+    // Колеса
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.3, metalness: 0.9 });
+    function createWheel(x, z) {
+      const wheelGroup = new THREE.Group();
+      const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.4, 16), wheelMat);
+      tire.rotation.z = Math.PI / 2;
+      tire.castShadow = true;
+      tire.receiveShadow = true;
+      wheelGroup.add(tire);
+      
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.41, 8), rimMat);
+      rim.rotation.z = Math.PI / 2;
+      rim.castShadow = true;
+      wheelGroup.add(rim);
+      
+      wheelGroup.position.set(x, 0.45, z);
+      return wheelGroup;
+    }
+    carGroup.add(createWheel(-1.2, 1.6));
+    carGroup.add(createWheel(1.2, 1.6));
+    carGroup.add(createWheel(-1.2, -1.6));
+    carGroup.add(createWheel(1.2, -1.6));
+    
+    // Фары
+    const headlightMat = new THREE.MeshStandardMaterial({ color: 0xffffcc, roughness: 0.2, emissive: new THREE.Color(0xffaa22), emissiveIntensity: 0.5 });
+    const headlightL = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8), headlightMat);
+    headlightL.position.set(-0.6, 0.55, -2.2);
+    carGroup.add(headlightL);
+    const headlightR = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8), headlightMat);
+    headlightR.position.set(0.6, 0.55, -2.2);
+    carGroup.add(headlightR);
+    
+    // Задние фонари
+    const taillightMat = new THREE.MeshStandardMaterial({ color: 0xff2200, roughness: 0.2, emissive: new THREE.Color(0xff0000), emissiveIntensity: 0.6 });
+    const taillightL = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8), taillightMat);
+    taillightL.position.set(-0.6, 0.55, 2.2);
+    carGroup.add(taillightL);
+    const taillightR = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8), taillightMat);
+    taillightR.position.set(0.6, 0.55, 2.2);
+    carGroup.add(taillightR);
+    
+    carGroup.position.set(0, 0.5, 0);
+    scene.add(carGroup);
+
+    // Частицы (пыль / атмосфера)
+    const particlesGeom = new THREE.BufferGeometry();
+    const particlesCount = 400;
+    const positions = new Float32Array(particlesCount * 3);
+    for (let i = 0; i < particlesCount * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 60;
+      positions[i+1] = Math.random() * 15;
+      positions[i+2] = (Math.random() - 0.5) * 80;
+    }
+    particlesGeom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particlesMat = new THREE.PointsMaterial({ 
+      color: 0xffaa44, 
+      size: 0.08,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.4
     });
-    document.getElementById('listenWallBtn').addEventListener('click', () => {
-        listenToWall();
-    });
-    document.getElementById('resetGameBtn').addEventListener('click', () => {
-        fullReset();
+    const particles = new THREE.Points(particlesGeom, particlesMat);
+    scene.add(particles);
+
+    // ---------- УПРАВЛЕНИЕ ----------
+    const keys = { w: false, a: false, s: false, d: false, r: false };
+    
+    window.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      if (key in keys) {
+        keys[key] = true;
+        e.preventDefault();
+      }
     });
     
-    // имитация бытовых звуков когда мама одна (каждые 10-15 секунд)
-    setInterval(() => {
-        if (momState === "home_idle") {
-            const randomHomeSound = homeSounds[Math.floor(Math.random() * homeSounds.length)];
-            addMomLog(randomHomeSound, false);
+    window.addEventListener('keyup', (e) => {
+      const key = e.key.toLowerCase();
+      if (key in keys) {
+        keys[key] = false;
+        e.preventDefault();
+      }
+    });
+
+    // Респаун по R
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'r') {
+        carGroup.position.set(0, 0.5, 0);
+        carGroup.rotation.y = 0;
+        camera.position.set(0, 8, 15);
+        camera.lookAt(carGroup.position);
+        e.preventDefault();
+      }
+    });
+
+    // Поворот камеры мышью
+    let mouseX = 0;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+    });
+
+    // ---------- АНИМАЦИЯ ----------
+    let speed = 0;
+    const maxSpeed = 0.4;
+    const acceleration = 0.015;
+    const friction = 0.02;
+    const turnSpeed = 0.04;
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Управление машиной
+      if (keys.w) speed = Math.min(speed + acceleration, maxSpeed);
+      else if (keys.s) speed = Math.max(speed - acceleration, -maxSpeed * 0.6);
+      else {
+        if (speed > 0) speed = Math.max(speed - friction, 0);
+        else if (speed < 0) speed = Math.min(speed + friction, 0);
+      }
+
+      // Поворот
+      if (keys.a) carGroup.rotation.y += turnSpeed * (Math.abs(speed) + 0.1);
+      if (keys.d) carGroup.rotation.y -= turnSpeed * (Math.abs(speed) + 0.1);
+
+      // Движение вперед
+      carGroup.position.x += Math.sin(carGroup.rotation.y) * speed;
+      carGroup.position.z += Math.cos(carGroup.rotation.y) * speed;
+
+      // Ограничение по карте
+      carGroup.position.x = Math.max(-25, Math.min(25, carGroup.position.x));
+      carGroup.position.z = Math.max(-38, Math.min(38, carGroup.position.z));
+
+      // Камера следует за машиной с видом от третьего лица
+      const camOffset = new THREE.Vector3(0, 5, 10);
+      camOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), carGroup.rotation.y + mouseX * 0.5);
+      camera.position.lerp(
+        new THREE.Vector3(
+          carGroup.position.x + camOffset.x,
+          carGroup.position.y + camOffset.y,
+          carGroup.position.z + camOffset.z
+        ),
+        0.08
+      );
+      camera.lookAt(
+        carGroup.position.x,
+        carGroup.position.y + 0.8,
+        carGroup.position.z
+      );
+
+      // Анимация частиц
+      particles.rotation.y += 0.0002;
+      
+      // Легкое покачивание пальм (ветер)
+      scene.children.forEach(child => {
+        if (child.isGroup && child.children.length > 0 && child.children[0].material?.color?.getHex() === 0x8b6b4d) {
+          child.rotation.z = Math.sin(Date.now() * 0.003 + child.position.x) * 0.02;
         }
-    }, 11000);
-    
-    // начальная загрузка
-    fullReset();
-</script>
+      });
+
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Обработка изменения размера окна
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      labelRenderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    console.log('🚗 Добро пожаловать в Лос-Сантос! Управление: WASD - движение, R - респаун, мышь - камера');
+  </script>
 </body>
 </html>
